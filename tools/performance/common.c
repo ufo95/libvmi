@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -27,18 +28,14 @@
 #include <stdlib.h>
 #include <math.h>
     void
-print_measurement(struct timeval ktv_start,
-                  struct timeval ktv_end, long int *diff) 
+print_measurement(struct timeval ktv_start, struct timeval ktv_end, long int *diff) 
 {
     *diff =
         (((long int) ktv_end.tv_usec - (long int) ktv_start.tv_usec) +
-          (((long int) ktv_end.tv_sec % 1000000 -
-             (long int) ktv_start.tv_sec % 1000000)  *1000000 ) );
+          (((long int) ktv_end.tv_sec % 1000000 - (long int) ktv_start.tv_sec % 1000000)  *1000000 ) );
      printf("%ld.%.6ld : %ld.%.6ld : %ld\n",
               ((long int) ktv_start.tv_sec) % 1000000,
-              (long int) ktv_start.tv_usec,
-              ((long int) ktv_end.tv_sec) % 1000000,
-              (long int) ktv_end.tv_usec, *diff);
+              (long int) ktv_start.tv_usec, ((long int) ktv_end.tv_sec) % 1000000, (long int) ktv_end.tv_usec, *diff);
 }  static double
 
 stddev(long int *data, int count) 
@@ -71,14 +68,12 @@ avg_measurement(long int *data, int loops)
      for (i = 0; i < loops; ++i) {
         sum += data[i];
     }
-    printf("mean %f, stdev %f\n",
-            (double) ((double) sum / (double) loops), stddev(data, loops));
+    printf("mean %f, stdev %f\n", (double) ((double) sum / (double) loops), stddev(data, loops));
      
         // repeat avg for all but first measurement
         sum = 0;
     for (i = 1; i < loops; ++i) {
         sum += data[i];
     }
-    printf("mean (dropped first-%ld) %f\n", data[0],
-            (double) ((double) sum / ((double) loops - 1.0)));
+    printf("mean (dropped first-%ld) %f\n", data[0], (double) ((double) sum / ((double) loops - 1.0)));
 } 

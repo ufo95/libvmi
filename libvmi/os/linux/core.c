@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -35,11 +36,8 @@ linux_init(vmi_instance_t vmi)
 
     if (vmi->cr3) {
         vmi->kpgd = vmi->cr3;
-    } else if (VMI_SUCCESS ==
-               linux_system_map_symbol_to_address(vmi, "swapper_pg_dir",
-                                                  &vmi->kpgd)) {
-        dbprint("--got vaddr for swapper_pg_dir (0x%.16" PRIx64 ").\n",
-                vmi->kpgd);
+    } else if (VMI_SUCCESS == linux_system_map_symbol_to_address(vmi, "swapper_pg_dir", &vmi->kpgd)) {
+        dbprint("--got vaddr for swapper_pg_dir (0x%.16" PRIx64 ").\n", vmi->kpgd);
         if (driver_is_pv(vmi)) {
             vmi->kpgd = vmi_translate_kv2p(vmi, vmi->kpgd);
             if (vmi_read_addr_pa(vmi, vmi->kpgd, &(vmi->kpgd)) == VMI_FAILURE) {

@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to
  * memory in a target virtual machine or in a file containing a dump of
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -46,20 +47,16 @@ is_WINDOWS_KERNEL(vmi_instance_t vmi, addr_t base_p, uint8_t * pe)
     uint16_t optional_header_type = 0;
     struct export_table et;
 
-    peparse_assign_headers(pe, NULL, NULL, &optional_header_type,
-                           &optional_pe_header, NULL, NULL);
-    addr_t export_header_offset =
-        peparse_get_idd_rva(IMAGE_DIRECTORY_ENTRY_EXPORT,
-                            &optional_header_type, optional_pe_header, NULL,
-                            NULL);
+    peparse_assign_headers(pe, NULL, NULL, &optional_header_type, &optional_pe_header, NULL, NULL);
+    addr_t export_header_offset = peparse_get_idd_rva(IMAGE_DIRECTORY_ENTRY_EXPORT,
+                                                      &optional_header_type, optional_pe_header, NULL,
+                                                      NULL);
 
     // The kernel's export table is continuously allocated on the PA level with the PE header
     // This trick may not work for other PE headers (though may work for some drivers)
-    uint32_t nbytes =
-        vmi_read_pa(vmi, base_p + export_header_offset, &et,
-                    sizeof(struct export_table));
-    if (nbytes == sizeof(struct export_table) &&
-        !(et.export_flags || !et.name)) {
+    uint32_t nbytes = vmi_read_pa(vmi, base_p + export_header_offset, &et,
+                                  sizeof(struct export_table));
+    if (nbytes == sizeof(struct export_table) && !(et.export_flags || !et.name)) {
 
         char *name = vmi_read_str_pa(vmi, base_p + et.name);
 
@@ -85,8 +82,7 @@ print_os_version(vmi_instance_t vmi, addr_t kernel_base_p, uint8_t * pe)
     struct optional_header_pe32 *oh32 = NULL;
     struct optional_header_pe32plus *oh32plus = NULL;
 
-    peparse_assign_headers(pe, NULL, NULL, &optional_header_type, NULL, &oh32,
-                           &oh32plus);
+    peparse_assign_headers(pe, NULL, NULL, &optional_header_type, NULL, &oh32, &oh32plus);
 
     printf("\tVersion: ");
 
@@ -146,11 +142,9 @@ print_guid(vmi_instance_t vmi, addr_t kernel_base_p, uint8_t * pe)
     struct optional_header_pe32 *oh32 = NULL;
     struct optional_header_pe32plus *oh32plus = NULL;
 
-    peparse_assign_headers(pe, NULL, &pe_header, &optional_header_type, NULL,
-                           &oh32, &oh32plus);
-    addr_t debug_offset =
-        peparse_get_idd_rva(IMAGE_DIRECTORY_ENTRY_DEBUG, NULL, NULL, oh32,
-                            oh32plus);
+    peparse_assign_headers(pe, NULL, &pe_header, &optional_header_type, NULL, &oh32, &oh32plus);
+    addr_t debug_offset = peparse_get_idd_rva(IMAGE_DIRECTORY_ENTRY_DEBUG, NULL, NULL, oh32,
+                                              oh32plus);
 
     if (optional_header_type == IMAGE_PE32_MAGIC) {
 
@@ -167,31 +161,25 @@ print_guid(vmi_instance_t vmi, addr_t kernel_base_p, uint8_t * pe)
     }
 
     struct image_debug_directory debug_directory;
-    vmi_read_pa(vmi, kernel_base_p + debug_offset,
-                (uint8_t *) & debug_directory,
-                sizeof(struct image_debug_directory));
+    vmi_read_pa(vmi, kernel_base_p + debug_offset, (uint8_t *) & debug_directory, sizeof(struct image_debug_directory));
 
-    printf("\tPE GUID: %.8x%.5x\n", pe_header->time_date_stamp,
-           size_of_image);
+    printf("\tPE GUID: %.8x%.5x\n", pe_header->time_date_stamp, size_of_image);
 
     if (debug_directory.type == IMAGE_DEBUG_TYPE_MISC) {
         printf("This operating system uses .dbg instead of .pdb\n");
         return;
     } else if (debug_directory.type != IMAGE_DEBUG_TYPE_CODEVIEW) {
-        printf
-            ("The header is not in CodeView format, unable to deal with that!\n");
+        printf("The header is not in CodeView format, unable to deal with that!\n");
         return;
     }
 
     struct cv_info_pdb70 *pdb_header = malloc(debug_directory.size_of_data);
-    vmi_read_pa(vmi, kernel_base_p + debug_directory.address_of_raw_data,
-                pdb_header, debug_directory.size_of_data);
+    vmi_read_pa(vmi, kernel_base_p + debug_directory.address_of_raw_data, pdb_header, debug_directory.size_of_data);
 
     // The PDB header has to be PDB 7.0
     // http://www.debuginfo.com/articles/debuginfomatch.html
     if (pdb_header->cv_signature != RSDS) {
-        printf
-            ("The CodeView debug information has to be in PDB 7.0 for the kernel!\n");
+        printf("The CodeView debug information has to be in PDB 7.0 for the kernel!\n");
         return;
     }
 
@@ -228,8 +216,7 @@ print_pe_header(vmi_instance_t vmi, addr_t image_base_p, uint8_t * pe)
     struct pe_header *pe_header = NULL;
     struct dos_header *dos_header = NULL;
     uint16_t optional_header_type = 0;
-    peparse_assign_headers(pe, &dos_header, &pe_header, &optional_header_type,
-                           NULL, NULL, NULL);
+    peparse_assign_headers(pe, &dos_header, &pe_header, &optional_header_type, NULL, NULL, NULL);
 
     printf("\tSignature: %u.\n", pe_header->signature);
     printf("\tMachine: %u.\n", pe_header->machine);
@@ -237,22 +224,18 @@ print_pe_header(vmi_instance_t vmi, addr_t image_base_p, uint8_t * pe)
     printf("\t# of symbols: %u.\n", pe_header->number_of_symbols);
     printf("\tTimestamp: %u.\n", pe_header->time_date_stamp);
     printf("\tCharacteristics: %u.\n", pe_header->characteristics);
-    printf("\tOptional header size: %u.\n",
-           pe_header->size_of_optional_header);
+    printf("\tOptional header size: %u.\n", pe_header->size_of_optional_header);
     printf("\tOptional header type: 0x%x\n", optional_header_type);
 
     uint32_t c;
     for (c = 0; c < pe_header->number_of_sections; c++) {
 
         struct section_header section;
-        addr_t section_addr = image_base_p
-            + dos_header->offset_to_pe + sizeof(struct pe_header)
-            + pe_header->size_of_optional_header
-            + c * sizeof(struct section_header);
+        addr_t section_addr = image_base_p + dos_header->offset_to_pe + sizeof(struct pe_header)
+            + pe_header->size_of_optional_header + c * sizeof(struct section_header);
 
         // Read the section from memory
-        vmi_read_pa(vmi, section_addr, (uint8_t *) & section,
-                    sizeof(struct section_header));
+        vmi_read_pa(vmi, section_addr, (uint8_t *) & section, sizeof(struct section_header));
 
         // The character array is not null terminated, so only print the first 8 characters!
         printf("\tSection %u: %.8s\n", c + 1, section.short_name);
@@ -285,9 +268,7 @@ main(int argc, char **argv)
     }
 
     /* partialy initialize the libvmi library */
-    if (vmi_init_custom
-        (&vmi, VMI_AUTO | VMI_INIT_PARTIAL | VMI_CONFIG_GHASHTABLE,
-         config) == VMI_FAILURE) {
+    if (vmi_init_custom(&vmi, VMI_AUTO | VMI_INIT_PARTIAL | VMI_CONFIG_GHASHTABLE, config) == VMI_FAILURE) {
         printf("Failed to init LibVMI library.\n");
         g_hash_table_destroy(config);
         return 1;
@@ -301,8 +282,7 @@ main(int argc, char **argv)
 
         uint8_t pe[MAX_HEADER_SIZE];
 
-        if (VMI_SUCCESS ==
-            peparse_get_image_phys(vmi, i, MAX_HEADER_SIZE, pe)) {
+        if (VMI_SUCCESS == peparse_get_image_phys(vmi, i, MAX_HEADER_SIZE, pe)) {
             if (VMI_SUCCESS == is_WINDOWS_KERNEL(vmi, i, pe)) {
 
                 printf("Windows Kernel found @ 0x%" PRIx32 "\n", i);

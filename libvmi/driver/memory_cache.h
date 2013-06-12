@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -30,10 +31,7 @@
 void memory_cache_init(vmi_instance_t vmi,
                        void *(*get_data) (vmi_instance_t,
                                           addr_t,
-                                          uint32_t),
-                       void (*release_data) (void *,
-                                             size_t),
-                       unsigned long age_limit);
+                                          uint32_t), void (*release_data) (void *, size_t), unsigned long age_limit);
 
 void *memory_cache_insert(vmi_instance_t vmi, addr_t paddr);
 

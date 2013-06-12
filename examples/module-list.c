@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -90,12 +91,10 @@ main(int argc, char **argv)
         } else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
             /*TODO don't use a hard-coded offsets here */
             /* this offset works with WinXP SP2 */
-            unicode_string_t *us =
-                vmi_read_unicode_str_va(vmi, next_module + 0x2c, 0);
+            unicode_string_t *us = vmi_read_unicode_str_va(vmi, next_module + 0x2c, 0);
             unicode_string_t out = { 0 };
             //         both of these work
-            if (us &&
-                VMI_SUCCESS == vmi_convert_str_encoding(us, &out, "UTF-8")) {
+            if (us && VMI_SUCCESS == vmi_convert_str_encoding(us, &out, "UTF-8")) {
                 printf("%s\n", out.contents);
                 //            if (us && 
                 //                VMI_SUCCESS == vmi_convert_string_encoding (us, &out, "WCHAR_T")) {

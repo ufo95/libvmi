@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -54,25 +55,19 @@ my_init_module(void)
         mmOffset = (unsigned long) (&(p->mm)) - (unsigned long) (p);
         pidOffset = (unsigned long) (&(p->pid)) - (unsigned long) (p);
         pgdOffset = (unsigned long) (&(p->mm->pgd)) - (unsigned long) (p->mm);
-        addrOffset =
-            (unsigned long) (&(p->mm->start_code)) - (unsigned long) (p->mm);
+        addrOffset = (unsigned long) (&(p->mm->start_code)) - (unsigned long) (p->mm);
 
         printk(KERN_ALERT "[domain name] {\n");
         printk(KERN_ALERT "    ostype = \"Linux\";\n");
         printk(KERN_ALERT "    sysmap = \"[insert path here]\";\n");
-        printk(KERN_ALERT "    linux_name = 0x%x;\n",
-               (unsigned int) commOffset);
-        printk(KERN_ALERT "    linux_tasks = 0x%x;\n",
-               (unsigned int) tasksOffset);
+        printk(KERN_ALERT "    linux_name = 0x%x;\n", (unsigned int) commOffset);
+        printk(KERN_ALERT "    linux_tasks = 0x%x;\n", (unsigned int) tasksOffset);
         printk(KERN_ALERT "    linux_mm = 0x%x;\n", (unsigned int) mmOffset);
-        printk(KERN_ALERT "    linux_pid = 0x%x;\n",
-               (unsigned int) pidOffset);
-        printk(KERN_ALERT "    linux_pgd = 0x%x;\n",
-               (unsigned int) pgdOffset);
+        printk(KERN_ALERT "    linux_pid = 0x%x;\n", (unsigned int) pidOffset);
+        printk(KERN_ALERT "    linux_pgd = 0x%x;\n", (unsigned int) pgdOffset);
         printk(KERN_ALERT "}\n");
     } else {
-        printk(KERN_ALERT
-               "%s: found no process to populate task_struct.\n", MYMODNAME);
+        printk(KERN_ALERT "%s: found no process to populate task_struct.\n", MYMODNAME);
     }
 
     return 0;

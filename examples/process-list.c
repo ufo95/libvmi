@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -125,8 +126,7 @@ main(int argc, char **argv)
 
     status = vmi_read_addr_va(vmi, current_list_entry, 0, &next_list_entry);
     if (status == VMI_FAILURE) {
-        printf("Failed to read next pointer at 0x%lx before entering loop\n",
-               current_list_entry);
+        printf("Failed to read next pointer at 0x%lx before entering loop\n", current_list_entry);
         goto error_exit;
     }
 
@@ -154,8 +154,7 @@ main(int argc, char **argv)
         }
 
         /* print out the process name */
-        printf("[%5d] %s (struct addr:%lx)\n", pid, procname,
-               current_process);
+        printf("[%5d] %s (struct addr:%lx)\n", pid, procname, current_process);
         if (procname) {
             free(procname);
             procname = NULL;
@@ -166,11 +165,9 @@ main(int argc, char **argv)
 
         /* follow the next pointer */
 
-        status =
-            vmi_read_addr_va(vmi, current_list_entry, 0, &next_list_entry);
+        status = vmi_read_addr_va(vmi, current_list_entry, 0, &next_list_entry);
         if (status == VMI_FAILURE) {
-            printf("Failed to read next pointer in loop at %lx\n",
-                   current_list_entry);
+            printf("Failed to read next pointer in loop at %lx\n", current_list_entry);
             goto error_exit;
         }
 

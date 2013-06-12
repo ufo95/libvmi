@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -100,27 +101,28 @@ typedef struct xen_instance {
 status_t xen_init(vmi_instance_t vmi);
 void xen_destroy(vmi_instance_t vmi);
 unsigned long xen_get_domainid_from_name(vmi_instance_t vmi, char *name);
-status_t xen_get_name_from_domainid(vmi_instance_t vmi,
-                                    unsigned long domid, char **name);
+status_t xen_get_name_from_domainid(vmi_instance_t vmi, unsigned long domid, char **name);
 unsigned long xen_get_domainid(vmi_instance_t vmi);
 void xen_set_domainid(vmi_instance_t vmi, unsigned long domainid);
 status_t xen_check_domainid(vmi_instance_t vmi, unsigned long domainid);
 status_t xen_get_domainname(vmi_instance_t vmi, char **name);
 void xen_set_domainname(vmi_instance_t vmi, char *name);
 status_t xen_get_memsize(vmi_instance_t vmi, unsigned long *size);
-status_t xen_get_vcpureg(vmi_instance_t vmi,
-                         reg_t *value, registers_t reg, unsigned long vcpu);
+status_t xen_get_vcpureg(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu);
 status_t
 
-xen_set_vcpureg(vmi_instance_t vmi,
-                reg_t value, registers_t reg, unsigned long vcpu);
+
+
+
+
+
+
+ xen_set_vcpureg(vmi_instance_t vmi, reg_t value, registers_t reg, unsigned long vcpu);
 status_t xen_get_address_width(vmi_instance_t vmi, uint8_t * width_in_bytes);
 void *xen_read_page(vmi_instance_t vmi, addr_t page);
-status_t xen_write(vmi_instance_t vmi,
-                   addr_t paddr, void *buf, uint32_t length);
+status_t xen_write(vmi_instance_t vmi, addr_t paddr, void *buf, uint32_t length);
 int xen_is_pv(vmi_instance_t vmi);
 status_t xen_test(unsigned long id, char *name);
 status_t xen_pause_vm(vmi_instance_t vmi);
 status_t xen_resume_vm(vmi_instance_t vmi);
-status_t xen_set_domain_debug_control(vmi_instance_t vmi,
-                                      unsigned long vcpu, int enable);
+status_t xen_set_domain_debug_control(vmi_instance_t vmi, unsigned long vcpu, int enable);

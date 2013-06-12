@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -211,9 +212,7 @@ extern "C" {
  * @return VMI_SUCCESS or VMI_FAILURE
  */
     status_t
-     peparse_get_image_phys(vmi_instance_t vmi,
-                            addr_t base_paddr,
-                            size_t len, const uint8_t * const image);
+     peparse_get_image_phys(vmi_instance_t vmi, addr_t base_paddr, size_t len, const uint8_t * const image);
 
 /**
  * Read a virtual address and return a valid PE image if one was found
@@ -228,9 +227,7 @@ extern "C" {
  */
     status_t
      peparse_get_image_virt(vmi_instance_t vmi,
-                            addr_t base_vaddr,
-                            uint32_t pid,
-                            size_t len, const uint8_t * const image);
+                            addr_t base_vaddr, uint32_t pid, size_t len, const uint8_t * const image);
 
 /**
  * Assign PE headers to an image.
@@ -249,8 +246,7 @@ extern "C" {
                             struct pe_header **pe_header,
                             uint16_t * optional_header_type,
                             void **optional_pe_header,
-                            struct optional_header_pe32 **oh_pe32,
-                            struct optional_header_pe32plus **oh_pe32plus);
+                            struct optional_header_pe32 **oh_pe32, struct optional_header_pe32plus **oh_pe32plus);
 
 /**
  * Get an RVA value from the PE image data directory (idd).
@@ -268,8 +264,7 @@ extern "C" {
      peparse_get_idd_rva(uint32_t entry_id,
                          uint16_t * optional_header_type,
                          void *optional_header,
-                         struct optional_header_pe32 *oh_pe32,
-                         struct optional_header_pe32plus *oh_pe32plus);
+                         struct optional_header_pe32 *oh_pe32, struct optional_header_pe32plus *oh_pe32plus);
 
 /**
  * Get the size from the PE image data directory (idd).
@@ -287,8 +282,7 @@ extern "C" {
         peparse_get_idd_size(uint32_t entry_id,
                              uint16_t * optional_header_type,
                              void *optional_header,
-                             struct optional_header_pe32 *oh_pe32,
-                             struct optional_header_pe32plus *oh_pe32plus);
+                             struct optional_header_pe32 *oh_pe32, struct optional_header_pe32plus *oh_pe32plus);
 
 /**
  * Get the export table from a PE image.
@@ -304,9 +298,7 @@ extern "C" {
      peparse_get_export_table(vmi_instance_t vmi,
                               addr_t base_vaddr,
                               uint32_t pid,
-                              struct export_table *et,
-                              addr_t *export_table_rva,
-                              size_t * export_table_size);
+                              struct export_table *et, addr_t *export_table_rva, size_t * export_table_size);
 
 #pragma GCC visibility pop
 #ifdef __cplusplus

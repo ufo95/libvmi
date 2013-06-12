@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -167,8 +168,7 @@ linux_pgd_to_pid(vmi_instance_t vmi, addr_t pgd)
     /* first we the address of the task_struct with this PGD */
     ts_addr = linux_get_taskstruct_addr_from_pgd(vmi, pgd);
     if (!ts_addr) {
-        errprint("Could not find task struct for pgd = 0x%" PRIx64 ".\n",
-                 pgd);
+        errprint("Could not find task struct for pgd = 0x%" PRIx64 ".\n", pgd);
         goto error_exit;
     }
 

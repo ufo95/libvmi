@@ -23,7 +23,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LibVMI.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 #include "../libvmi.h"
 
 #define CONFIG_STR_LENGTH 1024
@@ -38,12 +38,12 @@ typedef struct vmi_config_entry {
             int mm;
             int pid;
             int pgd;
-            int addr; 
+            int addr;
             int name;
         } linux_offsets;
         struct windows_offsets {
             int ntoskrnl;
-            int tasks; 
+            int tasks;
             int pdbase;
             int pid;
             int peb;
@@ -57,4 +57,4 @@ typedef struct vmi_config_entry {
 } vmi_config_entry_t;
 
 int vmi_parse_config(char *td);
-vmi_config_entry_t* vmi_get_config();
+vmi_config_entry_t *vmi_get_config();

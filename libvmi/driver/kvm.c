@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -72,8 +73,7 @@ exec_qmp_cmd(kvm_instance_t *kvm, char *query)
     int cmd_length = strlen(name) + strlen(query) + 29;
     char *cmd = safe_malloc(cmd_length);
 
-    snprintf(cmd, cmd_length, "virsh qemu-monitor-command %s %s", name,
-             query);
+    snprintf(cmd, cmd_length, "virsh qemu-monitor-command %s %s", name, query);
     dbprint("--qmp: %s\n", cmd);
 
     p = popen(cmd, "r");
@@ -98,8 +98,7 @@ exec_qmp_cmd(kvm_instance_t *kvm, char *query)
 static char *
 exec_info_registers(kvm_instance_t *kvm)
 {
-    char *query =
-        "'{\"execute\": \"human-monitor-command\", \"arguments\": {\"command-line\": \"info registers\"}}'";
+    char *query = "'{\"execute\": \"human-monitor-command\", \"arguments\": {\"command-line\": \"info registers\"}}'";
     return exec_qmp_cmd(kvm, query);
 }
 
@@ -109,9 +108,7 @@ exec_memory_access(kvm_instance_t *kvm)
     char *tmpfile = tempnam("/tmp", "vmi");
     char *query = (char *) safe_malloc(256);
 
-    sprintf(query,
-            "'{\"execute\": \"pmemaccess\", \"arguments\": {\"path\": \"%s\"}}'",
-            tmpfile);
+    sprintf(query, "'{\"execute\": \"pmemaccess\", \"arguments\": {\"path\": \"%s\"}}'", tmpfile);
     kvm->ds_path = strdup(tmpfile);
     free(tmpfile);
 
@@ -185,9 +182,7 @@ init_domain_socket(kvm_instance_t *kvm)
     }
 
     address.sun_family = AF_UNIX;
-    address_length =
-        sizeof(address.sun_family) + sprintf(address.sun_path, "%s",
-                                             kvm->ds_path);
+    address_length = sizeof(address.sun_family) + sprintf(address.sun_path, "%s", kvm->ds_path);
 
     if (connect(socket_fd, (struct sockaddr *) &address, address_length)
         != 0) {
@@ -377,8 +372,7 @@ kvm_init(vmi_instance_t vmi)
             free(status);
         return init_domain_socket(kvm_get_instance(vmi));
     } else {
-        dbprint
-            ("--kvm: didn't find patch, falling back to slower native access\n");
+        dbprint("--kvm: didn't find patch, falling back to slower native access\n");
         memory_cache_init(vmi, kvm_get_memory_native, kvm_release_memory, 1);
         if (status)
             free(status);
@@ -532,8 +526,7 @@ error_exit:
 }
 
 status_t
-kvm_get_vcpureg(vmi_instance_t vmi,
-                reg_t *value, registers_t reg, unsigned long vcpu)
+kvm_get_vcpureg(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu)
 {
     char *regs = exec_info_registers(kvm_get_instance(vmi));
     status_t ret = VMI_SUCCESS;
@@ -826,8 +819,7 @@ kvm_get_memsize(vmi_instance_t vmi, unsigned long *size)
 }
 
 status_t
-kvm_get_vcpureg(vmi_instance_t vmi,
-                reg_t *value, registers_t reg, unsigned long vcpu)
+kvm_get_vcpureg(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu)
 {
     return VMI_FAILURE;
 }

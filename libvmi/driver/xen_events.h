@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -102,8 +103,7 @@ status_t xen_events_init(vmi_instance_t vmi);
 void xen_events_destroy(vmi_instance_t vmi);
 status_t xen_events_listen(vmi_instance_t vmi, uint32_t timeout);
 status_t xen_set_reg_access(vmi_instance_t vmi, reg_event_t event);
-status_t xen_set_mem_access(vmi_instance_t vmi, mem_event_t event,
-                            vmi_mem_access_t page_access_flag);
+status_t xen_set_mem_access(vmi_instance_t vmi, mem_event_t event, vmi_mem_access_t page_access_flag);
 status_t xen_start_single_step(vmi_instance_t vmi, single_step_event_t event);
 status_t xen_stop_single_step(vmi_instance_t vmi, uint32_t vcpu);
 status_t xen_shutdown_single_step(vmi_instance_t vmi);

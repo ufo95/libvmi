@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to
  * memory in a target virtual machine or in a file containing a dump of
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -53,8 +54,7 @@ vmifs_getattr(const char *path, struct stat *stbuf)
 }
 
 static int
-vmifs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
-              off_t offset, struct fuse_file_info *fi)
+vmifs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
 {
     (void) offset;
     (void) fi;
@@ -83,8 +83,7 @@ vmifs_open(const char *path, struct fuse_file_info *fi)
 }
 
 static int
-vmifs_read(const char *path, char *buf, size_t size, off_t offset,
-           struct fuse_file_info *fi)
+vmifs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
     (void) fi;
     if (strcmp(path, mem_path) != 0)
@@ -150,8 +149,7 @@ main(int argc, char *argv[])
 
     /* initialize the libvmi library */
     if (vmi_init_custom
-        (&vmi, VMI_AUTO | VMI_INIT_PARTIAL | VMI_CONFIG_GHASHTABLE,
-         (vmi_config_t) config) == VMI_FAILURE) {
+        (&vmi, VMI_AUTO | VMI_INIT_PARTIAL | VMI_CONFIG_GHASHTABLE, (vmi_config_t) config) == VMI_FAILURE) {
         printf("Failed to init LibVMI library.\n");
         return 1;
     }

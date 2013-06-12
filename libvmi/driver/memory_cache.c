@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -84,14 +85,12 @@ clean_cache(vmi_instance_t vmi)
 
         key = last->data;
         list = g_list_prepend(list, key);
-        vmi->memory_cache_lru =
-            g_list_remove_link(vmi->memory_cache_lru, last);
+        vmi->memory_cache_lru = g_list_remove_link(vmi->memory_cache_lru, last);
         vmi->memory_cache_size--;
     }
     g_list_foreach(list, remove_entry, vmi->memory_cache);
     g_list_free(list);
-    dbprint("--MEMORY cache cleanup round complete (cache size = %u)\n",
-            g_hash_table_size(vmi->memory_cache));
+    dbprint("--MEMORY cache cleanup round complete (cache size = %u)\n", g_hash_table_size(vmi->memory_cache));
 }
 
 static void *
@@ -99,8 +98,7 @@ validate_and_return_data(vmi_instance_t vmi, memory_cache_entry_t entry)
 {
     time_t now = time(NULL);
 
-    if (vmi->memory_cache_age &&
-        (now - entry->last_updated > vmi->memory_cache_age)) {
+    if (vmi->memory_cache_age && (now - entry->last_updated > vmi->memory_cache_age)) {
         dbprint("--MEMORY cache refresh 0x%" PRIx64 "\n", entry->paddr);
         release_data_callback(entry->data, entry->length);
         entry->data = get_memory_data(vmi, entry->paddr, entry->length);
@@ -130,10 +128,8 @@ create_new_entry(vmi_instance_t vmi, addr_t paddr, uint32_t length)
     // TODO: perform other reasonable checks
 
     if (vmi->hvm && (paddr + length - 1 > vmi->size)) {
-        errprint("--requesting PA [0x%" PRIx64 "] beyond memsize [0x%" PRIx64
-                 "]\n", paddr + length, vmi->size);
-        errprint("\tpaddr: %" PRIx64 ", length %" PRIx32 ", vmi->size %"
-                 PRIx64 "\n", paddr, length, vmi->size);
+        errprint("--requesting PA [0x%" PRIx64 "] beyond memsize [0x%" PRIx64 "]\n", paddr + length, vmi->size);
+        errprint("\tpaddr: %" PRIx64 ", length %" PRIx32 ", vmi->size %" PRIx64 "\n", paddr, length, vmi->size);
         return 0;
     }
 
@@ -158,14 +154,9 @@ create_new_entry(vmi_instance_t vmi, addr_t paddr, uint32_t length)
 void
 memory_cache_init(vmi_instance_t vmi,
                   void *(*get_data) (vmi_instance_t,
-                                     addr_t,
-                                     uint32_t),
-                  void (*release_data) (void *,
-                                        size_t), unsigned long age_limit)
+                                     addr_t, uint32_t), void (*release_data) (void *, size_t), unsigned long age_limit)
 {
-    vmi->memory_cache =
-        g_hash_table_new_full(g_int64_hash, g_int64_equal,
-                              g_free, memory_cache_entry_free);
+    vmi->memory_cache = g_hash_table_new_full(g_int64_hash, g_int64_equal, g_free, memory_cache_entry_free);
     vmi->memory_cache_lru = NULL;
     vmi->memory_cache_age = age_limit;
     vmi->memory_cache_size = 0;

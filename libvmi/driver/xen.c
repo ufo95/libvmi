@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -209,8 +210,7 @@ _bail:
 }
 
 status_t
-xen_get_name_from_domainid(vmi_instance_t vmi,
-                           unsigned long domid, char **name)
+xen_get_name_from_domainid(vmi_instance_t vmi, unsigned long domid, char **name)
 {
 
     // This function is only usable with xenstore
@@ -234,8 +234,7 @@ xen_get_name_from_domainid(vmi_instance_t vmi,
     if (!xsh)
         goto _bail;
 
-    char *tmp =
-        malloc(snprintf(NULL, 0, "/local/domain/%lu/name", domid) + 1);
+    char *tmp = malloc(snprintf(NULL, 0, "/local/domain/%lu/name", domid) + 1);
     sprintf(tmp, "/local/domain/%lu/name", domid);
     char *nameCandidate = xs_read(xsh, xth, tmp, NULL);
     free(tmp);
@@ -314,8 +313,7 @@ xen_discover_guest_addr_width(vmi_instance_t vmi)
             ret = VMI_FAILURE;
             goto _bail;
         }
-        xen_get_instance(vmi)->addr_width =
-            (vmi_get_bit(hw_ctxt.msr_efer, 8) == 0 ? 4 : 8);
+        xen_get_instance(vmi)->addr_width = (vmi_get_bit(hw_ctxt.msr_efer, 8) == 0 ? 4 : 8);
     } else {    // PV
         xen_domctl_t domctl = { 0 };
         domctl.domain = xen_get_domainid(vmi);
@@ -329,25 +327,19 @@ xen_discover_guest_addr_width(vmi_instance_t vmi)
 
         rc = xc_domctl(xen_get_instance(vmi)->xchandle, &domctl);
         if (rc) {
-            errprint
-                ("Failed to get domain address width (#1), value retrieved %d\n",
-                 domctl.u.address_size.size);
+            errprint("Failed to get domain address width (#1), value retrieved %d\n", domctl.u.address_size.size);
             goto _bail;
         }       // if
 
         // translate width to bytes from bits
         xen_get_instance(vmi)->addr_width = domctl.u.address_size.size / 8;
 
-        if (8 != xen_get_instance(vmi)->addr_width &&
-            4 != xen_get_instance(vmi)->addr_width) {
-            errprint
-                ("Failed to get domain address width (#2), value retrieved %d\n",
-                 domctl.u.address_size.size);
+        if (8 != xen_get_instance(vmi)->addr_width && 4 != xen_get_instance(vmi)->addr_width) {
+            errprint("Failed to get domain address width (#2), value retrieved %d\n", domctl.u.address_size.size);
             goto _bail;
         }
 
-        dbprint("**guest address width is %d bits\n",
-                xen_get_instance(vmi)->addr_width * 8);
+        dbprint("**guest address width is %d bits\n", xen_get_instance(vmi)->addr_width * 8);
     }   // if-else
 
     ret = VMI_SUCCESS;
@@ -379,8 +371,7 @@ xen_init(vmi_instance_t vmi)
     /* initialize other xen-specific values */
 
     /* setup the info struct */
-    rc = xc_domain_getinfo(xchandle, xen_get_domainid(vmi), 1,
-                           &(xen_get_instance(vmi)->info));
+    rc = xc_domain_getinfo(xchandle, xen_get_domainid(vmi), 1, &(xen_get_instance(vmi)->info));
     if (rc != 1) {
         errprint("Failed to get domain info for Xen.\n");
         goto _bail;
@@ -469,17 +460,14 @@ xen_get_domainname(vmi_instance_t vmi, char **name)
         goto _bail;
     }
 
-    char *tmp =
-        malloc(snprintf
-               (NULL, 0, "/local/domain/%lu/name",
-                xen_get_domainid(vmi)) + 1);
+    char *tmp = malloc(snprintf(NULL, 0, "/local/domain/%lu/name",
+                                xen_get_domainid(vmi)) + 1);
     sprintf(tmp, "/local/domain/%lu/name", xen_get_domainid(vmi));
     *name = xs_read(xen_get_instance(vmi)->xshandle, xth, tmp, NULL);
     free(tmp);
 
     if (NULL == name) {
-        errprint("Couldn't get name of domain %lu from Xenstore\n",
-                 xen_get_domainid(vmi));
+        errprint("Couldn't get name of domain %lu from Xenstore\n", xen_get_domainid(vmi));
         goto _bail;
     }
     ret = VMI_SUCCESS;
@@ -511,15 +499,13 @@ xen_get_memsize(vmi_instance_t vmi, unsigned long *size)
 }
 
 static status_t
-xen_get_vcpureg_hvm(vmi_instance_t vmi,
-                    reg_t *value, registers_t reg, unsigned long vcpu)
+xen_get_vcpureg_hvm(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu)
 {
     status_t ret = VMI_SUCCESS;
     struct hvm_hw_cpu hw_ctxt = { 0 };
 
     if (xc_domain_hvm_getcontext_partial
-        (xen_get_xchandle(vmi), xen_get_domainid(vmi),
-         HVM_SAVE_CODE(CPU), vcpu, &hw_ctxt, sizeof hw_ctxt) != 0) {
+        (xen_get_xchandle(vmi), xen_get_domainid(vmi), HVM_SAVE_CODE(CPU), vcpu, &hw_ctxt, sizeof hw_ctxt) != 0) {
         errprint("Failed to get context information (HVM domain).\n");
         ret = VMI_FAILURE;
         goto _bail;
@@ -782,8 +768,7 @@ _bail:
 }
 
 static status_t
-xen_set_vcpureg_hvm(vmi_instance_t vmi,
-                    reg_t value, registers_t reg, unsigned long vcpu)
+xen_set_vcpureg_hvm(vmi_instance_t vmi, reg_t value, registers_t reg, unsigned long vcpu)
 {
     uint32_t size = 0;
     uint32_t off = 0;
@@ -795,8 +780,7 @@ xen_set_vcpureg_hvm(vmi_instance_t vmi,
     /* calling with no arguments --> return is the size of buffer required
      *  for storing the HVM context
      */
-    size = xc_domain_hvm_getcontext
-        (xen_get_xchandle(vmi), xen_get_domainid(vmi), 0, 0);
+    size = xc_domain_hvm_getcontext(xen_get_xchandle(vmi), xen_get_domainid(vmi), 0, 0);
 
     if (size <= 0) {
         errprint("Failed to fetch HVM context buffer size.\n");
@@ -816,8 +800,7 @@ xen_set_vcpureg_hvm(vmi_instance_t vmi,
      *  variant, because there is no equivalent setcontext_partial.
      * NOTE: to avoid inducing race conditions/errors, run while VM is paused.
      */
-    if (xc_domain_hvm_getcontext
-        (xen_get_xchandle(vmi), xen_get_domainid(vmi), buf, size) < 0) {
+    if (xc_domain_hvm_getcontext(xen_get_xchandle(vmi), xen_get_domainid(vmi), buf, size) < 0) {
 
         errprint("Failed to fetch HVM context buffer.\n");
         ret = VMI_FAILURE;
@@ -1096,8 +1079,7 @@ xen_set_vcpureg_hvm(vmi_instance_t vmi,
         break;
     }
 
-    if (xc_domain_hvm_setcontext
-        (xen_get_xchandle(vmi), xen_get_domainid(vmi), buf, size)) {
+    if (xc_domain_hvm_setcontext(xen_get_xchandle(vmi), xen_get_domainid(vmi), buf, size)) {
         errprint("Failed to set context information (HVM domain).\n");
         ret = VMI_FAILURE;
         goto _bail;
@@ -1111,15 +1093,13 @@ _bail:
 }
 
 static status_t
-xen_get_vcpureg_pv64(vmi_instance_t vmi,
-                     reg_t *value, registers_t reg, unsigned long vcpu)
+xen_get_vcpureg_pv64(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu)
 {
     status_t ret = VMI_SUCCESS;
     vcpu_guest_context_any_t ctx = { 0 };
     xen_domctl_t domctl = { 0 };
 
-    if (xc_vcpu_getcontext
-        (xen_get_xchandle(vmi), xen_get_domainid(vmi), vcpu, &ctx)) {
+    if (xc_vcpu_getcontext(xen_get_xchandle(vmi), xen_get_domainid(vmi), vcpu, &ctx)) {
         errprint("Failed to get context information (PV domain).\n");
         ret = VMI_FAILURE;
         goto _bail;
@@ -1233,15 +1213,13 @@ _bail:
 }
 
 static status_t
-xen_set_vcpureg_pv64(vmi_instance_t vmi,
-                     reg_t value, registers_t reg, unsigned long vcpu)
+xen_set_vcpureg_pv64(vmi_instance_t vmi, reg_t value, registers_t reg, unsigned long vcpu)
 {
     status_t ret = VMI_SUCCESS;
     vcpu_guest_context_any_t ctx = { 0 };
     xen_domctl_t domctl = { 0 };
 
-    if (xc_vcpu_getcontext(xen_get_xchandle(vmi),
-                           xen_get_domainid(vmi), vcpu, &ctx)) {
+    if (xc_vcpu_getcontext(xen_get_xchandle(vmi), xen_get_domainid(vmi), vcpu, &ctx)) {
         errprint("Failed to get context information (PV domain).\n");
         ret = VMI_FAILURE;
         goto _bail;
@@ -1351,8 +1329,7 @@ xen_set_vcpureg_pv64(vmi_instance_t vmi,
         break;
     }
 
-    if (xc_vcpu_setcontext
-        (xen_get_xchandle(vmi), xen_get_domainid(vmi), vcpu, &ctx)) {
+    if (xc_vcpu_setcontext(xen_get_xchandle(vmi), xen_get_domainid(vmi), vcpu, &ctx)) {
         errprint("Failed to set context information (PV domain).\n");
         ret = VMI_FAILURE;
         goto _bail;
@@ -1363,15 +1340,13 @@ _bail:
 }
 
 static status_t
-xen_get_vcpureg_pv32(vmi_instance_t vmi,
-                     reg_t *value, registers_t reg, unsigned long vcpu)
+xen_get_vcpureg_pv32(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu)
 {
     status_t ret = VMI_SUCCESS;
     vcpu_guest_context_any_t ctx = { 0 };
     xen_domctl_t domctl = { 0 };
 
-    if (xc_vcpu_getcontext
-        (xen_get_xchandle(vmi), xen_get_domainid(vmi), vcpu, &ctx)) {
+    if (xc_vcpu_getcontext(xen_get_xchandle(vmi), xen_get_domainid(vmi), vcpu, &ctx)) {
         errprint("Failed to get context information (PV domain).\n");
         ret = VMI_FAILURE;
         goto _bail;
@@ -1455,15 +1430,13 @@ _bail:
 }
 
 static status_t
-xen_set_vcpureg_pv32(vmi_instance_t vmi,
-                     reg_t value, registers_t reg, unsigned long vcpu)
+xen_set_vcpureg_pv32(vmi_instance_t vmi, reg_t value, registers_t reg, unsigned long vcpu)
 {
     status_t ret = VMI_SUCCESS;
     vcpu_guest_context_any_t ctx = { 0 };
     xen_domctl_t domctl = { 0 };
 
-    if (xc_vcpu_getcontext
-        (xen_get_xchandle(vmi), xen_get_domainid(vmi), vcpu, &ctx)) {
+    if (xc_vcpu_getcontext(xen_get_xchandle(vmi), xen_get_domainid(vmi), vcpu, &ctx)) {
         errprint("Failed to get context information (PV domain).\n");
         ret = VMI_FAILURE;
         goto _bail;
@@ -1547,8 +1520,7 @@ _bail:
 }
 
 status_t
-xen_get_vcpureg(vmi_instance_t vmi,
-                reg_t *value, registers_t reg, unsigned long vcpu)
+xen_get_vcpureg(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu)
 {
     if (!xen_get_instance(vmi)->hvm) {
         if (8 == xen_get_instance(vmi)->addr_width) {
@@ -1562,8 +1534,7 @@ xen_get_vcpureg(vmi_instance_t vmi,
 }
 
 status_t
-xen_set_vcpureg(vmi_instance_t vmi,
-                reg_t value, registers_t reg, unsigned long vcpu)
+xen_set_vcpureg(vmi_instance_t vmi, reg_t value, registers_t reg, unsigned long vcpu)
 {
     if (!xen_get_instance(vmi)->hvm) {
         if (8 == xen_get_instance(vmi)->addr_width) {
@@ -1631,19 +1602,14 @@ xen_resume_vm(vmi_instance_t vmi)
 }
 
 status_t
-xen_set_domain_debug_control(vmi_instance_t vmi,
-                             unsigned long vcpu, int enable)
+xen_set_domain_debug_control(vmi_instance_t vmi, unsigned long vcpu, int enable)
 {
     status_t ret = VMI_FAILURE;
     int rc = -1;
 
-    uint32_t op = (enable) ?
-        XEN_DOMCTL_DEBUG_OP_SINGLE_STEP_ON :
-        XEN_DOMCTL_DEBUG_OP_SINGLE_STEP_OFF;
+    uint32_t op = (enable) ? XEN_DOMCTL_DEBUG_OP_SINGLE_STEP_ON : XEN_DOMCTL_DEBUG_OP_SINGLE_STEP_OFF;
 
-    ret =
-        xc_domain_debug_control(xen_get_xchandle(vmi), xen_get_domainid(vmi),
-                                op, vcpu);
+    ret = xc_domain_debug_control(xen_get_xchandle(vmi), xen_get_domainid(vmi), op, vcpu);
 
     return ret;
 }
@@ -1670,8 +1636,7 @@ xen_get_domainid_from_name(vmi_instance_t vmi, char *name)
 }
 
 status_t
-xen_get_name_from_domainid(vmi_instance_t vmi,
-                           unsigned long domid, char **name)
+xen_get_name_from_domainid(vmi_instance_t vmi, unsigned long domid, char **name)
 {
     return VMI_FAILURE;
 }
@@ -1713,15 +1678,13 @@ xen_get_memsize(vmi_instance_t vmi, unsigned long *size)
 }
 
 status_t
-xen_get_vcpureg(vmi_instance_t vmi,
-                reg_t *value, registers_t reg, unsigned long vcpu)
+xen_get_vcpureg(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu)
 {
     return VMI_FAILURE;
 }
 
 status_t
-xen_set_vcpureg(vmi_instance_t vmi,
-                reg_t value, registers_t reg, unsigned long vcpu)
+xen_set_vcpureg(vmi_instance_t vmi, reg_t value, registers_t reg, unsigned long vcpu)
 {
     return VMI_FAILURE;
 }
@@ -1769,8 +1732,7 @@ xen_resume_vm(vmi_instance_t vmi)
 }
 
 status_t
-xen_set_domain_debug_control(vmi_instance_t vmi,
-                             unsigned long vcpu, int enable)
+xen_set_domain_debug_control(vmi_instance_t vmi, unsigned long vcpu, int enable)
 {
     return VMI_FAILURE;
 }

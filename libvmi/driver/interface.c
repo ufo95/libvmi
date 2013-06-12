@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -43,10 +44,8 @@ struct driver_instance {
     status_t (*get_name_ptr) (vmi_instance_t, char **);
     void (*set_name_ptr) (vmi_instance_t, char *);
     status_t (*get_memsize_ptr) (vmi_instance_t, unsigned long *);
-    status_t (*get_vcpureg_ptr) (vmi_instance_t,
-                                 reg_t *, registers_t, unsigned long);
-    status_t (*set_vcpureg_ptr) (vmi_instance_t,
-                                 reg_t, registers_t, unsigned long);
+    status_t (*get_vcpureg_ptr) (vmi_instance_t, reg_t *, registers_t, unsigned long);
+    status_t (*set_vcpureg_ptr) (vmi_instance_t, reg_t, registers_t, unsigned long);
     status_t (*get_address_width_ptr) (vmi_instance_t vmi, uint8_t * width);
     void *(*read_page_ptr) (vmi_instance_t, addr_t);
     status_t (*write_ptr) (vmi_instance_t, addr_t, void *, uint32_t);
@@ -55,8 +54,7 @@ struct driver_instance {
     status_t (*resume_vm_ptr) (vmi_instance_t);
     status_t (*events_listen_ptr) (vmi_instance_t, uint32_t);
     status_t (*set_reg_access_ptr) (vmi_instance_t, reg_event_t);
-    status_t (*set_mem_access_ptr) (vmi_instance_t,
-                                    mem_event_t, vmi_mem_access_t);
+    status_t (*set_mem_access_ptr) (vmi_instance_t, mem_event_t, vmi_mem_access_t);
     status_t (*start_single_step_ptr) (vmi_instance_t, single_step_event_t);
     status_t (*stop_single_step_ptr) (vmi_instance_t, uint32_t);
     status_t (*shutdown_single_step_ptr) (vmi_instance_t);
@@ -242,8 +240,7 @@ driver_init_mode(vmi_instance_t vmi, unsigned long id, char *name)
         errprint("Opening a live VMM requires root access.\n");
         return VMI_FAILURE;
     } else if (count > 1) {
-        errprint
-            ("Found more than one VMM or file to use,\nplease specify what you want instead of using VMI_AUTO.\n");
+        errprint("Found more than one VMM or file to use,\nplease specify what you want instead of using VMI_AUTO.\n");
         return VMI_FAILURE;
     } else {    // count == 1
         return VMI_SUCCESS;
@@ -286,8 +283,7 @@ driver_get_id_from_name(vmi_instance_t vmi, char *name)
     if (NULL != ptrs && NULL != ptrs->get_id_from_name_ptr) {
         return ptrs->get_id_from_name_ptr(vmi, name);
     } else {
-        dbprint
-            ("WARNING: driver_get_id_from_name function not implemented.\n");
+        dbprint("WARNING: driver_get_id_from_name function not implemented.\n");
         return 0;
     }
 }
@@ -300,8 +296,7 @@ driver_get_name_from_id(vmi_instance_t vmi, unsigned long domid, char **name)
     if (NULL != ptrs && NULL != ptrs->get_name_from_id_ptr) {
         return ptrs->get_name_from_id_ptr(vmi, domid, name);
     } else {
-        dbprint
-            ("WARNING: driver_get_name_from_id function not implemented.\n");
+        dbprint("WARNING: driver_get_name_from_id function not implemented.\n");
         return 0;
     }
 }
@@ -386,8 +381,7 @@ driver_get_memsize(vmi_instance_t vmi, unsigned long *size)
 }
 
 status_t
-driver_get_vcpureg(vmi_instance_t vmi,
-                   reg_t *value, registers_t reg, unsigned long vcpu)
+driver_get_vcpureg(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
@@ -400,8 +394,7 @@ driver_get_vcpureg(vmi_instance_t vmi,
 }
 
 status_t
-driver_set_vcpureg(vmi_instance_t vmi,
-                   reg_t value, registers_t reg, unsigned long vcpu)
+driver_set_vcpureg(vmi_instance_t vmi, reg_t value, registers_t reg, unsigned long vcpu)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
     if (NULL != ptrs && NULL != ptrs->set_vcpureg_ptr) {
@@ -420,8 +413,7 @@ driver_get_address_width(vmi_instance_t vmi, uint8_t * width)
     if (NULL != ptrs && NULL != ptrs->get_address_width_ptr) {
         return ptrs->get_address_width_ptr(vmi, width);
     } else {
-        dbprint
-            ("WARNING: driver_get_address_width function not implemented.\n");
+        dbprint("WARNING: driver_get_address_width function not implemented.\n");
         return VMI_FAILURE;
     }
 }
@@ -510,15 +502,13 @@ driver_set_reg_access(vmi_instance_t vmi, reg_event_t event)
     if (NULL != ptrs && NULL != ptrs->set_reg_access_ptr) {
         return ptrs->set_reg_access_ptr(vmi, event);
     } else {
-        dbprint
-            ("WARNING: driver_set_reg_w_access function not implemented.\n");
+        dbprint("WARNING: driver_set_reg_w_access function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
 status_t
-driver_set_mem_access(vmi_instance_t vmi,
-                      mem_event_t event, vmi_mem_access_t page_access_flag)
+driver_set_mem_access(vmi_instance_t vmi, mem_event_t event, vmi_mem_access_t page_access_flag)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
     if (NULL != ptrs && NULL != ptrs->set_mem_access_ptr) {
@@ -536,8 +526,7 @@ driver_start_single_step(vmi_instance_t vmi, single_step_event_t event)
     if (NULL != ptrs && NULL != ptrs->start_single_step_ptr) {
         return ptrs->start_single_step_ptr(vmi, event);
     } else {
-        dbprint
-            ("WARNING: driver_start_single_step function not implemented.\n");
+        dbprint("WARNING: driver_start_single_step function not implemented.\n");
         return VMI_FAILURE;
     }
 }
@@ -549,8 +538,7 @@ driver_stop_single_step(vmi_instance_t vmi, unsigned long vcpu)
     if (NULL != ptrs && NULL != ptrs->stop_single_step_ptr) {
         return ptrs->stop_single_step_ptr(vmi, vcpu);
     } else {
-        dbprint
-            ("WARNING: driver_stop_single_step function not implemented.\n");
+        dbprint("WARNING: driver_stop_single_step function not implemented.\n");
         return VMI_FAILURE;
     }
 }
@@ -562,8 +550,7 @@ driver_shutdown_single_step(vmi_instance_t vmi)
     if (NULL != ptrs && NULL != ptrs->shutdown_single_step_ptr) {
         return ptrs->shutdown_single_step_ptr(vmi);
     } else {
-        dbprint
-            ("WARNING: driver_shutdown_single_step function not implemented.\n");
+        dbprint("WARNING: driver_shutdown_single_step function not implemented.\n");
         return VMI_FAILURE;
     }
 }

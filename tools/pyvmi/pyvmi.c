@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -54,8 +55,7 @@ typedef struct {
 } pyvmi_instance;
 
 status_t
-pyvmi_add_to_config(pyvmi_config * config,
-                    PyObject * pykey, PyObject * pyvalue)
+pyvmi_add_to_config(pyvmi_config * config, PyObject * pykey, PyObject * pyvalue)
 {
     status_t ret = VMI_FAILURE;
 
@@ -77,21 +77,17 @@ pyvmi_add_to_config(pyvmi_config * config,
             // Numeric values are given by value by Python, so these have to be buffered
             if (config->num_entries < MAX_CONFIG_BUFFER) {
 
-                config->buffer[config->num_entries] =
-                    PyInt_AsUnsignedLongMask(pyvalue);
-                g_hash_table_insert(config->table, key,
-                                    &(config->buffer[config->num_entries]));
+                config->buffer[config->num_entries] = PyInt_AsUnsignedLongMask(pyvalue);
+                g_hash_table_insert(config->table, key, &(config->buffer[config->num_entries]));
                 config->num_entries++;
                 ret = VMI_SUCCESS;
 
             } else {
-                PyErr_SetString(PyExc_ValueError,
-                                "Not enough space in config buffer.");
+                PyErr_SetString(PyExc_ValueError, "Not enough space in config buffer.");
             }
 
         } else {
-            PyErr_SetString(PyExc_ValueError,
-                            "Value has to be either String or Int");
+            PyErr_SetString(PyExc_ValueError, "Value has to be either String or Int");
         }
     } else {
         PyErr_SetString(PyExc_ValueError, "Key has to be a String");
@@ -131,8 +127,7 @@ pyvmi_init(PyObject * self, PyObject * args)
         Py_ssize_t pos = 0;
 
         while (PyDict_Next(dict, &pos, &pykey, &pyvalue)) {
-            if (VMI_FAILURE ==
-                pyvmi_add_to_config(conf(object), pykey, pyvalue)) {
+            if (VMI_FAILURE == pyvmi_add_to_config(conf(object), pykey, pyvalue)) {
                 goto init_fail;
             }
         }
@@ -151,8 +146,7 @@ pyvmi_init(PyObject * self, PyObject * args)
     } else if (strcmp("partial", inittype) == 0) {
         flags |= VMI_AUTO | VMI_INIT_PARTIAL;
     } else {
-        PyErr_SetString(PyExc_ValueError,
-                        "Inittype must be 'complete' or 'partial'");
+        PyErr_SetString(PyExc_ValueError, "Inittype must be 'complete' or 'partial'");
         goto init_fail;
     }
 
@@ -331,8 +325,7 @@ pyvmi_read_pa(PyObject * self, PyObject * args)
     if (nbytes != length) {
         snprintf(msg, sizeof(msg),
                  "%s was asked to read PA [0x%.16llx-0x%.16llx] (%d bytes), but only read %lld bytes)",
-                 __FUNCTION__, (ll_t) paddr, (ll_t) (paddr + length),
-                 length, (ll_t) nbytes);
+                 __FUNCTION__, (ll_t) paddr, (ll_t) (paddr + length), length, (ll_t) nbytes);
         PyErr_SetString(PyExc_ValueError, msg);
         return NULL;
     }
@@ -422,8 +415,7 @@ pyvmi_read_va(PyObject * self, PyObject * args)
 
     size_t nbytes = vmi_read_va(vmi(self), vaddr, pid, mem(self), length);
     if (nbytes != length) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -454,8 +446,7 @@ pyvmi_read_ksym(PyObject * self, PyObject * args)
     size_t nbytes = vmi_read_ksym(vmi(self), sym, mem(self), length);
 
     if (nbytes != length) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -479,8 +470,7 @@ pyvmi_write_pa(PyObject * self, PyObject * args)
     size_t nbytes = vmi_write_pa(vmi(self), paddr, buf, (size_t) count);
 
     if (nbytes != count) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -502,8 +492,7 @@ pyvmi_write_va(PyObject * self, PyObject * args)
 
     size_t nbytes = vmi_write_va(vmi(self), vaddr, pid, buf, (size_t) count);
     if (nbytes != count) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -525,8 +514,7 @@ pyvmi_write_ksym(PyObject * self, PyObject * args)
     size_t nbytes = vmi_write_ksym(vmi(self), sym, buf, (size_t) count);
 
     if (nbytes != count) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -547,8 +535,7 @@ pyvmi_read_8_pa(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_8_pa(vmi(self), paddr, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -567,8 +554,7 @@ pyvmi_read_16_pa(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_16_pa(vmi(self), paddr, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -587,8 +573,7 @@ pyvmi_read_32_pa(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_32_pa(vmi(self), paddr, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -607,8 +592,7 @@ pyvmi_read_64_pa(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_64_pa(vmi(self), paddr, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -627,8 +611,7 @@ pyvmi_read_addr_pa(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_addr_pa(vmi(self), paddr, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -647,8 +630,7 @@ pyvmi_read_str_pa(PyObject * self, PyObject * args)
     }
 
     if ((str = vmi_read_str_pa(vmi(self), paddr)) == NULL) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -668,8 +650,7 @@ pyvmi_read_8_va(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_8_va(vmi(self), vaddr, pid, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -689,8 +670,7 @@ pyvmi_read_16_va(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_16_va(vmi(self), vaddr, pid, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -710,8 +690,7 @@ pyvmi_read_32_va(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_32_va(vmi(self), vaddr, pid, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -731,8 +710,7 @@ pyvmi_read_64_va(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_64_va(vmi(self), vaddr, pid, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -752,8 +730,7 @@ pyvmi_read_addr_va(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_addr_va(vmi(self), vaddr, pid, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -773,8 +750,7 @@ pyvmi_read_str_va(PyObject * self, PyObject * args)
     }
 
     if ((str = vmi_read_str_va(vmi(self), vaddr, pid)) == NULL) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -793,8 +769,7 @@ pyvmi_read_8_ksym(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_8_ksym(vmi(self), sym, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -813,8 +788,7 @@ pyvmi_read_16_ksym(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_16_ksym(vmi(self), sym, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -833,8 +807,7 @@ pyvmi_read_32_ksym(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_32_ksym(vmi(self), sym, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -853,8 +826,7 @@ pyvmi_read_64_ksym(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_64_ksym(vmi(self), sym, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -873,8 +845,7 @@ pyvmi_read_addr_ksym(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_read_addr_ksym(vmi(self), sym, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -893,8 +864,7 @@ pyvmi_read_str_ksym(PyObject * self, PyObject * args)
     }
 
     if ((str = vmi_read_str_ksym(vmi(self), sym)) == NULL) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to read memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to read memory at specified address");
         return NULL;
     }
 
@@ -915,8 +885,7 @@ pyvmi_write_8_pa(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_8_pa(vmi(self), paddr, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -935,8 +904,7 @@ pyvmi_write_16_pa(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_16_pa(vmi(self), paddr, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -955,8 +923,7 @@ pyvmi_write_32_pa(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_32_pa(vmi(self), paddr, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -975,8 +942,7 @@ pyvmi_write_64_pa(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_64_pa(vmi(self), paddr, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -996,8 +962,7 @@ pyvmi_write_8_va(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_8_va(vmi(self), vaddr, pid, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -1017,8 +982,7 @@ pyvmi_write_16_va(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_16_va(vmi(self), vaddr, pid, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -1038,8 +1002,7 @@ pyvmi_write_32_va(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_32_va(vmi(self), vaddr, pid, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -1059,8 +1022,7 @@ pyvmi_write_64_va(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_64_va(vmi(self), vaddr, pid, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -1079,8 +1041,7 @@ pyvmi_write_8_ksym(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_8_ksym(vmi(self), sym, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -1099,8 +1060,7 @@ pyvmi_write_16_ksym(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_16_ksym(vmi(self), sym, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -1119,8 +1079,7 @@ pyvmi_write_32_ksym(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_32_ksym(vmi(self), sym, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -1139,8 +1098,7 @@ pyvmi_write_64_ksym(PyObject * self, PyObject * args)
     }
 
     if (VMI_FAILURE == vmi_write_64_ksym(vmi(self), sym, &value)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "Unable to write memory at specified address");
+        PyErr_SetString(PyExc_ValueError, "Unable to write memory at specified address");
         return NULL;
     }
 
@@ -1197,8 +1155,7 @@ pyvmi_get_vcpureg(PyObject * self, PyObject * args)
         reg = R15;
     } else if (strcmp(reg_name, "RIP") == 0 || strcmp(reg_name, "rip") == 0) {
         reg = RIP;
-    } else if (strcmp(reg_name, "RFLAGS") == 0 ||
-               strcmp(reg_name, "rflags") == 0) {
+    } else if (strcmp(reg_name, "RFLAGS") == 0 || strcmp(reg_name, "rflags") == 0) {
         reg = RFLAGS;
     } else if (strcmp(reg_name, "CR0") == 0 || strcmp(reg_name, "cr0") == 0) {
         reg = CR0;
@@ -1220,143 +1177,97 @@ pyvmi_get_vcpureg(PyObject * self, PyObject * args)
         reg = DR6;
     } else if (strcmp(reg_name, "DR7") == 0 || strcmp(reg_name, "dr7") == 0) {
         reg = DR7;
-    } else if (strcmp(reg_name, "CS_SEL") == 0 ||
-               strcmp(reg_name, "cs_sel") == 0) {
+    } else if (strcmp(reg_name, "CS_SEL") == 0 || strcmp(reg_name, "cs_sel") == 0) {
         reg = CS_SEL;
-    } else if (strcmp(reg_name, "DS_SEL") == 0 ||
-               strcmp(reg_name, "ds_sel") == 0) {
+    } else if (strcmp(reg_name, "DS_SEL") == 0 || strcmp(reg_name, "ds_sel") == 0) {
         reg = DS_SEL;
-    } else if (strcmp(reg_name, "ES_SEL") == 0 ||
-               strcmp(reg_name, "es_sel") == 0) {
+    } else if (strcmp(reg_name, "ES_SEL") == 0 || strcmp(reg_name, "es_sel") == 0) {
         reg = ES_SEL;
-    } else if (strcmp(reg_name, "FS_SEL") == 0 ||
-               strcmp(reg_name, "fs_sel") == 0) {
+    } else if (strcmp(reg_name, "FS_SEL") == 0 || strcmp(reg_name, "fs_sel") == 0) {
         reg = FS_SEL;
-    } else if (strcmp(reg_name, "GS_SEL") == 0 ||
-               strcmp(reg_name, "gs_sel") == 0) {
+    } else if (strcmp(reg_name, "GS_SEL") == 0 || strcmp(reg_name, "gs_sel") == 0) {
         reg = GS_SEL;
-    } else if (strcmp(reg_name, "SS_SEL") == 0 ||
-               strcmp(reg_name, "ss_sel") == 0) {
+    } else if (strcmp(reg_name, "SS_SEL") == 0 || strcmp(reg_name, "ss_sel") == 0) {
         reg = SS_SEL;
-    } else if (strcmp(reg_name, "TR_SEL") == 0 ||
-               strcmp(reg_name, "tr_sel") == 0) {
+    } else if (strcmp(reg_name, "TR_SEL") == 0 || strcmp(reg_name, "tr_sel") == 0) {
         reg = TR_SEL;
-    } else if (strcmp(reg_name, "LDTR_SEL") == 0 ||
-               strcmp(reg_name, "ldtr_sel") == 0) {
+    } else if (strcmp(reg_name, "LDTR_SEL") == 0 || strcmp(reg_name, "ldtr_sel") == 0) {
         reg = LDTR_SEL;
-    } else if (strcmp(reg_name, "CS_LIMIT") == 0 ||
-               strcmp(reg_name, "cs_limit") == 0) {
+    } else if (strcmp(reg_name, "CS_LIMIT") == 0 || strcmp(reg_name, "cs_limit") == 0) {
         reg = CS_LIMIT;
-    } else if (strcmp(reg_name, "DS_LIMIT") == 0 ||
-               strcmp(reg_name, "ds_limit") == 0) {
+    } else if (strcmp(reg_name, "DS_LIMIT") == 0 || strcmp(reg_name, "ds_limit") == 0) {
         reg = DS_LIMIT;
-    } else if (strcmp(reg_name, "ES_LIMIT") == 0 ||
-               strcmp(reg_name, "es_limit") == 0) {
+    } else if (strcmp(reg_name, "ES_LIMIT") == 0 || strcmp(reg_name, "es_limit") == 0) {
         reg = ES_LIMIT;
-    } else if (strcmp(reg_name, "FS_LIMIT") == 0 ||
-               strcmp(reg_name, "fs_limit") == 0) {
+    } else if (strcmp(reg_name, "FS_LIMIT") == 0 || strcmp(reg_name, "fs_limit") == 0) {
         reg = FS_LIMIT;
-    } else if (strcmp(reg_name, "GS_LIMIT") == 0 ||
-               strcmp(reg_name, "gs_limit") == 0) {
+    } else if (strcmp(reg_name, "GS_LIMIT") == 0 || strcmp(reg_name, "gs_limit") == 0) {
         reg = GS_LIMIT;
-    } else if (strcmp(reg_name, "SS_LIMIT") == 0 ||
-               strcmp(reg_name, "ss_limit") == 0) {
+    } else if (strcmp(reg_name, "SS_LIMIT") == 0 || strcmp(reg_name, "ss_limit") == 0) {
         reg = SS_LIMIT;
-    } else if (strcmp(reg_name, "TR_LIMIT") == 0 ||
-               strcmp(reg_name, "tr_limit") == 0) {
+    } else if (strcmp(reg_name, "TR_LIMIT") == 0 || strcmp(reg_name, "tr_limit") == 0) {
         reg = TR_LIMIT;
-    } else if (strcmp(reg_name, "LDTR_LIMIT") == 0 ||
-               strcmp(reg_name, "ldtr_limit") == 0) {
+    } else if (strcmp(reg_name, "LDTR_LIMIT") == 0 || strcmp(reg_name, "ldtr_limit") == 0) {
         reg = LDTR_LIMIT;
-    } else if (strcmp(reg_name, "IDTR_LIMIT") == 0 ||
-               strcmp(reg_name, "idtr_limit") == 0) {
+    } else if (strcmp(reg_name, "IDTR_LIMIT") == 0 || strcmp(reg_name, "idtr_limit") == 0) {
         reg = IDTR_LIMIT;
-    } else if (strcmp(reg_name, "GDTR_LIMIT") == 0 ||
-               strcmp(reg_name, "gdtr_limit") == 0) {
+    } else if (strcmp(reg_name, "GDTR_LIMIT") == 0 || strcmp(reg_name, "gdtr_limit") == 0) {
         reg = GDTR_LIMIT;
-    } else if (strcmp(reg_name, "CS_BASE") == 0 ||
-               strcmp(reg_name, "cs_base") == 0) {
+    } else if (strcmp(reg_name, "CS_BASE") == 0 || strcmp(reg_name, "cs_base") == 0) {
         reg = CS_BASE;
-    } else if (strcmp(reg_name, "DS_BASE") == 0 ||
-               strcmp(reg_name, "ds_base") == 0) {
+    } else if (strcmp(reg_name, "DS_BASE") == 0 || strcmp(reg_name, "ds_base") == 0) {
         reg = DS_BASE;
-    } else if (strcmp(reg_name, "ES_BASE") == 0 ||
-               strcmp(reg_name, "es_base") == 0) {
+    } else if (strcmp(reg_name, "ES_BASE") == 0 || strcmp(reg_name, "es_base") == 0) {
         reg = ES_BASE;
-    } else if (strcmp(reg_name, "FS_BASE") == 0 ||
-               strcmp(reg_name, "fs_base") == 0) {
+    } else if (strcmp(reg_name, "FS_BASE") == 0 || strcmp(reg_name, "fs_base") == 0) {
         reg = FS_BASE;
-    } else if (strcmp(reg_name, "GS_BASE") == 0 ||
-               strcmp(reg_name, "gs_base") == 0) {
+    } else if (strcmp(reg_name, "GS_BASE") == 0 || strcmp(reg_name, "gs_base") == 0) {
         reg = GS_BASE;
-    } else if (strcmp(reg_name, "SS_BASE") == 0 ||
-               strcmp(reg_name, "ss_base") == 0) {
+    } else if (strcmp(reg_name, "SS_BASE") == 0 || strcmp(reg_name, "ss_base") == 0) {
         reg = SS_BASE;
-    } else if (strcmp(reg_name, "TR_BASE") == 0 ||
-               strcmp(reg_name, "tr_base") == 0) {
+    } else if (strcmp(reg_name, "TR_BASE") == 0 || strcmp(reg_name, "tr_base") == 0) {
         reg = TR_BASE;
-    } else if (strcmp(reg_name, "LDTR_BASE") == 0 ||
-               strcmp(reg_name, "ldtr_base") == 0) {
+    } else if (strcmp(reg_name, "LDTR_BASE") == 0 || strcmp(reg_name, "ldtr_base") == 0) {
         reg = LDTR_BASE;
-    } else if (strcmp(reg_name, "IDTR_BASE") == 0 ||
-               strcmp(reg_name, "idtr_base") == 0) {
+    } else if (strcmp(reg_name, "IDTR_BASE") == 0 || strcmp(reg_name, "idtr_base") == 0) {
         reg = IDTR_BASE;
-    } else if (strcmp(reg_name, "GDTR_BASE") == 0 ||
-               strcmp(reg_name, "gdtr_base") == 0) {
+    } else if (strcmp(reg_name, "GDTR_BASE") == 0 || strcmp(reg_name, "gdtr_base") == 0) {
         reg = GDTR_BASE;
-    } else if (strcmp(reg_name, "CS_ARBYTES") == 0 ||
-               strcmp(reg_name, "cs_arbytes") == 0) {
+    } else if (strcmp(reg_name, "CS_ARBYTES") == 0 || strcmp(reg_name, "cs_arbytes") == 0) {
         reg = CS_ARBYTES;
-    } else if (strcmp(reg_name, "DS_ARBYTES") == 0 ||
-               strcmp(reg_name, "ds_arbytes") == 0) {
+    } else if (strcmp(reg_name, "DS_ARBYTES") == 0 || strcmp(reg_name, "ds_arbytes") == 0) {
         reg = DS_ARBYTES;
-    } else if (strcmp(reg_name, "ES_ARBYTES") == 0 ||
-               strcmp(reg_name, "es_arbytes") == 0) {
+    } else if (strcmp(reg_name, "ES_ARBYTES") == 0 || strcmp(reg_name, "es_arbytes") == 0) {
         reg = ES_ARBYTES;
-    } else if (strcmp(reg_name, "FS_ARBYTES") == 0 ||
-               strcmp(reg_name, "fs_arbytes") == 0) {
+    } else if (strcmp(reg_name, "FS_ARBYTES") == 0 || strcmp(reg_name, "fs_arbytes") == 0) {
         reg = FS_ARBYTES;
-    } else if (strcmp(reg_name, "GS_ARBYTES") == 0 ||
-               strcmp(reg_name, "gs_arbytes") == 0) {
+    } else if (strcmp(reg_name, "GS_ARBYTES") == 0 || strcmp(reg_name, "gs_arbytes") == 0) {
         reg = GS_ARBYTES;
-    } else if (strcmp(reg_name, "SS_ARBYTES") == 0 ||
-               strcmp(reg_name, "ss_arbytes") == 0) {
+    } else if (strcmp(reg_name, "SS_ARBYTES") == 0 || strcmp(reg_name, "ss_arbytes") == 0) {
         reg = SS_ARBYTES;
-    } else if (strcmp(reg_name, "TR_ARBYTES") == 0 ||
-               strcmp(reg_name, "tr_arbytes") == 0) {
+    } else if (strcmp(reg_name, "TR_ARBYTES") == 0 || strcmp(reg_name, "tr_arbytes") == 0) {
         reg = TR_ARBYTES;
-    } else if (strcmp(reg_name, "LDTR_ARBYTES") == 0 ||
-               strcmp(reg_name, "ldtr_arbytes") == 0) {
+    } else if (strcmp(reg_name, "LDTR_ARBYTES") == 0 || strcmp(reg_name, "ldtr_arbytes") == 0) {
         reg = LDTR_ARBYTES;
-    } else if (strcmp(reg_name, "SYSENTER_CS") == 0 ||
-               strcmp(reg_name, "sysenter_cs") == 0) {
+    } else if (strcmp(reg_name, "SYSENTER_CS") == 0 || strcmp(reg_name, "sysenter_cs") == 0) {
         reg = SYSENTER_CS;
-    } else if (strcmp(reg_name, "SYSENTER_ESP") == 0 ||
-               strcmp(reg_name, "sysenter_esp") == 0) {
+    } else if (strcmp(reg_name, "SYSENTER_ESP") == 0 || strcmp(reg_name, "sysenter_esp") == 0) {
         reg = SYSENTER_ESP;
-    } else if (strcmp(reg_name, "SYSENTER_EIP") == 0 ||
-               strcmp(reg_name, "sysenter_eip") == 0) {
+    } else if (strcmp(reg_name, "SYSENTER_EIP") == 0 || strcmp(reg_name, "sysenter_eip") == 0) {
         reg = SYSENTER_EIP;
-    } else if (strcmp(reg_name, "SHADOW_GS") == 0 ||
-               strcmp(reg_name, "shadow_gs") == 0) {
+    } else if (strcmp(reg_name, "SHADOW_GS") == 0 || strcmp(reg_name, "shadow_gs") == 0) {
         reg = SHADOW_GS;
-    } else if (strcmp(reg_name, "MSR_FLAGS") == 0 ||
-               strcmp(reg_name, "msr_flags") == 0) {
+    } else if (strcmp(reg_name, "MSR_FLAGS") == 0 || strcmp(reg_name, "msr_flags") == 0) {
         reg = MSR_FLAGS;
-    } else if (strcmp(reg_name, "MSR_LSTAR") == 0 ||
-               strcmp(reg_name, "msr_lstar") == 0) {
+    } else if (strcmp(reg_name, "MSR_LSTAR") == 0 || strcmp(reg_name, "msr_lstar") == 0) {
         reg = MSR_LSTAR;
-    } else if (strcmp(reg_name, "MSR_CSTAR") == 0 ||
-               strcmp(reg_name, "msr_cstar") == 0) {
+    } else if (strcmp(reg_name, "MSR_CSTAR") == 0 || strcmp(reg_name, "msr_cstar") == 0) {
         reg = MSR_CSTAR;
-    } else if (strcmp(reg_name, "MSR_SYSCALL_MASK") == 0 ||
-               strcmp(reg_name, "msr_syscall_mask") == 0) {
+    } else if (strcmp(reg_name, "MSR_SYSCALL_MASK") == 0 || strcmp(reg_name, "msr_syscall_mask") == 0) {
         reg = MSR_SYSCALL_MASK;
-    } else if (strcmp(reg_name, "MSR_EFER") == 0 ||
-               strcmp(reg_name, "msr_efer") == 0) {
+    } else if (strcmp(reg_name, "MSR_EFER") == 0 || strcmp(reg_name, "msr_efer") == 0) {
         reg = MSR_EFER;
-    } else if (strcmp(reg_name, "MSR_TSC_AUX") == 0 ||
-               strcmp(reg_name, "msr_tsc_aux") == 0) {
+    } else if (strcmp(reg_name, "MSR_TSC_AUX") == 0 || strcmp(reg_name, "msr_tsc_aux") == 0) {
         reg = MSR_TSC_AUX;
     } else if (strcmp(reg_name, "TSC") == 0 || strcmp(reg_name, "tsc") == 0) {
         reg = TSC;

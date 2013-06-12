@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -117,8 +118,7 @@ success:
     ret = vmi_init_complete(&vmi, config);
     free(config);
     fail_unless(ret == VMI_SUCCESS, "vmi_init_complete failed");
-    fail_unless(vmi != NULL,
-                "vmi_init_complete failed to initialize vmi instance struct");
+    fail_unless(vmi != NULL, "vmi_init_complete failed to initialize vmi instance struct");
     vmi_destroy(vmi);
 }
 
@@ -129,12 +129,10 @@ START_TEST(test_libvmi_init2)
     vmi_instance_t vmi = NULL;
     status_t ret = vmi_init(&vmi, VMI_AUTO | VMI_INIT_PARTIAL, get_testvm());
     fail_unless(ret == VMI_SUCCESS, "vmi_init failed with AUTO | PARTIAL");
-    fail_unless(vmi != NULL,
-                "vmi_init failed to initialize vmi instance struct");
+    fail_unless(vmi != NULL, "vmi_init failed to initialize vmi instance struct");
     ret = vmi_init_complete(&vmi, NULL);
     fail_unless(ret == VMI_SUCCESS, "vmi_init_complete failed");
-    fail_unless(vmi != NULL,
-                "vmi_init_complete failed to initialize vmi instance struct");
+    fail_unless(vmi != NULL, "vmi_init_complete failed to initialize vmi instance struct");
     vmi_destroy(vmi);
 }
 
@@ -145,8 +143,7 @@ START_TEST(test_libvmi_init1)
     vmi_instance_t vmi = NULL;
     status_t ret = vmi_init(&vmi, VMI_AUTO | VMI_INIT_COMPLETE, get_testvm());
     fail_unless(ret == VMI_SUCCESS, "vmi_init failed with AUTO | COMPLETE");
-    fail_unless(vmi != NULL,
-                "vmi_init failed to initialize vmi instance struct");
+    fail_unless(vmi != NULL, "vmi_init failed to initialize vmi instance struct");
     vmi_destroy(vmi);
 }
 

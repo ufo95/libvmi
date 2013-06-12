@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to
  * memory in a target virtual machine or in a file containing a dump of
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -99,11 +100,9 @@ events_init(vmi_instance_t vmi)
         return;
     }
 
-    vmi->mem_events = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL,
-                                            memevent_page_free);
+    vmi->mem_events = g_hash_table_new_full(g_int64_hash, g_int64_equal, NULL, memevent_page_free);
     vmi->reg_events = g_hash_table_new(g_int_hash, g_int_equal);
-    vmi->ss_events = g_hash_table_new_full(g_int_hash, g_int_equal, g_free,
-                                           NULL);
+    vmi->ss_events = g_hash_table_new_full(g_int_hash, g_int_equal, g_free, NULL);
 }
 
 void
@@ -114,8 +113,7 @@ events_destroy(vmi_instance_t vmi)
     }
 
     if (vmi->mem_events) {
-        g_hash_table_foreach_remove(vmi->mem_events, memevent_page_clean,
-                                    vmi);
+        g_hash_table_foreach_remove(vmi->mem_events, memevent_page_clean, vmi);
         g_hash_table_destroy(vmi->mem_events);
     }
 
@@ -138,8 +136,7 @@ register_reg_event(vmi_instance_t vmi, vmi_event_t * event)
     status_t rc = VMI_FAILURE;
 
     if (NULL != g_hash_table_lookup(vmi->reg_events, &(event->reg_event.reg))) {
-        dbprint("An event is already registered on this reg: %d\n",
-                event->reg_event.reg);
+        dbprint("An event is already registered on this reg: %d\n", event->reg_event.reg);
     } else if (VMI_SUCCESS == driver_set_reg_access(vmi, event->reg_event)) {
         g_hash_table_insert(vmi->reg_events, &(event->reg_event.reg), event);
         dbprint("Enabled register event on reg: %d\n", event->reg_event.reg);
@@ -163,17 +160,13 @@ register_mem_event(vmi_instance_t vmi, vmi_event_t * event)
     page = g_hash_table_lookup(vmi->mem_events, &page_key);
     if (NULL != page) {
 
-        vmi_mem_access_t page_access_flag =
-            combine_mem_access(page->access_flag, event->mem_event.in_access);
+        vmi_mem_access_t page_access_flag = combine_mem_access(page->access_flag, event->mem_event.in_access);
 
         if (granularity == VMI_MEMEVENT_PAGE) {
             if (page->event) {
-                dbprint("An event is already registered on this page: %"
-                        PRIu64 "\n", page_key);
+                dbprint("An event is already registered on this page: %" PRIu64 "\n", page_key);
             } else {
-                if (VMI_SUCCESS
-                    == driver_set_mem_access(vmi, event->mem_event,
-                                             page_access_flag)) {
+                if (VMI_SUCCESS == driver_set_mem_access(vmi, event->mem_event, page_access_flag)) {
                     page->access_flag = page_access_flag;
                     page->event = event;
                     rc = VMI_SUCCESS;
@@ -181,42 +174,28 @@ register_mem_event(vmi_instance_t vmi, vmi_event_t * event)
             }
         } else if (granularity == VMI_MEMEVENT_BYTE) {
             if (page->byte_events) {
-                if (NULL
-                    != g_hash_table_lookup(page->byte_events,
-                                           &(event->mem_event.
-                                             physical_address))) {
+                if (NULL != g_hash_table_lookup(page->byte_events, &(event->mem_event.physical_address))) {
                     dbprint("An event is already registered on this byte: 0x%"
                             PRIx64 "\n", event->mem_event.physical_address);
                 } else {
-                    if (VMI_SUCCESS
-                        == driver_set_mem_access(vmi, event->mem_event,
-                                                 page_access_flag)) {
+                    if (VMI_SUCCESS == driver_set_mem_access(vmi, event->mem_event, page_access_flag)) {
                         page->access_flag = page_access_flag;
-                        g_hash_table_insert(page->byte_events,
-                                            &(event->mem_event.
-                                              physical_address), event);
+                        g_hash_table_insert(page->byte_events, &(event->mem_event.physical_address), event);
                         rc = VMI_SUCCESS;
                     }
                 }
             } else {
-                if (VMI_SUCCESS
-                    == driver_set_mem_access(vmi, event->mem_event,
-                                             page_access_flag)) {
-                    page->byte_events = g_hash_table_new(g_int64_hash,
-                                                         g_int64_equal);
+                if (VMI_SUCCESS == driver_set_mem_access(vmi, event->mem_event, page_access_flag)) {
+                    page->byte_events = g_hash_table_new(g_int64_hash, g_int64_equal);
                     page->access_flag = page_access_flag;
-                    g_hash_table_insert(page->byte_events,
-                                        &(event->mem_event.physical_address),
-                                        event);
+                    g_hash_table_insert(page->byte_events, &(event->mem_event.physical_address), event);
                     rc = VMI_SUCCESS;
                 }
             }
         }
     } else
         // Page has no event registered
-    if (VMI_SUCCESS
-            == driver_set_mem_access(vmi, event->mem_event,
-                                         event->mem_event.in_access)) {
+    if (VMI_SUCCESS == driver_set_mem_access(vmi, event->mem_event, event->mem_event.in_access)) {
 
         page = (memevent_page_t *) g_malloc0(sizeof(memevent_page_t));
         page->access_flag = event->mem_event.in_access;
@@ -227,8 +206,7 @@ register_mem_event(vmi_instance_t vmi, vmi_event_t * event)
             dbprint("Enabling memory event on page: %" PRIu64 "\n", page_key);
         } else {
             page->byte_events = g_hash_table_new(g_int64_hash, g_int64_equal);
-            g_hash_table_insert(page->byte_events,
-                                &(event->mem_event.physical_address), event);
+            g_hash_table_insert(page->byte_events, &(event->mem_event.physical_address), event);
             dbprint("Enabling memory event on byte 0x%" PRIx64 ", page: %"
                     PRIu64 "\n", event->mem_event.physical_address, page_key);
         }
@@ -252,11 +230,9 @@ register_singlestep_event(vmi_instance_t vmi, vmi_event_t * event)
     for (; vcpu < vmi->num_vcpus; vcpu++) {
         if (CHECK_VCPU_SINGLESTEP(event->ss_event, vcpu)) {
             if (NULL != g_hash_table_lookup(vmi->ss_events, &vcpu)) {
-                dbprint("An event is already registered on this vcpu: %u\n",
-                        vcpu);
+                dbprint("An event is already registered on this vcpu: %u\n", vcpu);
             } else {
-                if (VMI_SUCCESS
-                    == driver_start_single_step(vmi, event->ss_event)) {
+                if (VMI_SUCCESS == driver_start_single_step(vmi, event->ss_event)) {
                     vcpu_i = malloc(sizeof(uint32_t));
                     *vcpu_i = vcpu;
                     g_hash_table_insert(vmi->ss_events, vcpu_i, event);
@@ -278,8 +254,7 @@ clear_reg_event(vmi_instance_t vmi, vmi_event_t * event)
     vmi_reg_access_t original_in_access = VMI_REGACCESS_N;
 
     if (NULL != g_hash_table_lookup(vmi->reg_events, &(event->reg_event.reg))) {
-        dbprint("Disabling register event on reg: %d\n",
-                event->reg_event.reg);
+        dbprint("Disabling register event on reg: %d\n", event->reg_event.reg);
         original_in_access = event->reg_event.in_access;
         event->reg_event.in_access = VMI_REGACCESS_N;
         rc = driver_set_reg_access(vmi, event->reg_event);
@@ -313,14 +288,12 @@ clear_mem_event(vmi_instance_t vmi, vmi_event_t * event)
 
         if (granularity == VMI_MEMEVENT_PAGE) {
             if (!page->event) {
-                dbprint
-                    ("Can't disable page-level memevent, non registered!\n");
+                dbprint("Can't disable page-level memevent, non registered!\n");
             } else {
 
                 remove_event = page->event;
 
-                dbprint("Disabling memory event on page: %" PRIu64 "\n",
-                        remove_event->mem_event.physical_address);
+                dbprint("Disabling memory event on page: %" PRIu64 "\n", remove_event->mem_event.physical_address);
                 remove_event->mem_event.in_access = VMI_MEMACCESS_N;
 
                 // We still have byte-level events registered on this page
@@ -329,14 +302,11 @@ clear_mem_event(vmi_instance_t vmi, vmi_event_t * event)
                     addr_t *pa;
                     vmi_event_t *loop;
                     for_each_event(vmi, i, page->byte_events, &pa, &loop) {
-                        page_access_flag =
-                            combine_mem_access(page_access_flag,
-                                               loop->mem_event.in_access);
+                        page_access_flag = combine_mem_access(page_access_flag, loop->mem_event.in_access);
                     }
                 }
 
-                rc = driver_set_mem_access(vmi, event->mem_event,
-                                           page_access_flag);
+                rc = driver_set_mem_access(vmi, event->mem_event, page_access_flag);
 
                 if (rc == VMI_SUCCESS) {
 
@@ -351,29 +321,21 @@ clear_mem_event(vmi_instance_t vmi, vmi_event_t * event)
             }
         } else if (granularity == VMI_MEMEVENT_BYTE) {
             if (!page->byte_events) {
-                dbprint
-                    ("Can't disable byte-level memevent, non registered!\n");
+                dbprint("Can't disable byte-level memevent, non registered!\n");
             } else {
 
                 remove_event =
-                    (vmi_event_t *) g_hash_table_lookup(page->byte_events,
-                                                        &(event->mem_event.
-                                                          physical_address));
+                    (vmi_event_t *) g_hash_table_lookup(page->byte_events, &(event->mem_event.physical_address));
 
                 if (NULL == remove_event) {
                     dbprint
                         ("Can't disable byte-level memevent, event not found on byte 0x%"
                          PRIx64 "!\n", event->mem_event.physical_address);
                 } else {
-                    g_hash_table_steal(page->byte_events,
-                                       &(remove_event->mem_event.
-                                         physical_address));
+                    g_hash_table_steal(page->byte_events, &(remove_event->mem_event.physical_address));
 
                     if (page->event) {
-                        page_access_flag =
-                            combine_mem_access(page_access_flag,
-                                               page->event->mem_event.
-                                               in_access);
+                        page_access_flag = combine_mem_access(page_access_flag, page->event->mem_event.in_access);
                     }
                     // We still have byte-level events registered on this page
                     if (g_hash_table_size(page->byte_events) > 0) {
@@ -381,14 +343,11 @@ clear_mem_event(vmi_instance_t vmi, vmi_event_t * event)
                         addr_t *pa;
                         vmi_event_t *loop;
                         for_each_event(vmi, i, page->byte_events, &pa, &loop) {
-                            page_access_flag =
-                                combine_mem_access(page_access_flag,
-                                                   loop->mem_event.in_access);
+                            page_access_flag = combine_mem_access(page_access_flag, loop->mem_event.in_access);
                         }
                     }
 
-                    rc = driver_set_mem_access(vmi, remove_event->mem_event,
-                                               page_access_flag);
+                    rc = driver_set_mem_access(vmi, remove_event->mem_event, page_access_flag);
 
                     if (rc == VMI_SUCCESS) {
 
@@ -399,23 +358,19 @@ clear_mem_event(vmi_instance_t vmi, vmi_event_t * event)
                             page->byte_events = NULL;
                         }
                         // if libvmi is shutting down memevent_page_clean will take care of cleaning up
-                        if (!vmi->shutting_down && !page->event
-                            && !page->byte_events) {
+                        if (!vmi->shutting_down && !page->event && !page->byte_events) {
                             g_hash_table_remove(vmi->mem_events, &page_key);
                         }
                     } else {
                         // place back the event as removal failed
                         g_hash_table_insert(page->byte_events,
-                                            &(remove_event->mem_event.
-                                              physical_address),
-                                            remove_event);
+                                            &(remove_event->mem_event.physical_address), remove_event);
                     }
                 }
             }
         }
     } else {
-        printf("Disabling event failed, no event found on page: %lu\n",
-               page_key);
+        printf("Disabling event failed, no event found on page: %lu\n", page_key);
     }
 
     return rc;
@@ -452,8 +407,7 @@ vmi_get_reg_event(vmi_instance_t vmi, registers_t reg)
 }
 
 vmi_event_t *
-vmi_get_mem_event(vmi_instance_t vmi, addr_t physical_address,
-                  vmi_memevent_granularity_t granularity)
+vmi_get_mem_event(vmi_instance_t vmi, addr_t physical_address, vmi_memevent_granularity_t granularity)
 {
 
     addr_t page_key = physical_address >> 12;
@@ -463,8 +417,7 @@ vmi_get_mem_event(vmi_instance_t vmi, addr_t physical_address,
         if (granularity == VMI_MEMEVENT_PAGE)
             return page->event;
         else if (granularity == VMI_MEMEVENT_BYTE && page->byte_events)
-            return (vmi_event_t *) g_hash_table_lookup(page->byte_events,
-                                                       &physical_address);
+            return (vmi_event_t *) g_hash_table_lookup(page->byte_events, &physical_address);
     }
 
     return NULL;
@@ -554,8 +507,7 @@ vmi_get_singlestep_event(vmi_instance_t vmi, uint32_t vcpu)
 }
 
 status_t
-vmi_stop_single_step_vcpu(vmi_instance_t vmi, vmi_event_t * event,
-                          uint32_t vcpu)
+vmi_stop_single_step_vcpu(vmi_instance_t vmi, vmi_event_t * event, uint32_t vcpu)
 {
 
     if (!(vmi->init_mode & VMI_INIT_EVENTS)) {
@@ -583,8 +535,7 @@ vmi_shutdown_single_step(vmi_instance_t vmi)
          * Recreate hash table for possible future use.
          */
         g_hash_table_destroy(vmi->ss_events);
-        vmi->ss_events =
-            g_hash_table_new_full(g_int_hash, g_int_equal, g_free, NULL);
+        vmi->ss_events = g_hash_table_new_full(g_int_hash, g_int_equal, g_free, NULL);
         return VMI_SUCCESS;
     } else {
         return VMI_FAILURE;

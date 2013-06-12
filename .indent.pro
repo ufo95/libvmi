@@ -29,7 +29,7 @@
 --indent-label0 // iln
 
 // breaking long lines
---line-length78 // ln
+--line-length120 // ln
 --break-after-boolean-operator // nbbo
 
 // other

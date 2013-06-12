@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -31,6 +32,7 @@
 #include <string.h>
 
 #ifndef VMI_DEBUG
+
 /* Nothing */
 #else
 void
@@ -74,8 +76,7 @@ safe_malloc_(size_t size, char const *file, int line)
     void *p = malloc(size);
 
     if (NULL == p) {
-        errprint("malloc %lu bytes failed at %s:%d\n",
-                 (unsigned long) size, file, line);
+        errprint("malloc %lu bytes failed at %s:%d\n", (unsigned long) size, file, line);
         exit(EXIT_FAILURE);
     }
     return p;

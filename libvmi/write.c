@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -35,8 +36,7 @@ size_t
 vmi_write_pa(vmi_instance_t vmi, addr_t paddr, void *buf, size_t count)
 {
     if (NULL == buf) {
-        dbprint("--%s: buf passed as NULL, returning without write\n",
-                __FUNCTION__);
+        dbprint("--%s: buf passed as NULL, returning without write\n", __FUNCTION__);
         return 0;
     }
     if (VMI_SUCCESS == driver_write(vmi, paddr, buf, count)) {
@@ -47,8 +47,7 @@ vmi_write_pa(vmi_instance_t vmi, addr_t paddr, void *buf, size_t count)
 }
 
 size_t
-vmi_write_va(vmi_instance_t vmi,
-             addr_t vaddr, int pid, void *buf, size_t count)
+vmi_write_va(vmi_instance_t vmi, addr_t vaddr, int pid, void *buf, size_t count)
 {
     addr_t paddr = 0;
     addr_t pfn = 0;
@@ -56,8 +55,7 @@ vmi_write_va(vmi_instance_t vmi,
     size_t buf_offset = 0;
 
     if (NULL == buf) {
-        dbprint("--%s: buf passed as NULL, returning without write\n",
-                __FUNCTION__);
+        dbprint("--%s: buf passed as NULL, returning without write\n", __FUNCTION__);
         return 0;
     }
 
@@ -83,9 +81,7 @@ vmi_write_va(vmi_instance_t vmi,
         }
 
         /* do the write */
-        if (VMI_FAILURE ==
-            driver_write(vmi, paddr,
-                         ((char *) buf + (addr_t) buf_offset), write_len)) {
+        if (VMI_FAILURE == driver_write(vmi, paddr, ((char *) buf + (addr_t) buf_offset), write_len)) {
             return buf_offset;
         }
 
@@ -146,8 +142,7 @@ vmi_write_64_pa(vmi_instance_t vmi, addr_t paddr, uint64_t * value)
 ///////////////////////////////////////////////////////////
 // Easy write to virtual memory
 static status_t
-vmi_write_X_va(vmi_instance_t vmi,
-               addr_t vaddr, int pid, void *value, int size)
+vmi_write_X_va(vmi_instance_t vmi, addr_t vaddr, int pid, void *value, int size)
 {
     size_t len_write = vmi_write_va(vmi, vaddr, pid, value, size);
 

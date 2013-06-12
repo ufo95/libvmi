@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -28,8 +29,7 @@
     
 #include <stdio.h>
 #include <sys/time.h>
-void print_measurement(struct timeval ktv_start,
-                        struct timeval ktv_end, long int *diff);
+void print_measurement(struct timeval ktv_start, struct timeval ktv_end, long int *diff);
 void avg_measurement(long int *data, int loops);
 
  

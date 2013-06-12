@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -66,16 +67,14 @@ file_get_memory(vmi_instance_t vmi, addr_t paddr, uint32_t length)
     if (paddr + length >= vmi->size) {
         dbprint
             ("--%s: request for PA range [0x%.16" PRIx64 "-0x%.16" PRIx64
-             "] reads past end of file\n", __FUNCTION__, paddr,
-             paddr + length);
+             "] reads past end of file\n", __FUNCTION__, paddr, paddr + length);
         goto error_noprint;
     }   // if
 
     memory = safe_malloc(length);
 
 #if USE_MMAP
-    (void) memcpy(memory,
-                  ((uint8_t *) file_get_instance(vmi)->map) + paddr, length);
+    (void) memcpy(memory, ((uint8_t *) file_get_instance(vmi)->map) + paddr, length);
 #else
     if (paddr != lseek(file_get_instance(vmi)->fd, paddr, SEEK_SET)) {
         goto error_print;
@@ -89,8 +88,7 @@ file_get_memory(vmi_instance_t vmi, addr_t paddr, uint32_t length)
 
 error_print:
     dbprint("%s: failed to read %d bytes at "
-            "PA (offset) 0x%.16" PRIx64 " [VM size 0x%.16" PRIx64 "]\n",
-            __FUNCTION__, length, paddr, vmi->size);
+            "PA (offset) 0x%.16" PRIx64 " [VM size 0x%.16" PRIx64 "]\n", __FUNCTION__, length, paddr, vmi->size);
 error_noprint:
     if (memory)
         free(memory);
@@ -216,8 +214,7 @@ error_exit:
 }
 
 status_t
-file_get_vcpureg(vmi_instance_t vmi,
-                 reg_t *value, registers_t reg, unsigned long vcpu)
+file_get_vcpureg(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu)
 {
     switch (reg) {
     case CR3:
@@ -333,8 +330,7 @@ file_get_memsize(vmi_instance_t vmi, unsigned long *size)
 }
 
 status_t
-file_get_vcpureg(vmi_instance_t vmi,
-                 reg_t *value, registers_t reg, unsigned long vcpu)
+file_get_vcpureg(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu)
 {
     return VMI_FAILURE;
 }

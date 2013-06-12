@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -69,12 +70,8 @@ vmi_get_winver(vmi_instance_t vmi)
     if (VMI_OS_WINDOWS != vmi->os_type || VMI_INIT_PARTIAL & vmi->init_mode)
         return VMI_OS_WINDOWS_NONE;
 
-    if (!vmi->os.windows_instance.version ||
-        vmi->os.windows_instance.version == VMI_OS_WINDOWS_UNKNOWN) {
-        vmi->os.windows_instance.version = find_windows_version(vmi,
-                                                                vmi->os.
-                                                                windows_instance.
-                                                                kdversion_block);
+    if (!vmi->os.windows_instance.version || vmi->os.windows_instance.version == VMI_OS_WINDOWS_UNKNOWN) {
+        vmi->os.windows_instance.version = find_windows_version(vmi, vmi->os.windows_instance.kdversion_block);
     }
     return vmi->os.windows_instance.version;
 }
@@ -125,8 +122,7 @@ vmi_get_offset(vmi_instance_t vmi, char *offset_name)
         return vmi->os.windows_instance.pid_offset;
     } else if (strncmp(offset_name, "win_pname", max_length) == 0) {
         if (vmi->os.windows_instance.pname_offset == 0) {
-            vmi->os.windows_instance.pname_offset =
-                find_pname_offset(vmi, NULL);
+            vmi->os.windows_instance.pname_offset = find_pname_offset(vmi, NULL);
             if (vmi->os.windows_instance.pname_offset == 0) {
                 dbprint("--failed to find pname_offset\n");
                 return 0;
@@ -144,8 +140,7 @@ vmi_get_offset(vmi_instance_t vmi, char *offset_name)
     } else if (strncmp(offset_name, "linux_pgd", max_length) == 0) {
         return vmi->os.linux_instance.pgd_offset;
     } else {
-        warnprint("Invalid offset name in vmi_get_offset (%s).\n",
-                  offset_name);
+        warnprint("Invalid offset name in vmi_get_offset (%s).\n", offset_name);
         return 0;
     }
 }
@@ -163,15 +158,13 @@ vmi_get_num_vcpus(vmi_instance_t vmi)
 }
 
 status_t
-vmi_get_vcpureg(vmi_instance_t vmi,
-                reg_t *value, registers_t reg, unsigned long vcpu)
+vmi_get_vcpureg(vmi_instance_t vmi, reg_t *value, registers_t reg, unsigned long vcpu)
 {
     return driver_get_vcpureg(vmi, value, reg, vcpu);
 }
 
 status_t
-vmi_set_vcpureg(vmi_instance_t vmi,
-                reg_t value, registers_t reg, unsigned long vcpu)
+vmi_set_vcpureg(vmi_instance_t vmi, reg_t value, registers_t reg, unsigned long vcpu)
 {
     return driver_set_vcpureg(vmi, value, reg, vcpu);
 }

@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -83,8 +84,7 @@ error_exit:
 }
 
 status_t
-linux_system_map_symbol_to_address(vmi_instance_t vmi,
-                                   char *symbol, addr_t *address)
+linux_system_map_symbol_to_address(vmi_instance_t vmi, char *symbol, addr_t *address)
 {
     FILE *f = NULL;
     char *row = NULL;
@@ -96,11 +96,9 @@ linux_system_map_symbol_to_address(vmi_instance_t vmi,
 
     row = safe_malloc(MAX_ROW_LENGTH);
     if ((f = fopen(vmi->sysmap, "r")) == NULL) {
-        fprintf(stderr,
-                "ERROR: could not find System.map file after checking:\n");
+        fprintf(stderr, "ERROR: could not find System.map file after checking:\n");
         fprintf(stderr, "\t%s\n", vmi->sysmap);
-        fprintf(stderr,
-                "To fix this problem, add the correct sysmap entry to /etc/libvmi.conf\n");
+        fprintf(stderr, "To fix this problem, add the correct sysmap entry to /etc/libvmi.conf\n");
         ret = VMI_FAILURE;
         goto error_exit;
     }

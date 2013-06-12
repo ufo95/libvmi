@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -24,6 +25,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with LibVMI.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 /* Portions of this header and dependent code is based upon that in xen-access, 
  *    from the official Xen source distribution.  That code carries the 
  *    following copyright notices and license.
@@ -114,8 +116,7 @@ spin_unlock(spinlock_t * lock)
 #define xen_event_ring_unlock(_m)     spin_unlock(&(_m)->ring_lock)
 
 int
-wait_for_event_or_timeout(xc_interface * xch, xc_evtchn * xce,
-                          unsigned long ms)
+wait_for_event_or_timeout(xc_interface * xch, xc_evtchn * xce, unsigned long ms)
 {
     struct pollfd fd = {.fd = xc_evtchn_fd(xce),.events = POLLIN | POLLERR };
     int port;
@@ -289,9 +290,7 @@ process_mem(vmi_instance_t vmi, mem_event_request_t req)
     }
 
     /* TODO, cleanup: ctx is unused here */
-    xc_domain_hvm_getcontext_partial(xch, dom,
-                                     HVM_SAVE_CODE(CPU), req.vcpu_id, &ctx,
-                                     sizeof(ctx));
+    xc_domain_hvm_getcontext_partial(xch, dom, HVM_SAVE_CODE(CPU), req.vcpu_id, &ctx, sizeof(ctx));
 
     memevent_page_t *page = g_hash_table_lookup(vmi->mem_events, &req.gfn);
     vmi_mem_access_t out_access;
@@ -411,22 +410,15 @@ xen_events_destroy(vmi_instance_t vmi)
 
     /* Unregister for all events */
     rc = xc_hvm_set_mem_access(xch, dom, HVMMEM_access_rwx, ~0ull, 0);
-    rc = xc_hvm_set_mem_access(xch, dom, HVMMEM_access_rwx, 0,
-                               xe->mem_event.max_pages);
-    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_INT3,
-                          HVMPME_mode_disabled);
-    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_CR0,
-                          HVMPME_mode_disabled);
-    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_CR3,
-                          HVMPME_mode_disabled);
-    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_CR4,
-                          HVMPME_mode_disabled);
+    rc = xc_hvm_set_mem_access(xch, dom, HVMMEM_access_rwx, 0, xe->mem_event.max_pages);
+    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_INT3, HVMPME_mode_disabled);
+    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_CR0, HVMPME_mode_disabled);
+    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_CR3, HVMPME_mode_disabled);
+    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_CR4, HVMPME_mode_disabled);
 #ifdef HVM_PARAM_MEMORY_EVENT_MSR
-    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_MSR,
-                          HVMPME_mode_disabled);
+    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_MSR, HVMPME_mode_disabled);
 #endif
-    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_SINGLE_STEP,
-                          HVMPME_mode_disabled);
+    rc = xc_set_hvm_param(xch, dom, HVM_PARAM_MEMORY_EVENT_SINGLE_STEP, HVMPME_mode_disabled);
 
     xen_events_listen(vmi, 0);
 
@@ -442,9 +434,7 @@ xen_events_destroy(vmi_instance_t vmi)
 #ifdef XENEVENT41
         // FIXME41: Xen 4.1.2 apparently mostly returns -1 for any call to this,
         // so just suppress the error for now
-        dbprint
-            ("Error %d setting mem_access listener required to not required\n",
-             rc);
+        dbprint("Error %d setting mem_access listener required to not required\n", rc);
 #else
         errprint("Error %d setting mem_access listener not required\n", rc);
 #endif
@@ -521,8 +511,7 @@ xen_events_init(vmi_instance_t vmi)
     // Allocate memory
     xe = calloc(1, sizeof(xen_events_t));
     if (!xe) {
-        errprint("%s error: allocation for xen_events_t failed\n",
-                 __FUNCTION__);
+        errprint("%s error: allocation for xen_events_t failed\n", __FUNCTION__);
         return VMI_FAILURE;
     }
 
@@ -536,8 +525,7 @@ xen_events_init(vmi_instance_t vmi)
     // Initialise shared page
     xc_get_hvm_param(xch, dom, HVM_PARAM_ACCESS_RING_PFN, &ring_pfn);
     mmap_pfn = ring_pfn;
-    xe->mem_event.ring_page =
-        xc_map_foreign_batch(xch, dom, PROT_READ | PROT_WRITE, &mmap_pfn, 1);
+    xe->mem_event.ring_page = xc_map_foreign_batch(xch, dom, PROT_READ | PROT_WRITE, &mmap_pfn, 1);
     if (mmap_pfn & XEN_DOMCTL_PFINFO_XTAB) {
         /* Map failed, populate ring page */
         rc = xc_domain_populate_physmap_exact(xch, dom, 1, 0, 0, &ring_pfn);
@@ -547,9 +535,7 @@ xen_events_init(vmi_instance_t vmi)
         }
 
         mmap_pfn = ring_pfn;
-        xe->mem_event.ring_page =
-            xc_map_foreign_batch(xch, dom,
-                                 PROT_READ | PROT_WRITE, &mmap_pfn, 1);
+        xe->mem_event.ring_page = xc_map_foreign_batch(xch, dom, PROT_READ | PROT_WRITE, &mmap_pfn, 1);
         if (mmap_pfn & XEN_DOMCTL_PFINFO_XTAB) {
             errprint("Could not map the ring page\n");
             goto err;
@@ -558,8 +544,7 @@ xen_events_init(vmi_instance_t vmi)
 
     rc = xc_mem_access_enable(xch, dom, &(xe->mem_event.evtchn_port));
 #elif XENEVENT41
-    rc = posix_memalign((void **) &xe->mem_event.ring_page, getpagesize(),
-                        getpagesize());
+    rc = posix_memalign((void **) &xe->mem_event.ring_page, getpagesize(), getpagesize());
     if (rc != 0) {
         errprint("Could not allocate the ring page!\n");
         goto err;
@@ -573,8 +558,7 @@ xen_events_init(vmi_instance_t vmi)
         goto err;
     }
 
-    rc = posix_memalign((void **) &xe->mem_event.shared_page, getpagesize(),
-                        getpagesize());
+    rc = posix_memalign((void **) &xe->mem_event.shared_page, getpagesize(), getpagesize());
     if (rc != 0) {
         errprint("Could not allocate the shared page!\n");
         goto err;
@@ -588,8 +572,7 @@ xen_events_init(vmi_instance_t vmi)
         goto err;
     }
 
-    rc = xc_mem_event_enable(xch, dom, xe->mem_event.shared_page,
-                             xe->mem_event.ring_page);
+    rc = xc_mem_event_enable(xch, dom, xe->mem_event.shared_page, xe->mem_event.ring_page);
 #endif
 
     if (rc != 0) {
@@ -601,8 +584,7 @@ xen_events_init(vmi_instance_t vmi)
             errprint("EPT not supported for this guest\n");
             break;
         default:
-            errprint("Error initialising memory events: %s\n",
-                     strerror(errno));
+            errprint("Error initialising memory events: %s\n", strerror(errno));
             break;
         }
         goto err;
@@ -615,11 +597,9 @@ xen_events_init(vmi_instance_t vmi)
     }
     // Bind event notification
 #ifdef XENEVENT42
-    rc = xc_evtchn_bind_interdomain(xe->mem_event.xce_handle, dom,
-                                    xe->mem_event.evtchn_port);
+    rc = xc_evtchn_bind_interdomain(xe->mem_event.xce_handle, dom, xe->mem_event.evtchn_port);
 #elif XENEVENT41
-    rc = xc_evtchn_bind_interdomain(xe->mem_event.xce_handle, dom,
-                                    xe->mem_event.shared_page->port);
+    rc = xc_evtchn_bind_interdomain(xe->mem_event.xce_handle, dom, xe->mem_event.shared_page->port);
 #endif
 
     if (rc < 0) {
@@ -632,9 +612,7 @@ xen_events_init(vmi_instance_t vmi)
 
     // Initialise ring
     SHARED_RING_INIT((mem_event_sring_t *) xe->mem_event.ring_page);
-    BACK_RING_INIT(&xe->mem_event.back_ring,
-                   (mem_event_sring_t *) xe->mem_event.ring_page,
-                   getpagesize());
+    BACK_RING_INIT(&xe->mem_event.back_ring, (mem_event_sring_t *) xe->mem_event.ring_page, getpagesize());
 
     /* This causes errors when going from VMI_PARTIAL->VMI_COMPLETE on Xen 4.1.2 */
 #ifndef XENEVENT41
@@ -735,8 +713,7 @@ xen_set_reg_access(vmi_instance_t vmi, reg_event_t event)
 }
 
 status_t
-xen_set_mem_access(vmi_instance_t vmi, mem_event_t event,
-                   vmi_mem_access_t page_access_flag)
+xen_set_mem_access(vmi_instance_t vmi, mem_event_t event, vmi_mem_access_t page_access_flag)
 {
     int rc;
     hvmmem_access_t access;
@@ -802,8 +779,7 @@ xen_set_mem_access(vmi_instance_t vmi, mem_event_t event,
         errprint("xc_hvm_set_mem_access failed with code: %d\n", rc);
         return VMI_FAILURE;
     }
-    dbprint("--Done Setting memaccess on physical address: %" PRIu64 "\n",
-            event.physical_address);
+    dbprint("--Done Setting memaccess on physical address: %" PRIu64 "\n", event.physical_address);
     return VMI_SUCCESS;
 }
 
@@ -814,8 +790,7 @@ xen_set_int3_access(vmi_instance_t vmi, int enabled)
     if (enabled)
         param = HVMPME_mode_sync;
 
-    return xc_set_hvm_param(xen_get_xchandle(vmi), xen_get_domainid(vmi),
-                            HVM_PARAM_MEMORY_EVENT_INT3, param);
+    return xc_set_hvm_param(xen_get_xchandle(vmi), xen_get_domainid(vmi), HVM_PARAM_MEMORY_EVENT_INT3, param);
 }
 
 status_t
@@ -827,9 +802,7 @@ xen_start_single_step(vmi_instance_t vmi, single_step_event_t event)
 
     dbprint("--Starting single step on domain %lu\n", dom);
 
-    rc = xc_set_hvm_param(xen_get_xchandle(vmi), dom,
-                          HVM_PARAM_MEMORY_EVENT_SINGLE_STEP,
-                          HVMPME_mode_sync);
+    rc = xc_set_hvm_param(xen_get_xchandle(vmi), dom, HVM_PARAM_MEMORY_EVENT_SINGLE_STEP, HVMPME_mode_sync);
 
     if (rc < 0) {
         errprint("Error %d setting HVM single step\n", rc);
@@ -882,9 +855,7 @@ xen_shutdown_single_step(vmi_instance_t vmi)
         xen_stop_single_step(vmi, i);
     }
 
-    rc = xc_set_hvm_param(xen_get_xchandle(vmi), dom,
-                          HVM_PARAM_MEMORY_EVENT_SINGLE_STEP,
-                          HVMPME_mode_disabled);
+    rc = xc_set_hvm_param(xen_get_xchandle(vmi), dom, HVM_PARAM_MEMORY_EVENT_SINGLE_STEP, HVMPME_mode_disabled);
 
     if (rc < 0) {
         errprint("Error %d disabling HVM single step\n", rc);
@@ -935,18 +906,15 @@ xen_events_listen(vmi_instance_t vmi, uint32_t timeout)
 #ifdef XENEVENT41
         // FIXME41: Xen 4.1.2 apparently mostly returns -1 for any call to this,
         // so just suppress the error for now
-        dbprint("Error %d setting mem_access listener required to %d\n", rc,
-                required);
+        dbprint("Error %d setting mem_access listener required to %d\n", rc, required);
 #else
-        errprint("Error %d setting mem_access listener required to %d\n", rc,
-                 required);
+        errprint("Error %d setting mem_access listener required to %d\n", rc, required);
 #endif
     }
 
     if (!vmi->shutting_down && timeout > 0) {
         dbprint("--Waiting for xen events...(%" PRIu32 " ms)\n", timeout);
-        rc = wait_for_event_or_timeout(xch, xe->mem_event.xce_handle,
-                                       timeout);
+        rc = wait_for_event_or_timeout(xch, xe->mem_event.xce_handle, timeout);
         if (rc < -1) {
             errprint("Error while waiting for event.\n");
             return VMI_FAILURE;
@@ -1046,8 +1014,7 @@ xen_set_reg_access(vmi_instance_t vmi, reg_event_t event)
 }
 
 status_t
-xen_set_mem_access(vmi_instance_t vmi, mem_event_t event,
-                   vmi_mem_access_t page_access_flag)
+xen_set_mem_access(vmi_instance_t vmi, mem_event_t event, vmi_mem_access_t page_access_flag)
 {
     return VMI_FAILURE;
 }

@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -121,9 +122,7 @@ get_check_magic_func(vmi_instance_t vmi)
         break;
     default:
         rtn = &check_magic_unknown;
-        dbprint
-            ("--%s: illegal value in vmi->os.windows_instance.version\n",
-             __FUNCTION__);
+        dbprint("--%s: illegal value in vmi->os.windows_instance.version\n", __FUNCTION__);
         break;
     }
 
@@ -175,9 +174,7 @@ find_pname_offset(vmi_instance_t vmi, check_magic_func check)
                     continue;
                 } else {
                     vmi->init_task = block_pa + offset;
-                    dbprint
-                        ("--%s: found Idle process at 0x%.8" PRIx64
-                         " + 0x%x\n", __FUNCTION__, block_pa + offset, i);
+                    dbprint("--%s: found Idle process at 0x%.8" PRIx64 " + 0x%x\n", __FUNCTION__, block_pa + offset, i);
                     boyer_moore_fini(bm);
                     return i;
                 }
@@ -189,9 +186,7 @@ find_pname_offset(vmi_instance_t vmi, check_magic_func check)
 }
 
 static addr_t
-find_process_by_name(vmi_instance_t vmi,
-                     check_magic_func check,
-                     addr_t start_address, const char *name)
+find_process_by_name(vmi_instance_t vmi, check_magic_func check, addr_t start_address, const char *name)
 {
     addr_t block_pa = 0;
     addr_t offset = 0;
@@ -205,8 +200,7 @@ find_process_by_name(vmi_instance_t vmi,
         check = get_check_magic_func(vmi);
     }
 
-    for (block_pa = start_address; block_pa < vmi->size;
-         block_pa += BLOCK_SIZE) {
+    for (block_pa = start_address; block_pa < vmi->size; block_pa += BLOCK_SIZE) {
         read = vmi_read_pa(vmi, block_pa, block_buffer, BLOCK_SIZE);
         if (BLOCK_SIZE != read) {
             continue;
@@ -217,8 +211,7 @@ find_process_by_name(vmi_instance_t vmi,
 
             if (check(value)) { // look for specific magic #
 
-                char *procname =
-                    windows_get_eprocess_name(vmi, block_pa + offset);
+                char *procname = windows_get_eprocess_name(vmi, block_pa + offset);
                 if (procname) {
                     if (strncmp(procname, name, 50) == 0) {
                         free(procname);
@@ -244,8 +237,7 @@ windows_find_eprocess(vmi_instance_t vmi, char *name)
             dbprint("--failed to find pname_offset\n");
             return 0;
         } else {
-            dbprint("**set os.windows_instance.pname_offset (0x%x)\n",
-                    vmi->os.windows_instance.pname_offset);
+            dbprint("**set os.windows_instance.pname_offset (0x%x)\n", vmi->os.windows_instance.pname_offset);
         }
     }
 

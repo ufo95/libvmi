@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -70,8 +71,7 @@ vmi_read_pa(vmi_instance_t vmi, addr_t paddr, void *buf, size_t count)
         }
 
         /* do the read */
-        memcpy(((char *) buf) + (addr_t) buf_offset,
-               memory + (addr_t) offset, read_len);
+        memcpy(((char *) buf) + (addr_t) buf_offset, memory + (addr_t) offset, read_len);
 
         /* set variables for next loop */
         count -= read_len;
@@ -82,8 +82,7 @@ vmi_read_pa(vmi_instance_t vmi, addr_t paddr, void *buf, size_t count)
 }
 
 size_t
-vmi_read_va(vmi_instance_t vmi,
-            addr_t vaddr, int pid, void *buf, size_t count)
+vmi_read_va(vmi_instance_t vmi, addr_t vaddr, int pid, void *buf, size_t count)
 {
     unsigned char *memory = NULL;
     addr_t paddr = 0;
@@ -92,8 +91,7 @@ vmi_read_va(vmi_instance_t vmi,
     size_t buf_offset = 0;
 
     if (NULL == buf) {
-        dbprint("--%s: buf passed as NULL, returning without read\n",
-                __FUNCTION__);
+        dbprint("--%s: buf passed as NULL, returning without read\n", __FUNCTION__);
         return 0;
     }
 
@@ -126,8 +124,7 @@ vmi_read_va(vmi_instance_t vmi,
         }
 
         /* do the read */
-        memcpy(((char *) buf) + (addr_t) buf_offset,
-               memory + (addr_t) offset, read_len);
+        memcpy(((char *) buf) + (addr_t) buf_offset, memory + (addr_t) offset, read_len);
 
         /* set variables for next loop */
         count -= read_len;
@@ -143,8 +140,7 @@ vmi_read_ksym(vmi_instance_t vmi, char *sym, void *buf, size_t count)
     addr_t vaddr = vmi_translate_ksym2v(vmi, sym);
 
     if (0 == vaddr) {
-        dbprint("--%s: vmi_translate_ksym2v failed for '%s'\n",
-                __FUNCTION__, sym);
+        dbprint("--%s: vmi_translate_ksym2v failed for '%s'\n", __FUNCTION__, sym);
         return 0;
     }
     return vmi_read_va(vmi, vaddr, 0, buf, count);
@@ -222,8 +218,7 @@ vmi_read_str_pa(vmi_instance_t vmi, addr_t paddr)
 
         buf_size += chunk_size;
         buf = realloc(buf, buf_size);
-        if (chunk_size !=
-            vmi_read_pa(vmi, paddr + offset, buf + offset, chunk_size)) {
+        if (chunk_size != vmi_read_pa(vmi, paddr + offset, buf + offset, chunk_size)) {
             goto exit;
         }
         len = strnlen(buf, buf_size);
@@ -241,8 +236,7 @@ exit:
 ///////////////////////////////////////////////////////////
 // Easy access to virtual memory
 static status_t
-vmi_read_X_va(vmi_instance_t vmi,
-              addr_t vaddr, int pid, void *value, int size)
+vmi_read_X_va(vmi_instance_t vmi, addr_t vaddr, int pid, void *value, int size)
 {
     size_t len_read = vmi_read_va(vmi, vaddr, pid, value, size);
 
@@ -370,8 +364,7 @@ vmi_read_win_unicode_struct_va(vmi_instance_t vmi, addr_t vaddr, int pid)
         read = vmi_read_va(vmi, vaddr, pid, &us64, struct_size);
         if (read != struct_size) {
             dbprint
-                ("--%s: failed to read UNICODE_STRING at VA 0x%.16" PRIx64
-                 " for pid %d\n", __FUNCTION__, vaddr, pid);
+                ("--%s: failed to read UNICODE_STRING at VA 0x%.16" PRIx64 " for pid %d\n", __FUNCTION__, vaddr, pid);
             goto out_error;
         }       // if
         buffer_va = us64.pBuffer;
@@ -383,8 +376,7 @@ vmi_read_win_unicode_struct_va(vmi_instance_t vmi, addr_t vaddr, int pid)
         read = vmi_read_va(vmi, vaddr, pid, &us32, struct_size);
         if (read != struct_size) {
             dbprint
-                ("--%s: failed to read UNICODE_STRING at VA 0x%.16" PRIx64
-                 " for pid %d\n", __FUNCTION__, vaddr, pid);
+                ("--%s: failed to read UNICODE_STRING at VA 0x%.16" PRIx64 " for pid %d\n", __FUNCTION__, vaddr, pid);
             goto out_error;
         }       // if
         buffer_va = us32.pBuffer;
@@ -399,9 +391,7 @@ vmi_read_win_unicode_struct_va(vmi_instance_t vmi, addr_t vaddr, int pid)
 
     read = vmi_read_va(vmi, buffer_va, pid, us->contents, us->length);
     if (read != us->length) {
-        dbprint
-            ("--%s: failed to read buffer at VA 0x%.16" PRIx64
-             " for pid %d\n", __FUNCTION__, buffer_va, pid);
+        dbprint("--%s: failed to read buffer at VA 0x%.16" PRIx64 " for pid %d\n", __FUNCTION__, buffer_va, pid);
         goto out_error;
     }   // if
 
@@ -438,8 +428,7 @@ vmi_read_unicode_str_va(vmi_instance_t vmi, addr_t vaddr, int pid)
 }
 
 status_t
-vmi_convert_str_encoding(const unicode_string_t *in,
-                         unicode_string_t *out, const char *outencoding)
+vmi_convert_str_encoding(const unicode_string_t *in, unicode_string_t *out, const char *outencoding)
 {
     iconv_t cd = 0;
     size_t iconv_val = 0;
@@ -462,11 +451,9 @@ vmi_convert_str_encoding(const unicode_string_t *in,
     cd = iconv_open(out->encoding, in->encoding);       // outset, inset
     if ((iconv_t) (-1) == cd) { // init failure
         if (EINVAL == errno) {
-            dbprint("%s: conversion from '%s' to '%s' not supported\n",
-                    __FUNCTION__, in->encoding, out->encoding);
+            dbprint("%s: conversion from '%s' to '%s' not supported\n", __FUNCTION__, in->encoding, out->encoding);
         } else {
-            dbprint("%s: Initializiation failure: %s\n", __FUNCTION__,
-                    strerror(errno));
+            dbprint("%s: Initializiation failure: %s\n", __FUNCTION__, strerror(errno));
         }       // if-else
         goto fail;
     }   // if
@@ -476,8 +463,7 @@ vmi_convert_str_encoding(const unicode_string_t *in,
     iconv_val = iconv(cd, &incurr, &inlen, &outcurr, &outlen);
     if ((size_t) - 1 == iconv_val) {
         dbprint("%s: iconv failed, in string '%s' length %zu, "
-                "out string '%s' length %zu\n", __FUNCTION__,
-                in->contents, in->length, out->contents, outlen);
+                "out string '%s' length %zu\n", __FUNCTION__, in->contents, in->length, out->contents, outlen);
         switch (errno) {
         case EILSEQ:
             dbprint("invalid multibyte sequence");

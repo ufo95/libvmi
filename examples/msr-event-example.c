@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -35,8 +36,7 @@ vmi_event_t msr_event;
 void
 msr_write_cb(vmi_instance_t vmi, vmi_event_t * event)
 {
-    printf("MSR write happened: MSR=%lx Value=%lx\n",
-           event->reg_event.context, event->reg_event.value);
+    printf("MSR write happened: MSR=%lx Value=%lx\n", event->reg_event.context, event->reg_event.value);
 }
 
 static int interrupted = 0;
@@ -69,8 +69,7 @@ main(int argc, char **argv)
     name = argv[1];
 
     // Initialize the libvmi library.
-    if (vmi_init(&vmi, VMI_XEN | VMI_INIT_PARTIAL | VMI_INIT_EVENTS, name) ==
-        VMI_FAILURE) {
+    if (vmi_init(&vmi, VMI_XEN | VMI_INIT_PARTIAL | VMI_INIT_EVENTS, name) == VMI_FAILURE) {
         printf("Failed to init LibVMI library.\n");
         return 1;
     } else {
@@ -102,8 +101,7 @@ leave:
 int
 main(int argc, char **argv)
 {
-    fprintf(stderr,
-            "MSR events not supported by this hypervisor platform.\n");
+    fprintf(stderr, "MSR events not supported by this hypervisor platform.\n");
     return 1;
 }
 #endif

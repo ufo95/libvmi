@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -39,8 +40,7 @@ entry_present(os_t os_type, uint64_t entry)
     /* Support Windows "Transition" pages (bit 11) and not "Prototype PTE" (bit 10)
      * pages on Windows.  See http://code.google.com/p/vmitools/issues/detail?id=35
      */
-    if (os_type == VMI_OS_WINDOWS
-        && (vmi_get_bit(entry, 11) && !(vmi_get_bit(entry, 10))))
+    if (os_type == VMI_OS_WINDOWS && (vmi_get_bit(entry, 11) && !(vmi_get_bit(entry, 10))))
         return 1;
     return 0;
 }
@@ -111,8 +111,7 @@ uint64_t
 get_pdpte_ia32e(vmi_instance_t vmi, addr_t vaddr, uint64_t pml4e)
 {
     uint64_t value = 0;
-    addr_t pdpte_address =
-        get_bits_51to12(pml4e) | get_pdpt_index_ia32e(vaddr);
+    addr_t pdpte_address = get_bits_51to12(pml4e) | get_pdpt_index_ia32e(vaddr);
     dbprint("--PTLookup: pdpte_address = 0x%.16" PRIx64 "\n", pdpte_address);
     vmi_read_64_pa(vmi, pdpte_address, &value);
     return value;
@@ -320,8 +319,7 @@ buffalo_nopae(vmi_instance_t instance, uint32_t entry, int pde)
 
         /* pagefile */
         if (pfnum != 0 && pfframe != 0) {
-            dbprint("--Buffalo: page file = %d, frame = 0x%.8x\n",
-                    pfnum, pfframe);
+            dbprint("--Buffalo: page file = %d, frame = 0x%.8x\n", pfnum, pfframe);
         }
         /* demand zero */
         else if (pfnum == 0 && pfframe == 0) {
@@ -571,8 +569,7 @@ vmi_translate_ksym2v(vmi_instance_t vmi, char *symbol)
 
     if (VMI_FAILURE == sym_cache_get(vmi, base_vaddr, 0, symbol, &ret)) {
         if (VMI_OS_LINUX == vmi->os_type) {
-            if (VMI_FAILURE
-                == linux_system_map_symbol_to_address(vmi, symbol, &ret)) {
+            if (VMI_FAILURE == linux_system_map_symbol_to_address(vmi, symbol, &ret)) {
                 ret = 0;
             }
         } else if (VMI_OS_WINDOWS == vmi->os_type) {
@@ -591,8 +588,7 @@ vmi_translate_ksym2v(vmi_instance_t vmi, char *symbol)
 
 /* convert a symbol into an address */
 addr_t
-vmi_translate_sym2v(vmi_instance_t vmi, addr_t base_vaddr, uint32_t pid,
-                    char *symbol)
+vmi_translate_sym2v(vmi_instance_t vmi, addr_t base_vaddr, uint32_t pid, char *symbol)
 {
     addr_t ret = 0;
 
@@ -602,8 +598,7 @@ vmi_translate_sym2v(vmi_instance_t vmi, addr_t base_vaddr, uint32_t pid,
             // TODO
             return VMI_FAILURE;
         } else if (VMI_OS_WINDOWS == vmi->os_type) {
-            if (VMI_FAILURE ==
-                windows_export_to_rva(vmi, symbol, base_vaddr, pid, &ret)) {
+            if (VMI_FAILURE == windows_export_to_rva(vmi, symbol, base_vaddr, pid, &ret)) {
                 ret = 0;
             } else {
                 ret += base_vaddr;
@@ -620,8 +615,7 @@ vmi_translate_sym2v(vmi_instance_t vmi, addr_t base_vaddr, uint32_t pid,
 
 /* convert an RVA into a symbol */
 const char *
-vmi_translate_v2sym(vmi_instance_t vmi, addr_t base_vaddr, uint32_t pid,
-                    addr_t rva)
+vmi_translate_v2sym(vmi_instance_t vmi, addr_t base_vaddr, uint32_t pid, addr_t rva)
 {
     char *ret = NULL;
 

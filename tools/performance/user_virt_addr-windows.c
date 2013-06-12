@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -59,9 +60,7 @@ main(int argc, char **argv)
     }
      for (i = 0; i < loops; ++i) {
         gettimeofday(&ktv_start, 0);
-        memory =
-            xa_access_user_va(&xai, peb.ImageBaseAddress, &offset, pid,
-                              PROT_READ);
+        memory = xa_access_user_va(&xai, peb.ImageBaseAddress, &offset, pid, PROT_READ);
         gettimeofday(&ktv_end, 0);
         if (memory == NULL) {
             perror("failed to map memory");

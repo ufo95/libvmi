@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -218,19 +219,14 @@ typedef struct _windows_unicode_string32 {
 
     void sym_cache_init(vmi_instance_t vmi);
     void sym_cache_destroy(vmi_instance_t vmi);
-    status_t sym_cache_get(vmi_instance_t vmi,
-                           addr_t base_addr,
-                           uint32_t pid, char *sym, addr_t *va);
-    void sym_cache_set(vmi_instance_t vmi,
-                       addr_t base_addr, uint32_t pid, char *sym, addr_t va);
-    status_t sym_cache_del(vmi_instance_t vmi,
-                           addr_t base_addr, uint32_t pid, char *sym);
+    status_t sym_cache_get(vmi_instance_t vmi, addr_t base_addr, uint32_t pid, char *sym, addr_t *va);
+    void sym_cache_set(vmi_instance_t vmi, addr_t base_addr, uint32_t pid, char *sym, addr_t va);
+    status_t sym_cache_del(vmi_instance_t vmi, addr_t base_addr, uint32_t pid, char *sym);
     void sym_cache_flush(vmi_instance_t vmi);
 
     void v2p_cache_init(vmi_instance_t vmi);
     void v2p_cache_destroy(vmi_instance_t vmi);
-    status_t v2p_cache_get(vmi_instance_t vmi,
-                           addr_t va, addr_t dtb, addr_t *pa);
+    status_t v2p_cache_get(vmi_instance_t vmi, addr_t va, addr_t dtb, addr_t *pa);
     void v2p_cache_set(vmi_instance_t vmi, addr_t va, addr_t dtb, addr_t pa);
     status_t v2p_cache_del(vmi_instance_t vmi, addr_t va, addr_t dtb);
     void v2p_cache_flush(vmi_instance_t vmi);
@@ -240,9 +236,7 @@ typedef struct _windows_unicode_string32 {
  */
     status_t
      get_memory_layout(vmi_instance_t vmi,
-                       page_mode_t *set_pm,
-                       reg_t *set_cr3,
-                       int *set_pae, int *set_pse, int *set_lme);
+                       page_mode_t *set_pm, reg_t *set_cr3, int *set_pae, int *set_pse, int *set_lme);
 
 /*-----------------------------------------
  * memory.c
@@ -253,9 +247,7 @@ typedef struct _windows_unicode_string32 {
  * os/linux/...
  */
     status_t linux_init(vmi_instance_t instance);
-    status_t linux_system_map_symbol_to_address(vmi_instance_t instance,
-                                                char *symbol,
-                                                addr_t *address);
+    status_t linux_system_map_symbol_to_address(vmi_instance_t instance, char *symbol, addr_t *address);
     addr_t linux_pid_to_pgd(vmi_instance_t vmi, int pid);
     int linux_pgd_to_pid(vmi_instance_t vmi, addr_t pgd);
 
@@ -266,10 +258,8 @@ typedef struct _windows_unicode_string32 {
 
     status_t windows_init(vmi_instance_t instance);
     addr_t windows_find_eprocess(vmi_instance_t instance, char *name);
-    status_t windows_export_to_rva(vmi_instance_t,
-                                   char *, addr_t, uint32_t, addr_t *);
-    status_t windows_kpcr_lookup(vmi_instance_t vmi,
-                                 char *symbol, addr_t *address);
+    status_t windows_export_to_rva(vmi_instance_t, char *, addr_t, uint32_t, addr_t *);
+    status_t windows_kpcr_lookup(vmi_instance_t vmi, char *symbol, addr_t *address);
     addr_t windows_find_cr3(vmi_instance_t vmi);
     int find_pname_offset(vmi_instance_t vmi, check_magic_func check);
     win_ver_t find_windows_version(vmi_instance_t vmi, addr_t KdVersionBlock);
@@ -277,8 +267,7 @@ typedef struct _windows_unicode_string32 {
     addr_t windows_pid_to_pgd(vmi_instance_t vmi, int pid);
     int windows_pgd_to_pid(vmi_instance_t vmi, addr_t pgd);
     status_t
-     windows_symbol_to_address(vmi_instance_t vmi,
-                               char *symbol, addr_t *address);
+     windows_symbol_to_address(vmi_instance_t vmi, char *symbol, addr_t *address);
 
     addr_t windows_find_eprocess_list_pid(vmi_instance_t vmi, int pid);
     addr_t windows_find_eprocess_list_pgd(vmi_instance_t vmi, addr_t pgd);

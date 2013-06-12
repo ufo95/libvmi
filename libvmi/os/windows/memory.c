@@ -1,3 +1,4 @@
+
 /* The LibVMI Library is an introspection library that simplifies access to 
  * memory in a target virtual machine or in a file containing a dump of 
  * a system's physical memory.  LibVMI is based on the XenAccess Library.
@@ -44,22 +45,17 @@ windows_symbol_to_address(vmi_instance_t vmi, char *symbol, addr_t *address)
     /* check kpcr if we have a cr3 */
     if ( /*cr3 && */ VMI_SUCCESS ==
         windows_kpcr_lookup(vmi, symbol, address)) {
-        dbprint("--got symbol from kpcr (%s --> 0x%" PRIx64 ").\n", symbol,
-                *address);
+        dbprint("--got symbol from kpcr (%s --> 0x%" PRIx64 ").\n", symbol, *address);
         return VMI_SUCCESS;
     }
     dbprint("--kpcr lookup failed, trying kernel PE export table\n");
 
     /* check exports */
-    if (VMI_SUCCESS ==
-        windows_export_to_rva(vmi, symbol,
-                              vmi->os.windows_instance.ntoskrnl_va, 0,
-                              address)) {
+    if (VMI_SUCCESS == windows_export_to_rva(vmi, symbol, vmi->os.windows_instance.ntoskrnl_va, 0, address)) {
         addr_t rva = *address;
 
         *address = vmi->os.windows_instance.ntoskrnl_va + rva;
-        dbprint("--got symbol from PE export table (%s --> 0x%.16" PRIx64
-                ").\n", symbol, *address);
+        dbprint("--got symbol from PE export table (%s --> 0x%.16" PRIx64 ").\n", symbol, *address);
         return VMI_SUCCESS;
     }
     dbprint("--kernel PE export table failed, nothing left to try\n");
@@ -102,8 +98,7 @@ windows_pgd_to_pid(vmi_instance_t vmi, addr_t pgd)
     /* first we need a pointer to this pgd's EPROCESS struct */
     eprocess = windows_find_eprocess_list_pgd(vmi, pgd);
     if (!eprocess) {
-        errprint("Could not find EPROCESS struct for pgd = 0x%" PRIx64 ".\n",
-                 pgd);
+        errprint("Could not find EPROCESS struct for pgd = 0x%" PRIx64 ".\n", pgd);
         goto error_exit;
     }
 
