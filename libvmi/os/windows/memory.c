@@ -29,18 +29,14 @@
 #include "driver/interface.h"
 
 status_t
-windows_symbol_to_address(
-    vmi_instance_t vmi,
-    char *symbol,
-    addr_t *address)
+windows_symbol_to_address(vmi_instance_t vmi, char *symbol, addr_t *address)
 {
     /* see if we have a cr3 value */
     reg_t cr3 = 0;
 
     if (vmi->kpgd) {
         cr3 = vmi->kpgd;
-    }
-    else {
+    } else {
         driver_get_vcpureg(vmi, &cr3, CR3, 0);
     }
     dbprint("--windows symbol lookup (%s)\n", symbol);
@@ -48,19 +44,22 @@ windows_symbol_to_address(
     /* check kpcr if we have a cr3 */
     if ( /*cr3 && */ VMI_SUCCESS ==
         windows_kpcr_lookup(vmi, symbol, address)) {
-        dbprint("--got symbol from kpcr (%s --> 0x%"PRIx64").\n", symbol,
+        dbprint("--got symbol from kpcr (%s --> 0x%" PRIx64 ").\n", symbol,
                 *address);
         return VMI_SUCCESS;
     }
     dbprint("--kpcr lookup failed, trying kernel PE export table\n");
 
     /* check exports */
-    if (VMI_SUCCESS == windows_export_to_rva(vmi, symbol, vmi->os.windows_instance.ntoskrnl_va, 0, address)) {
+    if (VMI_SUCCESS ==
+        windows_export_to_rva(vmi, symbol,
+                              vmi->os.windows_instance.ntoskrnl_va, 0,
+                              address)) {
         addr_t rva = *address;
 
         *address = vmi->os.windows_instance.ntoskrnl_va + rva;
-        dbprint("--got symbol from PE export table (%s --> 0x%.16"PRIx64").\n",
-             symbol, *address);
+        dbprint("--got symbol from PE export table (%s --> 0x%.16" PRIx64
+                ").\n", symbol, *address);
         return VMI_SUCCESS;
     }
     dbprint("--kernel PE export table failed, nothing left to try\n");
@@ -70,9 +69,7 @@ windows_symbol_to_address(
 
 /* finds the address of the page global directory for a given pid */
 addr_t
-windows_pid_to_pgd(
-    vmi_instance_t vmi,
-    int pid)
+windows_pid_to_pgd(vmi_instance_t vmi, int pid)
 {
     addr_t pgd = 0;
     addr_t eprocess = 0;
@@ -87,17 +84,14 @@ windows_pid_to_pgd(
     }
 
     /* now follow the pointer to the memory descriptor and grab the pgd value */
-    vmi_read_addr_va(vmi, eprocess + pdbase_offset - tasks_offset, 0,
-                     &pgd);
+    vmi_read_addr_va(vmi, eprocess + pdbase_offset - tasks_offset, 0, &pgd);
 
 error_exit:
     return pgd;
 }
 
 int
-windows_pgd_to_pid(
-    vmi_instance_t vmi,
-    addr_t pgd)
+windows_pgd_to_pid(vmi_instance_t vmi, addr_t pgd)
 {
     int pid = -1;
     addr_t eprocess = 0;
@@ -108,13 +102,13 @@ windows_pgd_to_pid(
     /* first we need a pointer to this pgd's EPROCESS struct */
     eprocess = windows_find_eprocess_list_pgd(vmi, pgd);
     if (!eprocess) {
-        errprint("Could not find EPROCESS struct for pgd = 0x%"PRIx64".\n", pgd);
+        errprint("Could not find EPROCESS struct for pgd = 0x%" PRIx64 ".\n",
+                 pgd);
         goto error_exit;
     }
 
     /* now follow the pointer to the memory descriptor and grab the pgd value */
-    vmi_read_32_va(vmi, eprocess + pid_offset - tasks_offset, 0,
-                     &pid);
+    vmi_read_32_va(vmi, eprocess + pid_offset - tasks_offset, 0, &pid);
 
 error_exit:
     return pid;

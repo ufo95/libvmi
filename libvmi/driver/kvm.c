@@ -51,7 +51,7 @@
 
 // request struct matches a definition in qemu source code
 struct request {
-    uint8_t type;   // 0 quit, 1 read, 2 write, ... rest reserved
+    uint8_t type;       // 0 quit, 1 read, 2 write, ... rest reserved
     uint64_t address;   // address to read from OR write to
     uint64_t length;    // number of bytes to read OR write
 };
@@ -62,9 +62,7 @@ struct request {
 //
 // QMP Command Interactions
 static char *
-exec_qmp_cmd(
-    kvm_instance_t *kvm,
-    char *query)
+exec_qmp_cmd(kvm_instance_t *kvm, char *query)
 {
     FILE *p;
     char *output = safe_malloc(20000);
@@ -92,15 +90,13 @@ exec_qmp_cmd(
     if (length == 0) {
         free(output);
         return NULL;
-    }
-    else {
+    } else {
         return output;
     }
 }
 
 static char *
-exec_info_registers(
-    kvm_instance_t *kvm)
+exec_info_registers(kvm_instance_t *kvm)
 {
     char *query =
         "'{\"execute\": \"human-monitor-command\", \"arguments\": {\"command-line\": \"info registers\"}}'";
@@ -108,8 +104,7 @@ exec_info_registers(
 }
 
 static char *
-exec_memory_access(
-    kvm_instance_t *kvm)
+exec_memory_access(kvm_instance_t *kvm)
 {
     char *tmpfile = tempnam("/tmp", "vmi");
     char *query = (char *) safe_malloc(256);
@@ -127,10 +122,7 @@ exec_memory_access(
 }
 
 static char *
-exec_xp(
-    kvm_instance_t *kvm,
-    int numwords,
-    addr_t paddr)
+exec_xp(kvm_instance_t *kvm, int numwords, addr_t paddr)
 {
     char *query = (char *) safe_malloc(256);
 
@@ -145,9 +137,7 @@ exec_xp(
 }
 
 static reg_t
-parse_reg_value(
-    char *regname,
-    char *ir_output)
+parse_reg_value(char *regname, char *ir_output)
 {
     if (NULL == ir_output || NULL == regname) {
         return 0;
@@ -158,15 +148,13 @@ parse_reg_value(
     if (NULL != ptr) {
         ptr += strlen(regname) + 1;
         return (reg_t) strtoll(ptr, (char **) NULL, 16);
-    }
-    else {
+    } else {
         return 0;
     }
 }
 
 status_t
-exec_memory_access_success(
-    char *status)
+exec_memory_access_success(char *status)
 {
     if (NULL == status) {
         return VMI_FAILURE;
@@ -176,8 +164,7 @@ exec_memory_access_success(
 
     if (NULL == ptr) {
         return VMI_SUCCESS;
-    }
-    else {
+    } else {
         return VMI_FAILURE;
     }
 }
@@ -185,8 +172,7 @@ exec_memory_access_success(
 //
 // Domain socket interactions (for memory access from KVM-QEMU)
 static status_t
-init_domain_socket(
-    kvm_instance_t *kvm)
+init_domain_socket(kvm_instance_t *kvm)
 {
     struct sockaddr_un address;
     int socket_fd;
@@ -214,8 +200,7 @@ init_domain_socket(
 }
 
 static void
-destroy_domain_socket(
-    kvm_instance_t *kvm)
+destroy_domain_socket(kvm_instance_t *kvm)
 {
     if (kvm->socket_fd) {
         struct request req;
@@ -231,39 +216,31 @@ destroy_domain_socket(
 // KVM-Specific Interface Functions (no direction mapping to driver_*)
 
 static kvm_instance_t *
-kvm_get_instance(
-    vmi_instance_t vmi)
+kvm_get_instance(vmi_instance_t vmi)
 {
     return ((kvm_instance_t *) vmi->driver);
 }
 
 void *
-kvm_get_memory_patch(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    uint32_t length)
+kvm_get_memory_patch(vmi_instance_t vmi, addr_t paddr, uint32_t length)
 {
     char *buf = safe_malloc(length + 1);
     struct request req;
 
-    req.type = 1;   // read request
+    req.type = 1;       // read request
     req.address = (uint64_t) paddr;
     req.length = (uint64_t) length;
 
-    int nbytes =
-        write(kvm_get_instance(vmi)->socket_fd, &req,
-              sizeof(struct request));
+    int nbytes = write(kvm_get_instance(vmi)->socket_fd, &req,
+                       sizeof(struct request));
     if (nbytes != sizeof(struct request)) {
         goto error_exit;
-    }
-    else {
+    } else {
         // get the data from kvm
-        nbytes =
-            read(kvm_get_instance(vmi)->socket_fd, buf, length + 1);
+        nbytes = read(kvm_get_instance(vmi)->socket_fd, buf, length + 1);
         if (nbytes != (length + 1)) {
             goto error_exit;
         }
-
         // check that kvm thinks everything is ok by looking at the last byte
         // of the buffer, 0 is failure and 1 is success
         if (buf[length]) {
@@ -280,10 +257,7 @@ error_exit:
 }
 
 void *
-kvm_get_memory_native(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    uint32_t length)
+kvm_get_memory_native(vmi_instance_t vmi, addr_t paddr, uint32_t length)
 {
     int numwords = ceil(length / 4);
     char *buf = safe_malloc(numwords * 4);
@@ -318,34 +292,26 @@ kvm_get_memory_native(
 }
 
 void
-kvm_release_memory(
-    void *memory,
-    size_t length)
+kvm_release_memory(void *memory, size_t length)
 {
     if (memory)
         free(memory);
 }
 
 status_t
-kvm_put_memory(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    uint32_t length,
-    void *buf)
+kvm_put_memory(vmi_instance_t vmi, addr_t paddr, uint32_t length, void *buf)
 {
     struct request req;
 
-    req.type = 2;   // write request
+    req.type = 2;       // write request
     req.address = (uint64_t) paddr;
     req.length = (uint64_t) length;
 
-    int nbytes =
-        write(kvm_get_instance(vmi)->socket_fd, &req,
-              sizeof(struct request));
+    int nbytes = write(kvm_get_instance(vmi)->socket_fd, &req,
+                       sizeof(struct request));
     if (nbytes != sizeof(struct request)) {
         goto error_exit;
-    }
-    else {
+    } else {
         uint8_t status = 0;
 
         write(kvm_get_instance(vmi)->socket_fd, buf, length);
@@ -364,16 +330,13 @@ error_exit:
 // General Interface Functions (1-1 mapping to driver_* function)
 
 status_t
-kvm_init(
-    vmi_instance_t vmi)
+kvm_init(vmi_instance_t vmi)
 {
     virConnectPtr conn = NULL;
     virDomainPtr dom = NULL;
     virDomainInfo info;
 
-    conn =
-        virConnectOpenAuth("qemu:///system", virConnectAuthPtrDefault,
-                           0);
+    conn = virConnectOpenAuth("qemu:///system", virConnectAuthPtrDefault, 0);
     if (NULL == conn) {
         dbprint("--no connection to kvm hypervisor\n");
         return VMI_FAILURE;
@@ -384,7 +347,6 @@ kvm_init(
         dbprint("--failed to find kvm domain\n");
         return VMI_FAILURE;
     }
-
     // get the libvirt version
     unsigned long libVer = 0;
 
@@ -410,17 +372,14 @@ kvm_init(
 
     if (VMI_SUCCESS == exec_memory_access_success(status)) {
         dbprint("--kvm: using custom patch for fast memory access\n");
-        memory_cache_init(vmi, kvm_get_memory_patch, kvm_release_memory,
-                          1);
+        memory_cache_init(vmi, kvm_get_memory_patch, kvm_release_memory, 1);
         if (status)
             free(status);
         return init_domain_socket(kvm_get_instance(vmi));
-    }
-    else {
+    } else {
         dbprint
             ("--kvm: didn't find patch, falling back to slower native access\n");
-        memory_cache_init(vmi, kvm_get_memory_native,
-                          kvm_release_memory, 1);
+        memory_cache_init(vmi, kvm_get_memory_native, kvm_release_memory, 1);
         if (status)
             free(status);
         return VMI_SUCCESS;
@@ -428,8 +387,7 @@ kvm_init(
 }
 
 void
-kvm_destroy(
-    vmi_instance_t vmi)
+kvm_destroy(vmi_instance_t vmi)
 {
     destroy_domain_socket(kvm_get_instance(vmi));
 
@@ -442,17 +400,13 @@ kvm_destroy(
 }
 
 unsigned long
-kvm_get_id_from_name(
-    vmi_instance_t vmi,
-    char *name)
+kvm_get_id_from_name(vmi_instance_t vmi, char *name)
 {
     virConnectPtr conn = NULL;
     virDomainPtr dom = NULL;
     unsigned long id;
 
-    conn =
-        virConnectOpenAuth("qemu:///system", virConnectAuthPtrDefault,
-                           0);
+    conn = virConnectOpenAuth("qemu:///system", virConnectAuthPtrDefault, 0);
     if (NULL == conn) {
         dbprint("--no connection to kvm hypervisor\n");
         return -1;
@@ -475,17 +429,12 @@ kvm_get_id_from_name(
 }
 
 status_t
-kvm_get_name_from_id(
-    vmi_instance_t vmi,
-    unsigned long domid,
-    char **name)
+kvm_get_name_from_id(vmi_instance_t vmi, unsigned long domid, char **name)
 {
     virConnectPtr conn = NULL;
     virDomainPtr dom = NULL;
 
-    conn =
-        virConnectOpenAuth("qemu:///system", virConnectAuthPtrDefault,
-                           0);
+    conn = virConnectOpenAuth("qemu:///system", virConnectAuthPtrDefault, 0);
     if (NULL == conn) {
         dbprint("--no connection to kvm hypervisor\n");
         return VMI_FAILURE;
@@ -508,31 +457,24 @@ kvm_get_name_from_id(
 }
 
 unsigned long
-kvm_get_id(
-    vmi_instance_t vmi)
+kvm_get_id(vmi_instance_t vmi)
 {
     return kvm_get_instance(vmi)->id;
 }
 
 void
-kvm_set_id(
-    vmi_instance_t vmi,
-    unsigned long id)
+kvm_set_id(vmi_instance_t vmi, unsigned long id)
 {
     kvm_get_instance(vmi)->id = id;
 }
 
 status_t
-kvm_check_id(
-    vmi_instance_t vmi,
-    unsigned long id)
+kvm_check_id(vmi_instance_t vmi, unsigned long id)
 {
     virConnectPtr conn = NULL;
     virDomainPtr dom = NULL;
 
-    conn =
-        virConnectOpenAuth("qemu:///system", virConnectAuthPtrDefault,
-                           0);
+    conn = virConnectOpenAuth("qemu:///system", virConnectAuthPtrDefault, 0);
     if (NULL == conn) {
         dbprint("--no connection to kvm hypervisor\n");
         return VMI_FAILURE;
@@ -553,9 +495,7 @@ kvm_check_id(
 }
 
 status_t
-kvm_get_name(
-    vmi_instance_t vmi,
-    char **name)
+kvm_get_name(vmi_instance_t vmi, char **name)
 {
     const char *tmpname = virDomainGetName(kvm_get_instance(vmi)->dom);
 
@@ -564,24 +504,19 @@ kvm_get_name(
     if (NULL != tmpname) {
         *name = strdup(tmpname);
         return VMI_SUCCESS;
-    }
-    else {
+    } else {
         return VMI_FAILURE;
     }
 }
 
 void
-kvm_set_name(
-    vmi_instance_t vmi,
-    char *name)
+kvm_set_name(vmi_instance_t vmi, char *name)
 {
     kvm_get_instance(vmi)->name = strndup(name, 500);
 }
 
 status_t
-kvm_get_memsize(
-    vmi_instance_t vmi,
-    unsigned long *size)
+kvm_get_memsize(vmi_instance_t vmi, unsigned long *size)
 {
     virDomainInfo info;
 
@@ -597,11 +532,8 @@ error_exit:
 }
 
 status_t
-kvm_get_vcpureg(
-    vmi_instance_t vmi,
-    reg_t *value,
-    registers_t reg,
-    unsigned long vcpu)
+kvm_get_vcpureg(vmi_instance_t vmi,
+                reg_t *value, registers_t reg, unsigned long vcpu)
 {
     char *regs = exec_info_registers(kvm_get_instance(vmi));
     status_t ret = VMI_SUCCESS;
@@ -699,8 +631,7 @@ kvm_get_vcpureg(
             ret = VMI_FAILURE;
             break;
         }
-    }
-    else {
+    } else {
         switch (reg) {
         case RAX:
             *value = parse_reg_value("EAX", regs);
@@ -777,9 +708,7 @@ kvm_get_vcpureg(
 }
 
 void *
-kvm_read_page(
-    vmi_instance_t vmi,
-    addr_t page)
+kvm_read_page(vmi_instance_t vmi, addr_t page)
 {
     addr_t paddr = page << vmi->page_shift;
 
@@ -787,33 +716,24 @@ kvm_read_page(
 }
 
 status_t
-kvm_write(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    void *buf,
-    uint32_t length)
+kvm_write(vmi_instance_t vmi, addr_t paddr, void *buf, uint32_t length)
 {
     return kvm_put_memory(vmi, paddr, length, buf);
 }
 
 int
-kvm_is_pv(
-    vmi_instance_t vmi)
+kvm_is_pv(vmi_instance_t vmi)
 {
     return 0;
 }
 
 status_t
-kvm_test(
-    unsigned long id,
-    char *name)
+kvm_test(unsigned long id, char *name)
 {
     virConnectPtr conn = NULL;
     virDomainPtr dom = NULL;
 
-    conn =
-        virConnectOpenAuth("qemu:///system", virConnectAuthPtrDefault,
-                           0);
+    conn = virConnectOpenAuth("qemu:///system", virConnectAuthPtrDefault, 0);
     if (NULL == conn) {
         dbprint("--no connection to kvm hypervisor\n");
         return VMI_FAILURE;
@@ -825,8 +745,7 @@ kvm_test(
 }
 
 status_t
-kvm_pause_vm(
-    vmi_instance_t vmi)
+kvm_pause_vm(vmi_instance_t vmi)
 {
     if (-1 == virDomainSuspend(kvm_get_instance(vmi)->dom)) {
         return VMI_FAILURE;
@@ -835,8 +754,7 @@ kvm_pause_vm(
 }
 
 status_t
-kvm_resume_vm(
-    vmi_instance_t vmi)
+kvm_resume_vm(vmi_instance_t vmi)
 {
     if (-1 == virDomainResume(kvm_get_instance(vmi)->dom)) {
         return VMI_FAILURE;
@@ -848,136 +766,104 @@ kvm_resume_vm(
 #else
 
 status_t
-kvm_init(
-    vmi_instance_t vmi)
+kvm_init(vmi_instance_t vmi)
 {
     return VMI_FAILURE;
 }
 
 void
-kvm_destroy(
-    vmi_instance_t vmi)
+kvm_destroy(vmi_instance_t vmi)
 {
     return;
 }
 
 unsigned long
-kvm_get_id_from_name(
-    vmi_instance_t vmi,
-    char *name)
+kvm_get_id_from_name(vmi_instance_t vmi, char *name)
 {
     return 0;
 }
 
 status_t
-kvm_get_name_from_id(
-    vmi_instance_t vmi,
-    unsigned long domid,
-    char **name)
+kvm_get_name_from_id(vmi_instance_t vmi, unsigned long domid, char **name)
 {
     return VMI_FAILURE;
 }
 
 unsigned long
-kvm_get_id(
-    vmi_instance_t vmi)
+kvm_get_id(vmi_instance_t vmi)
 {
     return 0;
 }
 
 void
-kvm_set_id(
-    vmi_instance_t vmi,
-    unsigned long id)
+kvm_set_id(vmi_instance_t vmi, unsigned long id)
 {
     return;
 }
 
 status_t
-kvm_check_id(
-    vmi_instance_t vmi,
-    unsigned long id)
+kvm_check_id(vmi_instance_t vmi, unsigned long id)
 {
     return VMI_FAILURE;
 }
 
 status_t
-kvm_get_name(
-    vmi_instance_t vmi,
-    char **name)
+kvm_get_name(vmi_instance_t vmi, char **name)
 {
     return VMI_FAILURE;
 }
 
 void
-kvm_set_name(
-    vmi_instance_t vmi,
-    char *name)
+kvm_set_name(vmi_instance_t vmi, char *name)
 {
     return;
 }
 
 status_t
-kvm_get_memsize(
-    vmi_instance_t vmi,
-    unsigned long *size)
+kvm_get_memsize(vmi_instance_t vmi, unsigned long *size)
 {
     return VMI_FAILURE;
 }
 
 status_t
-kvm_get_vcpureg(
-    vmi_instance_t vmi,
-    reg_t *value,
-    registers_t reg,
-    unsigned long vcpu)
+kvm_get_vcpureg(vmi_instance_t vmi,
+                reg_t *value, registers_t reg, unsigned long vcpu)
 {
     return VMI_FAILURE;
 }
 
 void *
-kvm_read_page(
-    vmi_instance_t vmi,
-    addr_t page)
+kvm_read_page(vmi_instance_t vmi, addr_t page)
 {
     return NULL;
 }
 
 status_t
-kvm_write(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    void *buf,
-    uint32_t length)
+kvm_write(vmi_instance_t vmi, addr_t paddr, void *buf, uint32_t length)
 {
     return VMI_FAILURE;
 }
 
 int
-kvm_is_pv(
-    vmi_instance_t vmi)
+kvm_is_pv(vmi_instance_t vmi)
 {
     return 0;
 }
 
 status_t
-kvm_test(
-    unsigned long id,
-    char *name)
+kvm_test(unsigned long id, char *name)
 {
     return VMI_FAILURE;
 }
 
 status_t
-kvm_pause_vm(
-    vmi_instance_t vmi)
+kvm_pause_vm(vmi_instance_t vmi)
 {
     return VMI_FAILURE;
 }
 
 status_t
-kvm_resume_vm(
-    vmi_instance_t vmi)
+kvm_resume_vm(vmi_instance_t vmi)
 {
     return VMI_FAILURE;
 }

@@ -29,7 +29,8 @@
 
 
 /* util test cases */
-TCase *util_tcase (void)
+TCase *
+util_tcase(void)
 {
     TCase *tc_util = tcase_create("LibVMI Util");
 

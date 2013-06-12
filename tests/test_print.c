@@ -29,7 +29,8 @@
 
 
 /* print test cases */
-TCase *print_tcase (void)
+TCase *
+print_tcase(void)
 {
     TCase *tc_print = tcase_create("LibVMI Print");
 

@@ -33,9 +33,7 @@
 #include "xenaccess/xenaccess.h"
 #include "common.h"
     int
-main(
-    int argc,
-    char **argv) 
+main(int argc, char **argv) 
 {
     xa_instance_t xai;
     xa_linux_taskaddr_t taskaddr;

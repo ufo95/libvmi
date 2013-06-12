@@ -50,9 +50,7 @@ typedef struct key_128 *key_128_t;
 
 // This function borrowed from cityhash-1.0.3
 static uint64_t
-hash128to64(
-    uint64_t low,
-    uint64_t high)
+hash128to64(uint64_t low, uint64_t high)
 {
     // Murmur-inspired hashing
     uint64_t kMul = 0x9ddfea08eb382d69ULL;
@@ -66,29 +64,36 @@ hash128to64(
     return b;
 }
 
-static guint64 key_128_hash(gconstpointer key){
+static guint64
+key_128_hash(gconstpointer key)
+{
     const key_128_t cache_key = (const key_128_t) key;
     return hash128to64(cache_key->low, cache_key->high);
 }
 
-static gboolean key_128_equals(gconstpointer key1, gconstpointer key2){
+static gboolean
+key_128_equals(gconstpointer key1, gconstpointer key2)
+{
     const key_128_t cache_key1 = (const key_128_t) key1;
     const key_128_t cache_key2 = (const key_128_t) key2;
-    return cache_key1->low == cache_key2->low && cache_key1->high == cache_key2->high;
+    return cache_key1->low == cache_key2->low &&
+        cache_key1->high == cache_key2->high;
 }
 
 /*
  * Initialize an already allocated key with the given values.
  * This is for performance!
  */
-static void key_128_init(vmi_instance_t vmi, key_128_t key, uint64_t low, uint64_t high)
+static void
+key_128_init(vmi_instance_t vmi, key_128_t key, uint64_t low, uint64_t high)
 {
     low = (low & ~(vmi->page_size - 1));
     key->low = low;
     key->high = high;
 }
 
-static key_128_t key_128_build (vmi_instance_t vmi, uint64_t low, uint64_t high)
+static key_128_t
+key_128_build(vmi_instance_t vmi, uint64_t low, uint64_t high)
 {
     key_128_t key = (key_128_t) safe_malloc(sizeof(struct key_128));
     key_128_init(vmi, key, low, high);
@@ -106,16 +111,14 @@ struct pid_cache_entry {
 typedef struct pid_cache_entry *pid_cache_entry_t;
 
 static void
-pid_cache_key_free(
-    gpointer data)
+pid_cache_key_free(gpointer data)
 {
     if (data)
         free(data);
 }
 
 static void
-pid_cache_entry_free(
-    gpointer data)
+pid_cache_entry_free(gpointer data)
 {
     pid_cache_entry_t entry = (pid_cache_entry_t) data;
 
@@ -124,9 +127,7 @@ pid_cache_entry_free(
 }
 
 static pid_cache_entry_t
-pid_cache_entry_create(
-    int pid,
-    addr_t dtb)
+pid_cache_entry_create(int pid, addr_t dtb)
 {
     pid_cache_entry_t entry =
         (pid_cache_entry_t) safe_malloc(sizeof(struct pid_cache_entry));
@@ -137,8 +138,7 @@ pid_cache_entry_create(
 }
 
 void
-pid_cache_init(
-    vmi_instance_t vmi)
+pid_cache_init(vmi_instance_t vmi)
 {
     vmi->pid_cache =
         g_hash_table_new_full(g_int_hash, g_int_equal,
@@ -146,17 +146,13 @@ pid_cache_init(
 }
 
 void
-pid_cache_destroy(
-    vmi_instance_t vmi)
+pid_cache_destroy(vmi_instance_t vmi)
 {
     g_hash_table_destroy(vmi->pid_cache);
 }
 
 status_t
-pid_cache_get(
-    vmi_instance_t vmi,
-    int pid,
-    addr_t *dtb)
+pid_cache_get(vmi_instance_t vmi, int pid, addr_t *dtb)
 {
     pid_cache_entry_t entry = NULL;
     gint key = (gint) pid;
@@ -164,7 +160,7 @@ pid_cache_get(
     if ((entry = g_hash_table_lookup(vmi->pid_cache, &key)) != NULL) {
         entry->last_used = time(NULL);
         *dtb = entry->dtb;
-        dbprint("--PID cache hit %d -- 0x%.16"PRIx64"\n", pid, *dtb);
+        dbprint("--PID cache hit %d -- 0x%.16" PRIx64 "\n", pid, *dtb);
         return VMI_SUCCESS;
     }
 
@@ -172,10 +168,7 @@ pid_cache_get(
 }
 
 void
-pid_cache_set(
-    vmi_instance_t vmi,
-    int pid,
-    addr_t dtb)
+pid_cache_set(vmi_instance_t vmi, int pid, addr_t dtb)
 {
     gint *key = (gint *) safe_malloc(sizeof(gint));
 
@@ -183,28 +176,24 @@ pid_cache_set(
     pid_cache_entry_t entry = pid_cache_entry_create(pid, dtb);
 
     g_hash_table_insert(vmi->pid_cache, key, entry);
-    dbprint("--PID cache set %d -- 0x%.16"PRIx64"\n", pid, dtb);
+    dbprint("--PID cache set %d -- 0x%.16" PRIx64 "\n", pid, dtb);
 }
 
 status_t
-pid_cache_del(
-    vmi_instance_t vmi,
-    int pid)
+pid_cache_del(vmi_instance_t vmi, int pid)
 {
     gint key = (gint) pid;
 
     dbprint("--PID cache del %d\n", pid);
     if (TRUE == g_hash_table_remove(vmi->pid_cache, &key)) {
         return VMI_SUCCESS;
-    }
-    else {
+    } else {
         return VMI_FAILURE;
     }
 }
 
 void
-pid_cache_flush(
-    vmi_instance_t vmi)
+pid_cache_flush(vmi_instance_t vmi)
 {
     g_hash_table_remove_all(vmi->pid_cache);
     dbprint("--PID cache flushed\n");
@@ -222,8 +211,7 @@ struct sym_cache_entry {
 typedef struct sym_cache_entry *sym_cache_entry_t;
 
 static void
-sym_cache_entry_free(
-    gpointer data)
+sym_cache_entry_free(gpointer data)
 {
     sym_cache_entry_t entry = (sym_cache_entry_t) data;
 
@@ -235,55 +223,44 @@ sym_cache_entry_free(
 }
 
 static sym_cache_entry_t
-sym_cache_entry_create(
-    char *sym,
-    addr_t va,
-    addr_t base_addr,
-    uint32_t pid)
+sym_cache_entry_create(char *sym, addr_t va, addr_t base_addr, uint32_t pid)
 {
     sym_cache_entry_t entry =
         (sym_cache_entry_t) safe_malloc(sizeof(struct sym_cache_entry));
     entry->sym = strdup(sym);
     entry->va = va;
-    entry->base_addr=base_addr,
-    entry->pid=pid,
-    entry->last_used = time(NULL);
+    entry->base_addr = base_addr,
+        entry->pid = pid, entry->last_used = time(NULL);
     return entry;
 }
 
 void
-sym_cache_init(
-    vmi_instance_t vmi)
+sym_cache_init(vmi_instance_t vmi)
 {
     vmi->sym_cache =
-        g_hash_table_new_full((GHashFunc)key_128_hash, key_128_equals, g_free,
-                              (GDestroyNotify)g_hash_table_destroy);
+        g_hash_table_new_full((GHashFunc) key_128_hash, key_128_equals,
+                              g_free, (GDestroyNotify) g_hash_table_destroy);
 }
 
 void
-sym_cache_destroy(
-    vmi_instance_t vmi)
+sym_cache_destroy(vmi_instance_t vmi)
 {
     g_hash_table_destroy(vmi->sym_cache);
 }
 
 status_t
-sym_cache_get(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    char *sym,
-    addr_t *va)
+sym_cache_get(vmi_instance_t vmi,
+              addr_t base_addr, uint32_t pid, char *sym, addr_t *va)
 {
 
-    status_t ret=VMI_FAILURE;
+    status_t ret = VMI_FAILURE;
 
     GHashTable *symbol_table = NULL;
     sym_cache_entry_t entry = NULL;
 
     struct key_128 local_key;
     key_128_t key = &local_key;
-    key_128_init(vmi, key, (uint64_t)base_addr, (uint64_t)pid);
+    key_128_init(vmi, key, (uint64_t) base_addr, (uint64_t) pid);
 
     if ((symbol_table = g_hash_table_lookup(vmi->sym_cache, key)) == NULL) {
         return ret;
@@ -292,61 +269,54 @@ sym_cache_get(
     if ((entry = g_hash_table_lookup(symbol_table, sym)) != NULL) {
         entry->last_used = time(NULL);
         *va = entry->va;
-        dbprint("--SYM cache hit %u:0x%.16"PRIx64":%s -- 0x%.16"PRIx64"\n", pid, base_addr, sym, *va);
-        ret=VMI_SUCCESS;
+        dbprint("--SYM cache hit %u:0x%.16" PRIx64 ":%s -- 0x%.16" PRIx64
+                "\n", pid, base_addr, sym, *va);
+        ret = VMI_SUCCESS;
     }
 
     return ret;
 }
 
 void
-sym_cache_set(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    char *sym,
-    addr_t va)
+sym_cache_set(vmi_instance_t vmi,
+              addr_t base_addr, uint32_t pid, char *sym, addr_t va)
 {
     GHashTable *symbol_table = NULL;
     sym_cache_entry_t entry = sym_cache_entry_create(sym, va, base_addr, pid);
 
-    key_128_t key = key_128_build(vmi, (uint64_t)base_addr, (uint64_t)pid);
+    key_128_t key = key_128_build(vmi, (uint64_t) base_addr, (uint64_t) pid);
 
     if ((symbol_table = g_hash_table_lookup(vmi->sym_cache, key)) == NULL) {
         symbol_table = g_hash_table_new_full(g_str_hash, g_str_equal, NULL,
-                              sym_cache_entry_free);
+                                             sym_cache_entry_free);
         g_hash_table_insert(vmi->sym_cache, key, symbol_table);
     } else {
         free(key);
     }
 
     g_hash_table_insert(symbol_table, sym, entry);
-    dbprint("--SYM cache set %s -- 0x%.16"PRIx64"\n", key, va);
+    dbprint("--SYM cache set %s -- 0x%.16" PRIx64 "\n", key, va);
 }
 
 status_t
-sym_cache_del(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    char *sym)
+sym_cache_del(vmi_instance_t vmi, addr_t base_addr, uint32_t pid, char *sym)
 {
-    status_t ret=VMI_FAILURE;
-    GHashTable *symbol_table=NULL;
+    status_t ret = VMI_FAILURE;
+    GHashTable *symbol_table = NULL;
     struct key_128 local_key;
     key_128_t key = &local_key;
-    key_128_init(vmi, key, (uint64_t)base_addr, (uint64_t)pid);
+    key_128_init(vmi, key, (uint64_t) base_addr, (uint64_t) pid);
 
     if ((symbol_table = g_hash_table_lookup(vmi->sym_cache, key)) == NULL) {
         return ret;
     }
 
-    dbprint("--SYM cache del %u:0x%.16"PRIx64":%s\n", pid, base_addr, sym);
+    dbprint("--SYM cache del %u:0x%.16" PRIx64 ":%s\n", pid, base_addr, sym);
 
     if (TRUE == g_hash_table_remove(symbol_table, sym)) {
-        ret=VMI_SUCCESS;
+        ret = VMI_SUCCESS;
 
-        if(!g_hash_table_size(symbol_table)) {
+        if (!g_hash_table_size(symbol_table)) {
             g_hash_table_remove(vmi->sym_cache, key);
         }
     }
@@ -355,108 +325,96 @@ sym_cache_del(
 }
 
 void
-sym_cache_flush(
-    vmi_instance_t vmi)
+sym_cache_flush(vmi_instance_t vmi)
 {
     g_hash_table_remove_all(vmi->sym_cache);
     dbprint("--SYM cache flushed\n");
 }
 
 void
-rva_cache_init(
-    vmi_instance_t vmi)
+rva_cache_init(vmi_instance_t vmi)
 {
     vmi->rva_cache =
-        g_hash_table_new_full((GHashFunc)key_128_hash, key_128_equals, g_free,
-                              (GDestroyNotify)g_hash_table_destroy);
+        g_hash_table_new_full((GHashFunc) key_128_hash, key_128_equals,
+                              g_free, (GDestroyNotify) g_hash_table_destroy);
 }
 
 void
-rva_cache_destroy(
-    vmi_instance_t vmi)
+rva_cache_destroy(vmi_instance_t vmi)
 {
     g_hash_table_destroy(vmi->rva_cache);
 }
 
 status_t
-rva_cache_get(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    addr_t rva,
-    char **sym)
+rva_cache_get(vmi_instance_t vmi,
+              addr_t base_addr, uint32_t pid, addr_t rva, char **sym)
 {
-    status_t ret=VMI_FAILURE;
+    status_t ret = VMI_FAILURE;
 
     GHashTable *rva_table = NULL;
     sym_cache_entry_t entry = NULL;
 
     struct key_128 local_key;
     key_128_t key = &local_key;
-    key_128_init(vmi, key, (uint64_t)base_addr, (uint64_t)pid);
+    key_128_init(vmi, key, (uint64_t) base_addr, (uint64_t) pid);
 
     if ((rva_table = g_hash_table_lookup(vmi->rva_cache, key)) == NULL) {
         return ret;
     }
 
-    if ((entry = g_hash_table_lookup(rva_table, GUINT_TO_POINTER(rva))) != NULL) {
+    if ((entry =
+         g_hash_table_lookup(rva_table, GUINT_TO_POINTER(rva))) != NULL) {
         entry->last_used = time(NULL);
         *sym = entry->sym;
-        dbprint("--RVA cache hit %u:0x%.16"PRIx64":%s -- 0x%.16"PRIx64"\n", pid, base_addr, *sym, rva);
-        ret=VMI_SUCCESS;
+        dbprint("--RVA cache hit %u:0x%.16" PRIx64 ":%s -- 0x%.16" PRIx64
+                "\n", pid, base_addr, *sym, rva);
+        ret = VMI_SUCCESS;
     }
 
     return ret;
 }
 
 void
-rva_cache_set(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    addr_t rva,
-    char *sym)
+rva_cache_set(vmi_instance_t vmi,
+              addr_t base_addr, uint32_t pid, addr_t rva, char *sym)
 {
     GHashTable *rva_table = NULL;
-    sym_cache_entry_t entry = sym_cache_entry_create(sym, rva, base_addr, pid);
+    sym_cache_entry_t entry =
+        sym_cache_entry_create(sym, rva, base_addr, pid);
 
-    key_128_t key = key_128_build(vmi, (uint64_t)base_addr, (uint64_t)pid);
+    key_128_t key = key_128_build(vmi, (uint64_t) base_addr, (uint64_t) pid);
 
     if ((rva_table = g_hash_table_lookup(vmi->rva_cache, key)) == NULL) {
         rva_table = g_hash_table_new_full(g_int_hash, g_int_equal, NULL,
-                              sym_cache_entry_free);
+                                          sym_cache_entry_free);
         g_hash_table_insert(vmi->rva_cache, GUINT_TO_POINTER(key), rva_table);
     } else {
         free(key);
     }
 
     g_hash_table_insert(rva_table, GUINT_TO_POINTER(rva), entry);
-    dbprint("--RVA cache set %s -- 0x%.16"PRIx64"\n", key, rva);
+    dbprint("--RVA cache set %s -- 0x%.16" PRIx64 "\n", key, rva);
 }
 
 status_t
-rva_cache_del(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    addr_t rva)
+rva_cache_del(vmi_instance_t vmi, addr_t base_addr, uint32_t pid, addr_t rva)
 {
-    status_t ret=VMI_FAILURE;
-    GHashTable *rva_table=NULL;
+    status_t ret = VMI_FAILURE;
+    GHashTable *rva_table = NULL;
     struct key_128 local_key;
     key_128_t key = &local_key;
-    key_128_init(vmi, key, (uint64_t)base_addr, (uint64_t)pid);
+    key_128_init(vmi, key, (uint64_t) base_addr, (uint64_t) pid);
 
     if ((rva_table = g_hash_table_lookup(vmi->rva_cache, key)) == NULL) {
         return ret;
     }
 
-    dbprint("--RVA cache del %u:0x%.16"PRIx64":%s\n", pid, base_addr, rva);
+    dbprint("--RVA cache del %u:0x%.16" PRIx64 ":%s\n", pid, base_addr, rva);
 
     if (TRUE == g_hash_table_remove(rva_table, GUINT_TO_POINTER(rva))) {
-        ret=VMI_SUCCESS;
+        ret = VMI_SUCCESS;
 
-        if(!g_hash_table_size(rva_table)) {
+        if (!g_hash_table_size(rva_table)) {
             g_hash_table_remove(vmi->rva_cache, key);
         }
     }
@@ -465,8 +423,7 @@ rva_cache_del(
 }
 
 void
-rva_cache_flush(
-    vmi_instance_t vmi)
+rva_cache_flush(vmi_instance_t vmi)
 {
     g_hash_table_remove_all(vmi->rva_cache);
     dbprint("--RVA cache flushed\n");
@@ -480,48 +437,46 @@ struct v2p_cache_entry {
 };
 typedef struct v2p_cache_entry *v2p_cache_entry_t;
 
-static v2p_cache_entry_t v2p_cache_entry_create (vmi_instance_t vmi, addr_t pa)
+static v2p_cache_entry_t
+v2p_cache_entry_create(vmi_instance_t vmi, addr_t pa)
 {
-    v2p_cache_entry_t entry = (v2p_cache_entry_t) safe_malloc(sizeof(struct v2p_cache_entry));
-    pa &= ~((addr_t)vmi->page_size - 1);
+    v2p_cache_entry_t entry =
+        (v2p_cache_entry_t) safe_malloc(sizeof(struct v2p_cache_entry));
+    pa &= ~((addr_t) vmi->page_size - 1);
     entry->pa = pa;
     entry->last_used = time(NULL);
     return entry;
 }
 
 void
-v2p_cache_init(
-    vmi_instance_t vmi)
+v2p_cache_init(vmi_instance_t vmi)
 {
-    vmi->v2p_cache = g_hash_table_new_full((GHashFunc) key_128_hash, key_128_equals, g_free, g_free);
+    vmi->v2p_cache =
+        g_hash_table_new_full((GHashFunc) key_128_hash, key_128_equals,
+                              g_free, g_free);
 }
 
 void
-v2p_cache_destroy(
-    vmi_instance_t vmi)
+v2p_cache_destroy(vmi_instance_t vmi)
 {
     g_hash_table_destroy(vmi->v2p_cache);
 }
 
 status_t
-v2p_cache_get(
-    vmi_instance_t vmi,
-    addr_t va,
-    addr_t dtb,
-    addr_t *pa)
+v2p_cache_get(vmi_instance_t vmi, addr_t va, addr_t dtb, addr_t *pa)
 {
     v2p_cache_entry_t entry = NULL;
     struct key_128 local_key;
     key_128_t key = &local_key;
 
-    key_128_init(vmi, key, (uint64_t)va, (uint64_t)dtb);
+    key_128_init(vmi, key, (uint64_t) va, (uint64_t) dtb);
 
     if ((entry = g_hash_table_lookup(vmi->v2p_cache, key)) != NULL) {
 
         entry->last_used = time(NULL);
         *pa = entry->pa | ((vmi->page_size - 1) & va);
-        dbprint("--V2P cache hit 0x%.16"PRIx64" -- 0x%.16"PRIx64" (0x%.16"PRIx64"/0x%.16"PRIx64")\n",
-                va, *pa, key->high, key->low);
+        dbprint("--V2P cache hit 0x%.16" PRIx64 " -- 0x%.16" PRIx64 " (0x%.16"
+                PRIx64 "/0x%.16" PRIx64 ")\n", va, *pa, key->high, key->low);
         return VMI_SUCCESS;
     }
 
@@ -529,48 +484,39 @@ v2p_cache_get(
 }
 
 void
-v2p_cache_set(
-    vmi_instance_t vmi,
-    addr_t va,
-    addr_t dtb,
-    addr_t pa)
+v2p_cache_set(vmi_instance_t vmi, addr_t va, addr_t dtb, addr_t pa)
 {
     if (!va || !dtb || !pa) {
         return;
     }
-    key_128_t key = key_128_build(vmi, (uint64_t)va, (uint64_t)dtb);
+    key_128_t key = key_128_build(vmi, (uint64_t) va, (uint64_t) dtb);
     v2p_cache_entry_t entry = v2p_cache_entry_create(vmi, pa);
     g_hash_table_insert(vmi->v2p_cache, key, entry);
-    dbprint("--V2P cache set 0x%.16"PRIx64" -- 0x%.16"PRIx64" (0x%.16"PRIx64"/0x%.16"PRIx64")\n", va,
-            pa, key->high, key->low);
+    dbprint("--V2P cache set 0x%.16" PRIx64 " -- 0x%.16" PRIx64 " (0x%.16"
+            PRIx64 "/0x%.16" PRIx64 ")\n", va, pa, key->high, key->low);
 }
 
 status_t
-v2p_cache_del(
-    vmi_instance_t vmi,
-    addr_t va,
-    addr_t dtb)
+v2p_cache_del(vmi_instance_t vmi, addr_t va, addr_t dtb)
 {
     struct key_128 local_key;
     key_128_t key = &local_key;
-    key_128_init(vmi, key, (uint64_t)va, (uint64_t)dtb);
-    dbprint("--V2P cache del 0x%.16"PRIx64" (0x%.16"PRIx64"/0x%.16"PRIx64")\n", va,
-            key->high, key->low);
+    key_128_init(vmi, key, (uint64_t) va, (uint64_t) dtb);
+    dbprint("--V2P cache del 0x%.16" PRIx64 " (0x%.16" PRIx64 "/0x%.16" PRIx64
+            ")\n", va, key->high, key->low);
 
     // key collision doesn't really matter here because worst case
     // scenario we incur an small performance hit
 
-    if (TRUE == g_hash_table_remove(vmi->v2p_cache, key)){
+    if (TRUE == g_hash_table_remove(vmi->v2p_cache, key)) {
         return VMI_SUCCESS;
-    }
-    else{
+    } else {
         return VMI_FAILURE;
     }
 }
 
 void
-v2p_cache_flush(
-    vmi_instance_t vmi)
+v2p_cache_flush(vmi_instance_t vmi)
 {
     g_hash_table_remove_all(vmi->v2p_cache);
     dbprint("--V2P cache flushed\n");
@@ -578,200 +524,148 @@ v2p_cache_flush(
 
 #else
 void
-pid_cache_init(
-    vmi_instance_t vmi)
+pid_cache_init(vmi_instance_t vmi)
 {
     return;
 }
 
 void
-pid_cache_destroy(
-    vmi_instance_t vmi)
-{
-    return;
-}
-
-status_t
-pid_cache_get(
-    vmi_instance_t vmi,
-    int pid,
-    addr_t *dtb)
-{
-    return VMI_FAILURE;
-}
-
-void
-pid_cache_set(
-    vmi_instance_t vmi,
-    int pid,
-    addr_t dtb)
+pid_cache_destroy(vmi_instance_t vmi)
 {
     return;
 }
 
 status_t
-pid_cache_del(
-    vmi_instance_t vmi,
-    int pid)
+pid_cache_get(vmi_instance_t vmi, int pid, addr_t *dtb)
 {
     return VMI_FAILURE;
 }
 
 void
-pid_cache_flush(
-    vmi_instance_t vmi)
-{
-    return;
-}
-
-void
-sym_cache_init(
-    vmi_instance_t vmi)
-{
-    return;
-}
-
-void
-sym_cache_destroy(
-    vmi_instance_t vmi)
+pid_cache_set(vmi_instance_t vmi, int pid, addr_t dtb)
 {
     return;
 }
 
 status_t
-sym_cache_get(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    char *sym,
-    addr_t *va)
+pid_cache_del(vmi_instance_t vmi, int pid)
 {
     return VMI_FAILURE;
 }
 
 void
-sym_cache_set(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    char *sym,
-    addr_t va)
+pid_cache_flush(vmi_instance_t vmi)
+{
+    return;
+}
+
+void
+sym_cache_init(vmi_instance_t vmi)
+{
+    return;
+}
+
+void
+sym_cache_destroy(vmi_instance_t vmi)
 {
     return;
 }
 
 status_t
-sym_cache_del(
-    vmi_instance_t vmi,
-    addr_t bade_addr,
-    uint32_t pid,
-    char *sym)
+sym_cache_get(vmi_instance_t vmi,
+              addr_t base_addr, uint32_t pid, char *sym, addr_t *va)
 {
     return VMI_FAILURE;
 }
 
 void
-sym_cache_flush(
-    vmi_instance_t vmi)
-{
-    return;
-}
-
-void
-rva_cache_init(
-    vmi_instance_t vmi)
-{
-    return;
-}
-
-void
-rva_cache_destroy(
-    vmi_instance_t vmi)
+sym_cache_set(vmi_instance_t vmi,
+              addr_t base_addr, uint32_t pid, char *sym, addr_t va)
 {
     return;
 }
 
 status_t
-rva_cache_get(
-    vmi_instance_t vmi,
-    char *sym,
-    addr_t *va)
+sym_cache_del(vmi_instance_t vmi, addr_t bade_addr, uint32_t pid, char *sym)
 {
     return VMI_FAILURE;
 }
 
 void
-rva_cache_set(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    addr_t rva,
-    char *sym)
+sym_cache_flush(vmi_instance_t vmi)
+{
+    return;
+}
+
+void
+rva_cache_init(vmi_instance_t vmi)
+{
+    return;
+}
+
+void
+rva_cache_destroy(vmi_instance_t vmi)
 {
     return;
 }
 
 status_t
-rva_cache_del(
-    vmi_instance_t vmi,
-    char *sym)
+rva_cache_get(vmi_instance_t vmi, char *sym, addr_t *va)
 {
     return VMI_FAILURE;
 }
 
 void
-rva_cache_flush(
-    vmi_instance_t vmi)
-{
-    return;
-}
-
-void
-v2p_cache_init(
-    vmi_instance_t vmi)
-{
-    return;
-}
-
-void
-v2p_cache_destroy(
-    vmi_instance_t vmi)
+rva_cache_set(vmi_instance_t vmi,
+              addr_t base_addr, uint32_t pid, addr_t rva, char *sym)
 {
     return;
 }
 
 status_t
-v2p_cache_get(
-    vmi_instance_t vmi,
-    addr_t va,
-    addr_t dtb,
-    addr_t *pa)
+rva_cache_del(vmi_instance_t vmi, char *sym)
 {
     return VMI_FAILURE;
 }
 
 void
-v2p_cache_set(
-    vmi_instance_t vmi,
-    addr_t va,
-    addr_t dtb,
-    addr_t pa)
+rva_cache_flush(vmi_instance_t vmi)
+{
+    return;
+}
+
+void
+v2p_cache_init(vmi_instance_t vmi)
+{
+    return;
+}
+
+void
+v2p_cache_destroy(vmi_instance_t vmi)
 {
     return;
 }
 
 status_t
-v2p_cache_del(
-    vmi_instance_t vmi,
-    addr_t va,
-    addr_t dtb)
+v2p_cache_get(vmi_instance_t vmi, addr_t va, addr_t dtb, addr_t *pa)
 {
     return VMI_FAILURE;
 }
 
 void
-v2p_cache_flush(
-    vmi_instance_t vmi)
+v2p_cache_set(vmi_instance_t vmi, addr_t va, addr_t dtb, addr_t pa)
+{
+    return;
+}
+
+status_t
+v2p_cache_del(vmi_instance_t vmi, addr_t va, addr_t dtb)
+{
+    return VMI_FAILURE;
+}
+
+void
+v2p_cache_flush(vmi_instance_t vmi)
 {
     return;
 }
@@ -779,70 +673,51 @@ v2p_cache_flush(
 
 // Below are wrapper functions for external API access to the cache
 void
-vmi_pidcache_add(
-    vmi_instance_t vmi,
-    int pid,
-    addr_t dtb)
+vmi_pidcache_add(vmi_instance_t vmi, int pid, addr_t dtb)
 {
     return pid_cache_set(vmi, pid, dtb);
 }
 
 void
-vmi_pidcache_flush(
-    vmi_instance_t vmi)
+vmi_pidcache_flush(vmi_instance_t vmi)
 {
     return pid_cache_flush(vmi);
 }
 
 void
-vmi_symcache_add(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    char *sym,
-    addr_t va)
+vmi_symcache_add(vmi_instance_t vmi,
+                 addr_t base_addr, uint32_t pid, char *sym, addr_t va)
 {
     return sym_cache_set(vmi, base_addr, pid, sym, va);
 }
 
 void
-vmi_symcache_flush(
-    vmi_instance_t vmi)
+vmi_symcache_flush(vmi_instance_t vmi)
 {
     return sym_cache_flush(vmi);
 }
 
 void
-vmi_rvacache_add(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    addr_t rva,
-    char *sym)
+vmi_rvacache_add(vmi_instance_t vmi,
+                 addr_t base_addr, uint32_t pid, addr_t rva, char *sym)
 {
     return rva_cache_set(vmi, base_addr, pid, rva, sym);
 }
 
 void
-vmi_rvacache_flush(
-    vmi_instance_t vmi)
+vmi_rvacache_flush(vmi_instance_t vmi)
 {
     return rva_cache_flush(vmi);
 }
 
 void
-vmi_v2pcache_add(
-    vmi_instance_t vmi,
-    addr_t va,
-    addr_t dtb,
-    addr_t pa)
+vmi_v2pcache_add(vmi_instance_t vmi, addr_t va, addr_t dtb, addr_t pa)
 {
     return v2p_cache_set(vmi, va, dtb, pa);
 }
 
 void
-vmi_v2pcache_flush(
-    vmi_instance_t vmi)
+vmi_v2pcache_flush(vmi_instance_t vmi)
 {
     return v2p_cache_flush(vmi);
 }

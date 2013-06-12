@@ -56,138 +56,138 @@ extern "C" {
 #define IMAGE_DIRECTORY_ENTRY_CLR_RUNTIME 14
 #define IMAGE_DIRECTORY_ENTRY_RESERVED 15
 
-struct image_data_directory {
-    uint32_t virtual_address;
-    uint32_t size;
-} __attribute__ ((packed));
+    struct image_data_directory {
+        uint32_t virtual_address;
+        uint32_t size;
+    } __attribute__ ((packed));
 
-struct pe_header {
-    int32_t signature;
-    uint16_t machine;
-    uint16_t number_of_sections;
-    uint32_t time_date_stamp;
-    uint32_t pointer_to_symbol_table;
-    uint32_t number_of_symbols;
-    uint16_t size_of_optional_header;
-    uint16_t characteristics;
-    // characteristics flags defined in pe.txt
-} __attribute__ ((packed));
+    struct pe_header {
+        int32_t signature;
+        uint16_t machine;
+        uint16_t number_of_sections;
+        uint32_t time_date_stamp;
+        uint32_t pointer_to_symbol_table;
+        uint32_t number_of_symbols;
+        uint16_t size_of_optional_header;
+        uint16_t characteristics;
+        // characteristics flags defined in pe.txt
+    } __attribute__ ((packed));
 
-struct dos_header {
-    uint16_t signature;
-    uint16_t bytes_in_last_block;
-    uint16_t blocks_in_file;
-    uint16_t reloc_ct;
-    uint16_t header_size;
-    uint16_t min_mem;
-    uint16_t max_mem;
-    uint16_t ss;
-    uint16_t sp;
-    uint16_t chksum;
-    uint16_t ip;
-    uint16_t cs;
-    uint16_t reloc_tbl_ofs;
-    uint16_t overlay;
-    uint8_t reserved[32];
-    uint32_t offset_to_pe;
-} __attribute__ ((packed));
+    struct dos_header {
+        uint16_t signature;
+        uint16_t bytes_in_last_block;
+        uint16_t blocks_in_file;
+        uint16_t reloc_ct;
+        uint16_t header_size;
+        uint16_t min_mem;
+        uint16_t max_mem;
+        uint16_t ss;
+        uint16_t sp;
+        uint16_t chksum;
+        uint16_t ip;
+        uint16_t cs;
+        uint16_t reloc_tbl_ofs;
+        uint16_t overlay;
+        uint8_t reserved[32];
+        uint32_t offset_to_pe;
+    } __attribute__ ((packed));
 
-struct optional_header_pe32 {
-    uint16_t magic; // 0x10b
-    uint8_t major_linker_version;
-    uint8_t minor_linker_version;
-    uint32_t size_of_code;
-    uint32_t size_of_initialized_data;
-    uint32_t size_of_uninitialized_data;
-    uint32_t address_of_entry_point;
-    uint32_t base_of_code;
-    uint32_t base_of_data;
-    uint32_t image_base;
-    uint32_t section_alignment;
-    uint32_t file_alignment;
-    uint16_t major_os_version;
-    uint16_t minor_os_version;
-    uint16_t major_image_version;
-    uint16_t minor_image_version;
-    uint16_t major_subsystem_version;
-    uint16_t minor_subsystem_version;
-    uint32_t win32_version_value;
-    uint32_t size_of_image;
-    uint32_t size_of_headers;
-    uint32_t checksum;
-    uint16_t subsystem;
-    uint16_t dll_characteristics;
-    uint32_t size_of_stack_reserve;
-    uint32_t size_of_stack_commit;
-    uint32_t size_of_heap_reserve;
-    uint32_t size_of_heap_commit;
-    uint32_t loader_flags;
-    uint32_t number_of_rva_and_sizes;
-    struct image_data_directory idd[16];
-} __attribute__ ((packed));
+    struct optional_header_pe32 {
+        uint16_t magic; // 0x10b
+        uint8_t major_linker_version;
+        uint8_t minor_linker_version;
+        uint32_t size_of_code;
+        uint32_t size_of_initialized_data;
+        uint32_t size_of_uninitialized_data;
+        uint32_t address_of_entry_point;
+        uint32_t base_of_code;
+        uint32_t base_of_data;
+        uint32_t image_base;
+        uint32_t section_alignment;
+        uint32_t file_alignment;
+        uint16_t major_os_version;
+        uint16_t minor_os_version;
+        uint16_t major_image_version;
+        uint16_t minor_image_version;
+        uint16_t major_subsystem_version;
+        uint16_t minor_subsystem_version;
+        uint32_t win32_version_value;
+        uint32_t size_of_image;
+        uint32_t size_of_headers;
+        uint32_t checksum;
+        uint16_t subsystem;
+        uint16_t dll_characteristics;
+        uint32_t size_of_stack_reserve;
+        uint32_t size_of_stack_commit;
+        uint32_t size_of_heap_reserve;
+        uint32_t size_of_heap_commit;
+        uint32_t loader_flags;
+        uint32_t number_of_rva_and_sizes;
+        struct image_data_directory idd[16];
+    } __attribute__ ((packed));
 
-struct optional_header_pe32plus {
-    uint16_t magic; // 0x20b
-    uint8_t major_linker_version;
-    uint8_t minor_linker_version;
-    uint32_t size_of_code;
-    uint32_t size_of_initialized_data;
-    uint32_t size_of_uninitialized_data;
-    uint32_t address_of_entry_point;
-    uint32_t base_of_code;
-    uint64_t image_base;
-    uint32_t section_alignment;
-    uint32_t file_alignment;
-    uint16_t major_os_version;
-    uint16_t minor_os_version;
-    uint16_t major_image_version;
-    uint16_t minor_image_version;
-    uint16_t major_subsystem_version;
-    uint16_t minor_subsystem_version;
-    uint32_t win32_version_value;
-    uint32_t size_of_image;
-    uint32_t size_of_headers;
-    uint32_t checksum;
-    uint16_t subsystem;
-    uint16_t dll_characteristics;
-    uint64_t size_of_stack_reserve;
-    uint64_t size_of_stack_commit;
-    uint64_t size_of_heap_reserve;
-    uint64_t size_of_heap_commit;
-    uint32_t loader_flags;
-    uint32_t number_of_rva_and_sizes;
-    struct image_data_directory idd[16];
-} __attribute__ ((packed));
+    struct optional_header_pe32plus {
+        uint16_t magic; // 0x20b
+        uint8_t major_linker_version;
+        uint8_t minor_linker_version;
+        uint32_t size_of_code;
+        uint32_t size_of_initialized_data;
+        uint32_t size_of_uninitialized_data;
+        uint32_t address_of_entry_point;
+        uint32_t base_of_code;
+        uint64_t image_base;
+        uint32_t section_alignment;
+        uint32_t file_alignment;
+        uint16_t major_os_version;
+        uint16_t minor_os_version;
+        uint16_t major_image_version;
+        uint16_t minor_image_version;
+        uint16_t major_subsystem_version;
+        uint16_t minor_subsystem_version;
+        uint32_t win32_version_value;
+        uint32_t size_of_image;
+        uint32_t size_of_headers;
+        uint32_t checksum;
+        uint16_t subsystem;
+        uint16_t dll_characteristics;
+        uint64_t size_of_stack_reserve;
+        uint64_t size_of_stack_commit;
+        uint64_t size_of_heap_reserve;
+        uint64_t size_of_heap_commit;
+        uint32_t loader_flags;
+        uint32_t number_of_rva_and_sizes;
+        struct image_data_directory idd[16];
+    } __attribute__ ((packed));
 
-struct section_header {
-    char short_name[8];
-    union {
-        uint32_t physical_address;
-        uint32_t virtual_size;
-    } a;
-    uint32_t virtual_address;
-    uint32_t size_of_raw_data;
-    uint32_t pointer_to_raw_data;
-    uint32_t pointer_to_relocations;
-    uint32_t pointer_to_line_numbers;
-    uint16_t number_of_relocations;
-    uint16_t number_of_line_numbers;
-    uint32_t characteristics;
-} __attribute__ ((packed));
+    struct section_header {
+        char short_name[8];
+        union {
+            uint32_t physical_address;
+            uint32_t virtual_size;
+        } a;
+        uint32_t virtual_address;
+        uint32_t size_of_raw_data;
+        uint32_t pointer_to_raw_data;
+        uint32_t pointer_to_relocations;
+        uint32_t pointer_to_line_numbers;
+        uint16_t number_of_relocations;
+        uint16_t number_of_line_numbers;
+        uint32_t characteristics;
+    } __attribute__ ((packed));
 
-struct export_table {
-    uint32_t export_flags;  // reserved, must be 0
-    uint32_t time_date_stamp;
-    uint16_t major_version;
-    uint16_t minor_version;
-    uint32_t name;
-    uint32_t base;
-    uint32_t number_of_functions;   // total number of exported items
-    uint32_t number_of_names;
-    uint32_t address_of_functions;
-    uint32_t address_of_names;
-    uint32_t address_of_name_ordinals;
-} __attribute__ ((packed));
+    struct export_table {
+        uint32_t export_flags;  // reserved, must be 0
+        uint32_t time_date_stamp;
+        uint16_t major_version;
+        uint16_t minor_version;
+        uint32_t name;
+        uint32_t base;
+        uint32_t number_of_functions;   // total number of exported items
+        uint32_t number_of_names;
+        uint32_t address_of_functions;
+        uint32_t address_of_names;
+        uint32_t address_of_name_ordinals;
+    } __attribute__ ((packed));
 
 /**
  * Validate a PE image by checking for the DOS header, NT signature,
@@ -197,10 +197,8 @@ struct export_table {
  * @param[in] len, length of the image
  * @return VMI_SUCCESS or VMI_FAILURE
  */
-status_t
-peparse_validate_pe_image(
-    const uint8_t * const image,
-    size_t len);
+    status_t
+     peparse_validate_pe_image(const uint8_t * const image, size_t len);
 
 /**
  * Read a physical address and return a valid PE image if one was found
@@ -212,12 +210,10 @@ peparse_validate_pe_image(
  * @param[out] image, address to store the data at
  * @return VMI_SUCCESS or VMI_FAILURE
  */
-status_t
-peparse_get_image_phys(
-    vmi_instance_t vmi,
-    addr_t base_paddr,
-    size_t len,
-    const uint8_t * const image);
+    status_t
+     peparse_get_image_phys(vmi_instance_t vmi,
+                            addr_t base_paddr,
+                            size_t len, const uint8_t * const image);
 
 /**
  * Read a virtual address and return a valid PE image if one was found
@@ -230,13 +226,11 @@ peparse_get_image_phys(
  * @param[out] image, address to store the data at
  * @return VMI_SUCCESS or VMI_FAILURE
  */
-status_t
-peparse_get_image_virt(
-    vmi_instance_t vmi,
-    addr_t base_vaddr,
-    uint32_t pid,
-    size_t len,
-    const uint8_t * const image);
+    status_t
+     peparse_get_image_virt(vmi_instance_t vmi,
+                            addr_t base_vaddr,
+                            uint32_t pid,
+                            size_t len, const uint8_t * const image);
 
 /**
  * Assign PE headers to an image.
@@ -249,15 +243,14 @@ peparse_get_image_virt(
  * @param[out] oh_pe32, (Optional) Pointer to store the PE32 type optional header
  * @param[out] oh_pe32plus, (Optional), Pointer to store the PE32_PLUS type optional header
  */
-void
-peparse_assign_headers(
-    const uint8_t * const image,
-    struct dos_header **dos_header,
-    struct pe_header **pe_header,
-    uint16_t *optional_header_type,
-    void **optional_pe_header,
-    struct optional_header_pe32 **oh_pe32,
-    struct optional_header_pe32plus **oh_pe32plus);
+    void
+     peparse_assign_headers(const uint8_t * const image,
+                            struct dos_header **dos_header,
+                            struct pe_header **pe_header,
+                            uint16_t * optional_header_type,
+                            void **optional_pe_header,
+                            struct optional_header_pe32 **oh_pe32,
+                            struct optional_header_pe32plus **oh_pe32plus);
 
 /**
  * Get an RVA value from the PE image data directory (idd).
@@ -271,13 +264,12 @@ peparse_assign_headers(
  * @param[in] oh_pe32, (Optional) PE32 type pointer to the optional header
  * @param[in] oh_pe32plus, (Optional) PE32_PLUS type pointer to the optional header
  */
-addr_t
-peparse_get_idd_rva(
-    uint32_t entry_id,
-    uint16_t *optional_header_type,
-    void *optional_header,
-    struct optional_header_pe32 *oh_pe32,
-    struct optional_header_pe32plus *oh_pe32plus);
+    addr_t
+     peparse_get_idd_rva(uint32_t entry_id,
+                         uint16_t * optional_header_type,
+                         void *optional_header,
+                         struct optional_header_pe32 *oh_pe32,
+                         struct optional_header_pe32plus *oh_pe32plus);
 
 /**
  * Get the size from the PE image data directory (idd).
@@ -291,13 +283,12 @@ peparse_get_idd_rva(
  * @param[in] oh_pe32, (Optional) PE32 type pointer to the optional header
  * @param[in] oh_pe32plus, (Optional) PE32_PLUS type pointer to the optional header
  */
-size_t
-peparse_get_idd_size(
-    uint32_t entry_id,
-    uint16_t *optional_header_type,
-    void *optional_header,
-    struct optional_header_pe32 *oh_pe32,
-    struct optional_header_pe32plus *oh_pe32plus);
+     size_t
+        peparse_get_idd_size(uint32_t entry_id,
+                             uint16_t * optional_header_type,
+                             void *optional_header,
+                             struct optional_header_pe32 *oh_pe32,
+                             struct optional_header_pe32plus *oh_pe32plus);
 
 /**
  * Get the export table from a PE image.
@@ -309,19 +300,16 @@ peparse_get_idd_size(
  * @param[out] (optional) export_table_rva, the rva of the export table as given in the IDD
  * @param[out] (optional) export_table_size, the size of the export table as given in the IDD
  */
-status_t
-peparse_get_export_table(
-    vmi_instance_t vmi,
-    addr_t base_vaddr,
-    uint32_t pid,
-    struct export_table *et,
-    addr_t *export_table_rva,
-    size_t *export_table_size);
+    status_t
+     peparse_get_export_table(vmi_instance_t vmi,
+                              addr_t base_vaddr,
+                              uint32_t pid,
+                              struct export_table *et,
+                              addr_t *export_table_rva,
+                              size_t * export_table_size);
 
 #pragma GCC visibility pop
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* PEPARSE_H */
-

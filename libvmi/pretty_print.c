@@ -29,9 +29,7 @@
 #include "private.h"
 
 void
-vmi_print_hex(
-    unsigned char *data,
-    unsigned long length)
+vmi_print_hex(unsigned char *data, unsigned long length)
 {
     int i, j, numrows, index;
 
@@ -46,8 +44,7 @@ vmi_print_hex(
             index = i * 16 + j;
             if (index < length) {
                 printf("%.2x ", data[index]);
-            }
-            else {
+            } else {
                 printf("   ");
             }
         }
@@ -58,8 +55,7 @@ vmi_print_hex(
             index = i * 16 + j;
             if (index < length) {
                 printf("%.2x ", data[index]);
-            }
-            else {
+            } else {
                 printf("   ");
             }
         }
@@ -71,8 +67,7 @@ vmi_print_hex(
             if (index < length) {
                 if (isprint((int) data[index])) {
                     printf("%c", data[index]);
-                }
-                else {
+                } else {
                     printf(".");
                 }
             }
@@ -82,10 +77,7 @@ vmi_print_hex(
 }
 
 void
-vmi_print_hex_pa(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    size_t length)
+vmi_print_hex_pa(vmi_instance_t vmi, addr_t paddr, size_t length)
 {
     unsigned char *buf = safe_malloc(length);
 
@@ -95,18 +87,13 @@ vmi_print_hex_pa(
 }
 
 void
-vmi_print_hex_va(
-    vmi_instance_t vmi,
-    addr_t vaddr,
-    int pid,
-    size_t length)
+vmi_print_hex_va(vmi_instance_t vmi, addr_t vaddr, int pid, size_t length)
 {
     addr_t paddr = 0;
 
     if (!pid) {
         paddr = vmi_translate_kv2p(vmi, vaddr);
-    }
-    else {
+    } else {
         paddr = vmi_translate_uv2p(vmi, vaddr, pid);
     }
 
@@ -114,10 +101,7 @@ vmi_print_hex_va(
 }
 
 void
-vmi_print_hex_ksym(
-    vmi_instance_t vmi,
-    char *sym,
-    size_t length)
+vmi_print_hex_ksym(vmi_instance_t vmi, char *sym, size_t length)
 {
     addr_t vaddr = vmi_translate_ksym2v(vmi, sym);
 

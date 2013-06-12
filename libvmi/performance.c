@@ -33,11 +33,9 @@ static struct timeval startTime;
 static struct timeval stopTime;
 
 static void
-print_measurement(
-    const char *id,
-    struct timeval ktv_start,
-    struct timeval ktv_end,
-    long int *diff)
+print_measurement(const char *id,
+                  struct timeval ktv_start,
+                  struct timeval ktv_end, long int *diff)
 {
     *diff =
         (((long int) ktv_end.tv_usec - (long int) ktv_start.tv_usec) +
@@ -54,9 +52,7 @@ print_measurement(
 }
 
 static double
-stddev(
-    long int *data,
-    int count)
+stddev(long int *data, int count)
 {
     double *sq_data = malloc(count * sizeof(double));
     double total = 0.0;
@@ -83,9 +79,7 @@ stddev(
 }
 
 static void
-avg_measurement(
-    long int *data,
-    int loops)
+avg_measurement(long int *data, int loops)
 {
     int i = 0;
     long int sum = 0;
@@ -94,20 +88,17 @@ avg_measurement(
         sum += data[i];
     }
     printf("mean %f, stdev %f\n",
-           (double) ((double) sum / (double) loops), stddev(data,
-                                                            loops));
+           (double) ((double) sum / (double) loops), stddev(data, loops));
 }
 
 void
-timer_start(
-    )
+timer_start()
 {
     gettimeofday(&startTime, 0);
 }
 
 void
-timer_stop(
-    const char *id)
+timer_stop(const char *id)
 {
     long int diff = 0;
 

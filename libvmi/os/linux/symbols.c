@@ -33,11 +33,7 @@
 #define MAX_ROW_LENGTH 500
 
 static int
-get_symbol_row(
-    FILE * f,
-    char *row,
-    char *symbol,
-    int position)
+get_symbol_row(FILE * f, char *row, char *symbol, int position)
 {
     int ret = VMI_FAILURE;
 
@@ -68,8 +64,7 @@ get_symbol_row(
                 }
                 ++curpos;
             }
-        }
-        else {  /* some went wrong in the loop above */
+        } else {        /* some went wrong in the loop above */
             goto error_exit;
         }
 
@@ -88,10 +83,8 @@ error_exit:
 }
 
 status_t
-linux_system_map_symbol_to_address(
-    vmi_instance_t vmi,
-    char *symbol,
-    addr_t *address)
+linux_system_map_symbol_to_address(vmi_instance_t vmi,
+                                   char *symbol, addr_t *address)
 {
     FILE *f = NULL;
     char *row = NULL;

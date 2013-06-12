@@ -31,9 +31,7 @@
 
 /* finds the task struct for a given pid */
 static addr_t
-linux_get_taskstruct_addr_from_pid(
-    vmi_instance_t vmi,
-    int pid)
+linux_get_taskstruct_addr_from_pid(vmi_instance_t vmi, int pid)
 {
     addr_t list_head = 0, next_process = 0;
     int task_pid = -1;
@@ -59,16 +57,14 @@ linux_get_taskstruct_addr_from_pid(
         next_process -= tasks_offset;
 
         /* if we are back at the list head, we are done */
-    } while(list_head != next_process); 
+    } while (list_head != next_process);
 
 error_exit:
     return 0;
 }
 
 static addr_t
-linux_get_taskstruct_addr_from_pgd(
-    vmi_instance_t vmi,
-    addr_t pgd)
+linux_get_taskstruct_addr_from_pgd(vmi_instance_t vmi, addr_t pgd)
 {
     addr_t list_head = 0, next_process = 0;
     addr_t task_pgd = 0;
@@ -100,7 +96,7 @@ linux_get_taskstruct_addr_from_pgd(
          * a fallback. task_struct->active_mm can be found very reliably
          * at task_struct->mm + 1 pointer width
          */
-        if(!ptr && width)
+        if (!ptr && width)
             vmi_read_addr_va(vmi, next_process + mm_offset + width, 0, &ptr);
         vmi_read_addr_va(vmi, ptr + pgd_offset, 0, &task_pgd);
         task_pgd = vmi_translate_kv2p(vmi, task_pgd);
@@ -110,8 +106,8 @@ linux_get_taskstruct_addr_from_pgd(
         }
 
         vmi_read_addr_va(vmi, next_process + tasks_offset, 0, &next_process);
-        next_process-=tasks_offset;
-        
+        next_process -= tasks_offset;
+
         /* if we are back at the list head, we are done */
     } while (list_head != next_process);
 
@@ -121,9 +117,7 @@ error_exit:
 
 /* finds the address of the page global directory for a given pid */
 addr_t
-linux_pid_to_pgd(
-    vmi_instance_t vmi,
-    int pid)
+linux_pid_to_pgd(vmi_instance_t vmi, int pid)
 {
     addr_t ts_addr = 0, pgd = 0, ptr = 0;
     uint8_t width = 0;
@@ -152,7 +146,7 @@ linux_pid_to_pgd(
      * a fallback. task_struct->active_mm can be found very reliably
      * at task_struct->mm + 1 pointer width
      */
-    if(!ptr && width)
+    if (!ptr && width)
         vmi_read_addr_va(vmi, ts_addr + mm_offset + width, 0, &ptr);
     vmi_read_addr_va(vmi, ptr + pgd_offset, 0, &pgd);
 
@@ -164,9 +158,7 @@ error_exit:
 }
 
 int
-linux_pgd_to_pid(
-    vmi_instance_t vmi,
-    addr_t pgd)
+linux_pgd_to_pid(vmi_instance_t vmi, addr_t pgd)
 {
     int pid = -1;
     addr_t ts_addr = 0;
@@ -175,7 +167,8 @@ linux_pgd_to_pid(
     /* first we the address of the task_struct with this PGD */
     ts_addr = linux_get_taskstruct_addr_from_pgd(vmi, pgd);
     if (!ts_addr) {
-        errprint("Could not find task struct for pgd = 0x%"PRIx64".\n", pgd);
+        errprint("Could not find task struct for pgd = 0x%" PRIx64 ".\n",
+                 pgd);
         goto error_exit;
     }
 

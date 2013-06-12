@@ -41,8 +41,7 @@
 extern FILE *yyin;
 
 static FILE *
-open_config_file(
-    )
+open_config_file()
 {
     FILE *f = NULL;
     char location[100];
@@ -52,8 +51,7 @@ open_config_file(
     /* first check home directory of sudo user */
     if ((sudo_user = getenv("SUDO_USER")) != NULL) {
         if ((pw_entry = getpwnam(sudo_user)) != NULL) {
-            snprintf(location, 100, "%s/etc/libvmi.conf\0",
-                     pw_entry->pw_dir);
+            snprintf(location, 100, "%s/etc/libvmi.conf\0", pw_entry->pw_dir);
             dbprint("--looking for config file at %s\n", location);
             if ((f = fopen(location, "r")) != NULL) {
                 goto success;
@@ -82,12 +80,11 @@ success:
 }
 
 status_t
-read_config_file(
-    vmi_instance_t vmi)
+read_config_file(vmi_instance_t vmi)
 {
     status_t ret = VMI_SUCCESS;
     vmi_config_entry_t *entry;
-    char *configstr = (char *)vmi->config;
+    char *configstr = (char *) vmi->config;
     char *tmp = NULL;
 
     yyin = NULL;
@@ -118,11 +115,9 @@ read_config_file(
 
     if (strncmp(entry->ostype, "Linux", CONFIG_STR_LENGTH) == 0) {
         vmi->os_type = VMI_OS_LINUX;
-    }
-    else if (strncmp(entry->ostype, "Windows", CONFIG_STR_LENGTH) == 0) {
+    } else if (strncmp(entry->ostype, "Windows", CONFIG_STR_LENGTH) == 0) {
         vmi->os_type = VMI_OS_WINDOWS;
-    }
-    else {
+    } else {
         errprint("Unknown or undefined OS type.\n");
         ret = VMI_FAILURE;
         goto error_exit;
@@ -155,8 +150,7 @@ read_config_file(
             vmi->os.linux_instance.pgd_offset =
                 entry->offsets.linux_offsets.pgd;
         }
-    }
-    else if (VMI_OS_WINDOWS == vmi->os_type) {
+    } else if (VMI_OS_WINDOWS == vmi->os_type) {
         dbprint("--reading in windows offsets from config file.\n");
         if (entry->offsets.windows_offsets.ntoskrnl) {
             vmi->os.windows_instance.ntoskrnl =
@@ -193,16 +187,13 @@ read_config_file(
                 entry->offsets.windows_offsets.sysproc;
         }
     }
-
 #ifdef VMI_DEBUG
     dbprint("--got ostype from config (%s).\n", entry->ostype);
     if (vmi->os_type == VMI_OS_LINUX) {
         dbprint("**set os_type to Linux.\n");
-    }
-    else if (vmi->os_type == VMI_OS_WINDOWS) {
+    } else if (vmi->os_type == VMI_OS_WINDOWS) {
         dbprint("**set os_type to Windows.\n");
-    }
-    else {
+    } else {
         dbprint("**set os_type to unknown.\n");
     }
 #endif
@@ -216,94 +207,80 @@ error_exit:
 }
 
 void
-read_config_ghashtable_entries(
-    char* key,
-    gpointer value,
-    vmi_instance_t vmi)
+read_config_ghashtable_entries(char *key, gpointer value, vmi_instance_t vmi)
 {
-    if(strncmp(key, "ostype", CONFIG_STR_LENGTH) == 0 || strncmp(key, "os_type", CONFIG_STR_LENGTH) == 0) {
-        if(strncmp((char *)value, "Linux", CONFIG_STR_LENGTH) == 0) {
+    if (strncmp(key, "ostype", CONFIG_STR_LENGTH) == 0 ||
+        strncmp(key, "os_type", CONFIG_STR_LENGTH) == 0) {
+        if (strncmp((char *) value, "Linux", CONFIG_STR_LENGTH) == 0) {
             vmi->os_type = VMI_OS_LINUX;
-        } else if(strncmp((char *)value, "Windows", CONFIG_STR_LENGTH) == 0) {
+        } else if (strncmp((char *) value, "Windows", CONFIG_STR_LENGTH) == 0) {
             vmi->os_type = VMI_OS_WINDOWS;
         }
         goto _done;
     }
 
-    if(strncmp(key, "sysmap", CONFIG_STR_LENGTH) == 0) {
-        vmi->sysmap = strdup((char *)value);
+    if (strncmp(key, "sysmap", CONFIG_STR_LENGTH) == 0) {
+        vmi->sysmap = strdup((char *) value);
         goto _done;
     }
 
     if (strncmp(key, "linux_tasks", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.linux_instance.tasks_offset =
-            *(int *)value;
+        vmi->os.linux_instance.tasks_offset = *(int *) value;
         goto _done;
     }
 
     if (strncmp(key, "linux_mm", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.linux_instance.mm_offset =
-            *(int *)value;
+        vmi->os.linux_instance.mm_offset = *(int *) value;
         goto _done;
     }
 
     if (strncmp(key, "linux_pid", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.linux_instance.pid_offset =
-            *(int *)value;
+        vmi->os.linux_instance.pid_offset = *(int *) value;
         goto _done;
     }
 
     if (strncmp(key, "linux_name", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.linux_instance.name_offset =
-            *(int *)value;
+        vmi->os.linux_instance.name_offset = *(int *) value;
         goto _done;
     }
 
     if (strncmp(key, "linux_pgd", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.linux_instance.pgd_offset =
-            *(int *)value;
+        vmi->os.linux_instance.pgd_offset = *(int *) value;
         goto _done;
     }
 
     if (strncmp(key, "win_ntoskrnl", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.windows_instance.ntoskrnl =
-            *(addr_t *)value;
+        vmi->os.windows_instance.ntoskrnl = *(addr_t *) value;
         goto _done;
     }
 
     if (strncmp(key, "win_tasks", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.windows_instance.tasks_offset =
-            *(int *)value;
+        vmi->os.windows_instance.tasks_offset = *(int *) value;
         goto _done;
     }
 
     if (strncmp(key, "win_pdbase", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.windows_instance.pdbase_offset =
-            *(int *)value;
+        vmi->os.windows_instance.pdbase_offset = *(int *) value;
         goto _done;
     }
 
     if (strncmp(key, "win_pid", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.windows_instance.pid_offset =
-            *(int *)value;
+        vmi->os.windows_instance.pid_offset = *(int *) value;
         goto _done;
     }
 
     if (strncmp(key, "win_pname", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.windows_instance.pname_offset =
-            *(int *)value;
+        vmi->os.windows_instance.pname_offset = *(int *) value;
         goto _done;
     }
 
     if (strncmp(key, "win_kdvb", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.windows_instance.kdversion_block =
-            *(addr_t *)value;
+        vmi->os.windows_instance.kdversion_block = *(addr_t *) value;
         goto _done;
     }
 
     if (strncmp(key, "win_sysproc", CONFIG_STR_LENGTH) == 0) {
-        vmi->os.windows_instance.sysproc =
-            *(addr_t *)value;
+        vmi->os.windows_instance.sysproc = *(addr_t *) value;
         goto _done;
     }
 
@@ -312,16 +289,16 @@ _done:
 }
 
 status_t
-read_config_ghashtable(
-    vmi_instance_t vmi)
+read_config_ghashtable(vmi_instance_t vmi)
 {
     status_t ret = VMI_FAILURE;
-    GHashTable *configtbl = (GHashTable *)vmi->config;
+    GHashTable *configtbl = (GHashTable *) vmi->config;
     vmi->os_type = VMI_OS_UNKNOWN;
 
-    g_hash_table_foreach(configtbl, (GHFunc)read_config_ghashtable_entries, vmi);
+    g_hash_table_foreach(configtbl, (GHFunc) read_config_ghashtable_entries,
+                         vmi);
 
-    if(vmi->os_type != VMI_OS_UNKNOWN) {
+    if (vmi->os_type != VMI_OS_UNKNOWN) {
         ret = VMI_SUCCESS;
     } else {
         errprint("Unknown or undefined OS type!\n");
@@ -331,8 +308,7 @@ read_config_ghashtable(
 }
 
 static uint32_t
-find_cr3(
-    vmi_instance_t vmi)
+find_cr3(vmi_instance_t vmi)
 {
     if (VMI_OS_WINDOWS == vmi->os_type) {
         vmi->os.windows_instance.version = VMI_OS_WINDOWS_UNKNOWN;
@@ -349,13 +325,9 @@ find_cr3(
  * and set pm/cr3/pae/pse/lme flags optionally on the given pointers
  */
 status_t
-get_memory_layout(
-    vmi_instance_t vmi,
-    page_mode_t *set_pm,
-    reg_t *set_cr3,
-    int *set_pae,
-    int *set_pse,
-    int *set_lme)
+get_memory_layout(vmi_instance_t vmi,
+                  page_mode_t *set_pm,
+                  reg_t *set_cr3, int *set_pae, int *set_pse, int *set_lme)
 {
     // To get the paging layout, the following bits are needed:
     // 1. CR0.PG
@@ -389,7 +361,6 @@ get_memory_layout(
         errprint("Paging disabled for this VM, not supported.\n");
         goto _exit;
     }
-
     //
     // Paging enabled (PG==1)
     //
@@ -416,15 +387,13 @@ get_memory_layout(
     if (VMI_SUCCESS == ret) {
         lme = vmi_get_bit(efer, 8);
         dbprint("**set lme = %d\n", lme);
-    }
-    else {
+    } else {
         dbprint("**failed to get MSR_EFER, trying method #2\n");
 
         // does this trick work in all cases?
         ret = driver_get_address_width(vmi, &dom_addr_width);
         if (VMI_FAILURE == ret) {
-            errprint
-                ("Failed to get domain address width. Giving up.\n");
+            errprint("Failed to get domain address width. Giving up.\n");
             goto _exit;
         }
         lme = (8 == dom_addr_width);
@@ -441,38 +410,37 @@ get_memory_layout(
         cr3 &= 0xFFFFF000ull;
     }
     // PAE == 1; determine IA-32e or PAE
-    else if (lme) {    // PAE == 1, LME == 1
+    else if (lme) {     // PAE == 1, LME == 1
         dbprint("**IA-32e paging\n");
         pm = VMI_PM_IA32E;
         cr3 &= 0xFFFFFFFFFFFFF000ull;
-    }
-    else {  // PAE == 1, LME == 0
+    } else {    // PAE == 1, LME == 0
         dbprint("**PAE paging\n");
         pm = VMI_PM_PAE;
         cr3 &= 0xFFFFFFE0;
     }   // if-else
-    dbprint("**set cr3 = 0x%.16"PRIx64"\n", vmi->cr3);
+    dbprint("**set cr3 = 0x%.16" PRIx64 "\n", vmi->cr3);
 
     /* testing to see CR3 value */
-    if (!driver_is_pv(vmi) && cr3 > vmi->size) {   // sanity check on CR3
-        dbprint("** Note cr3 value [0x%"PRIx64"] exceeds memsize [0x%"PRIx64"]\n",
-                cr3, vmi->size);
+    if (!driver_is_pv(vmi) && cr3 > vmi->size) {        // sanity check on CR3
+        dbprint("** Note cr3 value [0x%" PRIx64 "] exceeds memsize [0x%"
+                PRIx64 "]\n", cr3, vmi->size);
     }
 
-    if(set_pm != NULL) {
-        *set_pm=pm;
+    if (set_pm != NULL) {
+        *set_pm = pm;
     }
-    if(set_cr3 != NULL) {
-        *set_cr3=cr3;
+    if (set_cr3 != NULL) {
+        *set_cr3 = cr3;
     }
-    if(set_pae != NULL) {
-        *set_pae=pae;
+    if (set_pae != NULL) {
+        *set_pae = pae;
     }
-    if(set_pse != NULL) {
-        *set_pse=pse;
+    if (set_pse != NULL) {
+        *set_pse = pse;
     }
-    if(set_lme != NULL) {
-         *set_lme=lme;
+    if (set_lme != NULL) {
+        *set_lme = lme;
     }
 
 _exit:
@@ -480,18 +448,15 @@ _exit:
 }
 
 static status_t
-init_page_offset(
-    vmi_instance_t vmi)
+init_page_offset(vmi_instance_t vmi)
 {
     //TODO need to actually determine these values instead of just guessing
 
     if (VMI_OS_LINUX == vmi->os_type) {
         vmi->page_offset = 0xc0000000;
-    }
-    else if (VMI_OS_WINDOWS == vmi->os_type) {
+    } else if (VMI_OS_WINDOWS == vmi->os_type) {
         vmi->page_offset = 0x80000000;
-    }
-    else {
+    } else {
         vmi->page_offset = 0;
     }
     dbprint("**set page_offset = 0x%.8x\n", vmi->page_offset);
@@ -505,19 +470,15 @@ init_page_offset(
 }
 
 static status_t
-set_driver_type(
-    vmi_instance_t vmi,
-    vmi_mode_t mode,
-    unsigned long id,
-    char *name)
+set_driver_type(vmi_instance_t vmi,
+                vmi_mode_t mode, unsigned long id, char *name)
 {
     if (VMI_AUTO == mode) {
         if (VMI_FAILURE == driver_init_mode(vmi, id, name)) {
             errprint("Failed to identify correct mode.\n");
             return VMI_FAILURE;
         }
-    }
-    else {
+    } else {
         vmi->mode = mode;
     }
     dbprint("LibVMI Mode %d\n", vmi->mode);
@@ -526,16 +487,13 @@ set_driver_type(
 
 /* the name passed may contain the full path and we just want the filename */
 static void
-set_image_type_for_file(
-    vmi_instance_t vmi,
-    char *name)
+set_image_type_for_file(vmi_instance_t vmi, char *name)
 {
     char *ptr = NULL;
 
     if ((ptr = strrchr(name, '/')) == NULL) {
         ptr = name;
-    }
-    else {
+    } else {
         ptr++;
     }
     vmi->image_type = strndup(ptr, 500);
@@ -543,46 +501,40 @@ set_image_type_for_file(
 }
 
 static status_t
-set_id_and_name(
-    vmi_instance_t vmi,
-    vmi_mode_t mode,
-    unsigned long id,
-    char *name)
+set_id_and_name(vmi_instance_t vmi,
+                vmi_mode_t mode, unsigned long id, char *name)
 {
     if (VMI_FILE == vmi->mode) {
         if (name) {
             set_image_type_for_file(vmi, name);
             driver_set_name(vmi, name);
-        }
-        else {
+        } else {
             errprint("Must specify name for file mode.\n");
             return VMI_FAILURE;
         }
-    }
-    else {
+    } else {
         /* resolve and set id and name */
         if (VMI_INVALID_DOMID == id) {
             if (name) {
-                if (VMI_INVALID_DOMID != (id = driver_get_id_from_name(vmi, name)) ) {
+                if (VMI_INVALID_DOMID !=
+                    (id = driver_get_id_from_name(vmi, name))) {
                     dbprint("--got id from name (%s --> %lu)\n", name, id);
                     driver_set_id(vmi, id);
                 } else {
                     errprint("Failed to get domain id from name.\n");
                     return VMI_FAILURE;
                 }
-            }
-            else {
+            } else {
                 errprint("Must specifiy either id or name.\n");
                 return VMI_FAILURE;
             }
-        }
-        else {
+        } else {
             if (name) {
                 errprint("Specifying both id and name is undefined.\n");
                 return VMI_FAILURE;
             }
 
-            if(VMI_FAILURE == driver_check_id(vmi,id)) {
+            if (VMI_FAILURE == driver_check_id(vmi, id)) {
                 errprint("Invalid id.\n");
                 return VMI_FAILURE;
             }
@@ -595,21 +547,21 @@ set_id_and_name(
                 dbprint("--failed to get domain name from id!\n");
 
                 // Only under Xen this is OK
-                if(vmi->mode != VMI_XEN) {
+                if (vmi->mode != VMI_XEN) {
                     return VMI_FAILURE;
                 }
             }
         }
 
-       if(name != NULL) {
-               vmi->image_type = strndup(name, 100);
-               driver_set_name(vmi, name);
-       } else {
-               // create placeholder for image_type
-               char *idstring = malloc(snprintf(NULL, 0, "domid-%lu", id) + 1);
-               sprintf(idstring, "domid-%lu", id);
-               vmi->image_type = idstring;
-       }
+        if (name != NULL) {
+            vmi->image_type = strndup(name, 100);
+            driver_set_name(vmi, name);
+        } else {
+            // create placeholder for image_type
+            char *idstring = malloc(snprintf(NULL, 0, "domid-%lu", id) + 1);
+            sprintf(idstring, "domid-%lu", id);
+            vmi->image_type = idstring;
+        }
 
     }
     dbprint("**set image_type = %s\n", vmi->image_type);
@@ -617,12 +569,9 @@ set_id_and_name(
 }
 
 static status_t
-vmi_init_private(
-    vmi_instance_t *vmi,
-    uint32_t flags,
-    unsigned long id,
-    char *name,
-    vmi_config_t *config)
+vmi_init_private(vmi_instance_t *vmi,
+                 uint32_t flags,
+                 unsigned long id, char *name, vmi_config_t * config)
 {
     uint32_t access_mode = flags & 0x0000FFFF;
     uint32_t init_mode = flags & 0x00FF0000;
@@ -634,7 +583,7 @@ vmi_init_private(
     memset(*vmi, 0, sizeof(struct vmi_instance));
 
     /* initialize instance struct to default values */
-    dbprint("LibVMI Version 0.11.0\n");  //TODO change this with each release
+    dbprint("LibVMI Version 0.11.0\n"); //TODO change this with each release
 
     /* save the flags and init mode */
     (*vmi)->flags = flags;
@@ -665,17 +614,18 @@ vmi_init_private(
     dbprint("--completed driver init.\n");
 
     /* we check VMI_INIT_COMPLETE first as
-       VMI_INIT_PARTIAL is not exclusive */
+     * VMI_INIT_PARTIAL is not exclusive */
     if (init_mode & VMI_INIT_COMPLETE) {
 
         /* init_complete requires configuration */
-        if(VMI_CONFIG_NONE & (*vmi)->config_mode) {
+        if (VMI_CONFIG_NONE & (*vmi)->config_mode) {
             /* falling back to VMI_CONFIG_GLOBAL_FILE_ENTRY is unsafe here
-                as the config pointer is probably NULL */
+             * as the config pointer is probably NULL */
             goto error_exit;
         }
         /* read and parse the config file */
-        else if ( (VMI_CONFIG_STRING & (*vmi)->config_mode || VMI_CONFIG_GLOBAL_FILE_ENTRY & (*vmi)->config_mode)
+        else if ((VMI_CONFIG_STRING & (*vmi)->config_mode ||
+                  VMI_CONFIG_GLOBAL_FILE_ENTRY & (*vmi)->config_mode)
                  && VMI_FAILURE == read_config_file(*vmi)) {
             goto error_exit;
         }
@@ -696,7 +646,7 @@ vmi_init_private(
             errprint("Failed to get memory size.\n");
             goto error_exit;
         }
-        dbprint("**set size = %"PRIu64" [0x%"PRIx64"]\n", (*vmi)->size,
+        dbprint("**set size = %" PRIu64 " [0x%" PRIx64 "]\n", (*vmi)->size,
                 (*vmi)->size);
 
         /* determine the page sizes and layout for target OS */
@@ -707,34 +657,32 @@ vmi_init_private(
         (*vmi)->page_mode = VMI_PM_UNKNOWN;
 
         status = get_memory_layout(*vmi,
-                                        &((*vmi)->page_mode),
-                                        &((*vmi)->cr3),
-                                        &((*vmi)->pae),
-                                        &((*vmi)->pse),
-                                        &((*vmi)->lme));
+                                   &((*vmi)->page_mode),
+                                   &((*vmi)->cr3),
+                                   &((*vmi)->pae),
+                                   &((*vmi)->pse), &((*vmi)->lme));
 
         if (VMI_FAILURE == status) {
             dbprint
                 ("**Failed to get memory layout for VM. Trying heuristic method.\n");
             // fall-through
-        }   // if
+        }       // if
 
         // Heuristic method
         if (!(*vmi)->cr3) {
             (*vmi)->cr3 = find_cr3((*vmi));
-            dbprint("**set cr3 = 0x%.16"PRIx64"\n", (*vmi)->cr3);
-        }   // if
+            dbprint("**set cr3 = 0x%.16" PRIx64 "\n", (*vmi)->cr3);
+        }       // if
 
         /* setup OS specific stuff */
         if (VMI_OS_LINUX == (*vmi)->os_type) {
             status = linux_init(*vmi);
-        }
-        else if (VMI_OS_WINDOWS == (*vmi)->os_type) {
+        } else if (VMI_OS_WINDOWS == (*vmi)->os_type) {
             status = windows_init(*vmi);
         }
 
         /* Enable event handlers only if we're in a consistent state */
-        if((status == VMI_SUCCESS) && (init_mode & VMI_INIT_EVENTS)){
+        if ((status == VMI_SUCCESS) && (init_mode & VMI_INIT_EVENTS)) {
             events_init(*vmi);
         }
 
@@ -744,7 +692,7 @@ vmi_init_private(
         driver_get_memsize(*vmi, &(*vmi)->size);
 
         /* Enable event handlers */
-        if(init_mode & VMI_INIT_EVENTS){
+        if (init_mode & VMI_INIT_EVENTS) {
             events_init(*vmi);
         }
 
@@ -756,9 +704,7 @@ error_exit:
 }
 
 char *
-build_config_str(
-    vmi_instance_t *vmi,
-    char *config)
+build_config_str(vmi_instance_t *vmi, char *config)
 {
     int length = strlen(config) + strlen((*vmi)->image_type) + 2;
     char *config_str = safe_malloc(length);
@@ -768,19 +714,14 @@ build_config_str(
 }
 
 status_t
-vmi_init(
-    vmi_instance_t *vmi,
-    uint32_t flags,
-    char *name)
+vmi_init(vmi_instance_t *vmi, uint32_t flags, char *name)
 {
-    return vmi_init_private(vmi, flags | VMI_CONFIG_GLOBAL_FILE_ENTRY, VMI_INVALID_DOMID, name, NULL);
+    return vmi_init_private(vmi, flags | VMI_CONFIG_GLOBAL_FILE_ENTRY,
+                            VMI_INVALID_DOMID, name, NULL);
 }
 
 status_t
-vmi_init_custom(
-    vmi_instance_t *vmi,
-    uint32_t flags,
-    vmi_config_t config)
+vmi_init_custom(vmi_instance_t *vmi, uint32_t flags, vmi_config_t config)
 {
     status_t ret = VMI_FAILURE;
     uint32_t config_mode = flags & 0xFF000000;
@@ -791,40 +732,43 @@ vmi_init_custom(
 
     if (VMI_CONFIG_GLOBAL_FILE_ENTRY == config_mode) {
 
-        ret = vmi_init(vmi, flags, (char *)config);
+        ret = vmi_init(vmi, flags, (char *) config);
         goto _done;
 
     } else if (VMI_CONFIG_STRING == config_mode) {
 
-           char *name = NULL;
-           char *configstr = NULL;
+        char *name = NULL;
+        char *configstr = NULL;
 
         if (VMI_FILE == (*vmi)->mode) {
             name = strdup((*vmi)->image_type_complete);
-        }
-        else {
+        } else {
             name = strdup((*vmi)->image_type);
         }
 
-        configstr = build_config_str(vmi, (char *)config);
-        ret = vmi_init_private(vmi,flags, VMI_INVALID_DOMID, name, (vmi_config_t)configstr);
+        configstr = build_config_str(vmi, (char *) config);
+        ret =
+            vmi_init_private(vmi, flags, VMI_INVALID_DOMID, name,
+                             (vmi_config_t) configstr);
 
     } else if (VMI_CONFIG_GHASHTABLE == config_mode) {
 
         char *name = NULL;
         unsigned long domid = VMI_INVALID_DOMID;
-        GHashTable *configtbl = (GHashTable *)config;
+        GHashTable *configtbl = (GHashTable *) config;
 
-        name = (char *)g_hash_table_lookup(configtbl, "name");
+        name = (char *) g_hash_table_lookup(configtbl, "name");
         gpointer idptr;
-        if(g_hash_table_lookup_extended(configtbl, "domid", NULL, &idptr)) {
-            domid = *(unsigned long *)idptr;
+        if (g_hash_table_lookup_extended(configtbl, "domid", NULL, &idptr)) {
+            domid = *(unsigned long *) idptr;
         }
 
         if (name != NULL && domid != VMI_INVALID_DOMID) {
-            errprint("--specifying both the name and domid is not supported\n");
+            errprint
+                ("--specifying both the name and domid is not supported\n");
         } else if (name != NULL) {
-            ret = vmi_init_private(vmi, flags, VMI_INVALID_DOMID, name, config);
+            ret =
+                vmi_init_private(vmi, flags, VMI_INVALID_DOMID, name, config);
         } else if (domid != VMI_INVALID_DOMID) {
             ret = vmi_init_private(vmi, flags, domid, NULL, config);
         } else {
@@ -842,9 +786,7 @@ _done:
 }
 
 status_t
-vmi_init_complete(
-    vmi_instance_t *vmi,
-    char *config)
+vmi_init_complete(vmi_instance_t *vmi, char *config)
 {
     uint32_t flags = VMI_INIT_COMPLETE | (*vmi)->mode;
 
@@ -853,8 +795,7 @@ vmi_init_complete(
 
     if (VMI_FILE == (*vmi)->mode) {
         name = strdup((*vmi)->image_type_complete);
-    }
-    else {
+    } else {
         name = strdup((*vmi)->image_type);
     }
 
@@ -862,9 +803,9 @@ vmi_init_complete(
         configstr = build_config_str(vmi, config);
     }
 
-    if(configstr) {
+    if (configstr) {
         flags |= VMI_CONFIG_STRING;
-    } else if(name && (*vmi)->config_mode & VMI_CONFIG_GLOBAL_FILE_ENTRY) {
+    } else if (name && (*vmi)->config_mode & VMI_CONFIG_GLOBAL_FILE_ENTRY) {
         flags |= VMI_CONFIG_GLOBAL_FILE_ENTRY;
     } else {
         flags |= VMI_CONFIG_NONE;
@@ -878,15 +819,12 @@ vmi_init_complete(
     return vmi_init_private(vmi,
                             flags,
                             VMI_INVALID_DOMID,
-                            name,
-                            (vmi_config_t)configstr);
+                            name, (vmi_config_t) configstr);
 }
 
 status_t
-vmi_init_complete_custom(
-    vmi_instance_t *vmi,
-    uint32_t flags,
-    vmi_config_t config)
+vmi_init_complete_custom(vmi_instance_t *vmi,
+                         uint32_t flags, vmi_config_t config)
 {
     flags |= VMI_INIT_COMPLETE | (*vmi)->mode;
     vmi_destroy(*vmi);
@@ -894,11 +832,10 @@ vmi_init_complete_custom(
 }
 
 status_t
-vmi_destroy(
-    vmi_instance_t vmi)
+vmi_destroy(vmi_instance_t vmi)
 {
     vmi->shutting_down = TRUE;
-    if(vmi->init_mode & VMI_INIT_EVENTS){
+    if (vmi->init_mode & VMI_INIT_EVENTS) {
         events_destroy(vmi);
     }
     driver_destroy(vmi);

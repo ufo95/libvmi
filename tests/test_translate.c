@@ -28,7 +28,7 @@
 
 
 /* test vmi_pid_to_dtb */
-START_TEST (test_libvmi_piddtb)
+START_TEST(test_libvmi_piddtb)
 {
     vmi_instance_t vmi = NULL;
     addr_t next_process, list_head;
@@ -44,8 +44,7 @@ START_TEST (test_libvmi_piddtb)
 
         addr_t init_task_va = vmi_translate_ksym2v(vmi, "init_task");
         vmi_read_addr_va(vmi, init_task_va + tasks_offset, 0, &next_process);
-    }
-    else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
+    } else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
         tasks_offset = vmi_get_offset(vmi, "win_tasks");
         name_offset = vmi_get_offset(vmi, "win_pname");
         pid_offset = vmi_get_offset(vmi, "win_pid");
@@ -61,7 +60,8 @@ START_TEST (test_libvmi_piddtb)
         if (list_head == tmp_next) {
             break;
         }
-        vmi_read_32_va(vmi, next_process + pid_offset - tasks_offset, 0, &pid);
+        vmi_read_32_va(vmi, next_process + pid_offset - tasks_offset, 0,
+                       &pid);
         if ((VMI_OS_LINUX == vmi_get_ostype(vmi) && pid >= 500) ||
             (VMI_OS_WINDOWS == vmi_get_ostype(vmi) && pid > 0)) {
             addr_t dtb = vmi_pid_to_dtb(vmi, pid);
@@ -76,59 +76,54 @@ START_TEST (test_libvmi_piddtb)
     vmi_destroy(vmi);
     fail_unless(!failed, "pid_to_dtb failed");
 }
-END_TEST
 
-/* test vmi_translate_kv2p */
-START_TEST (test_libvmi_kv2p)
+END_TEST
+    /* test vmi_translate_kv2p */
+START_TEST(test_libvmi_kv2p)
 {
     vmi_instance_t vmi = NULL;
     vmi_init(&vmi, VMI_AUTO | VMI_INIT_COMPLETE, get_testvm());
     addr_t va = 0;
-    if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)){
+    if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
         va = vmi_translate_ksym2v(vmi, "PsInitialSystemProcess");
-    }
-    else if (VMI_OS_LINUX == vmi_get_ostype(vmi)){
+    } else if (VMI_OS_LINUX == vmi_get_ostype(vmi)) {
         va = vmi_translate_ksym2v(vmi, "init_task");
-    }
-    else{
+    } else {
         fail_unless(0, "vmi set to invalid os type");
     }
     addr_t pa = vmi_translate_kv2p(vmi, va);
     fail_unless(pa != 0, "kv2p translation failed");
     vmi_destroy(vmi);
 }
+
 END_TEST
-
-/* test vmi_translate_uv2p */
-//TODO figure out how to test this
-//START_TEST (test_libvmi_uv2p)
-//{
-//    vmi_translate_uv2p(vmi, vaddr, pid)
-//}
-//END_TEST
-
-/* test vmi_translate_ksym2v */
-START_TEST (test_libvmi_ksym2v)
+    /* test vmi_translate_uv2p */
+    //TODO figure out how to test this
+    //START_TEST (test_libvmi_uv2p)
+    //{
+    //    vmi_translate_uv2p(vmi, vaddr, pid)
+    //}
+    //END_TEST
+    /* test vmi_translate_ksym2v */
+START_TEST(test_libvmi_ksym2v)
 {
     vmi_instance_t vmi = NULL;
     vmi_init(&vmi, VMI_AUTO | VMI_INIT_COMPLETE, get_testvm());
     addr_t va = 0;
-    if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)){
+    if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
         va = vmi_translate_ksym2v(vmi, "PsInitialSystemProcess");
-    }
-    else if (VMI_OS_LINUX == vmi_get_ostype(vmi)){
+    } else if (VMI_OS_LINUX == vmi_get_ostype(vmi)) {
         va = vmi_translate_ksym2v(vmi, "init_task");
-    }
-    else{
+    } else {
         fail_unless(0, "vmi set to invalid os type");
     }
     fail_unless(va != 0, "ksym2v translation failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-/* translate test cases */
-TCase *translate_tcase (void)
+END_TEST
+    /* translate test cases */
+    TCase * translate_tcase(void)
 {
     TCase *tc_translate = tcase_create("LibVMI Translate");
     tcase_set_timeout(tc_translate, 30);

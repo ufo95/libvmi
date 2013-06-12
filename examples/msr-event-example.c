@@ -32,42 +32,48 @@
 #ifdef HAVE_MEM_EVENT_REASON_MSR
 vmi_event_t msr_event;
 
-void msr_write_cb(vmi_instance_t vmi, vmi_event_t *event){
-    printf("MSR write happened: MSR=%lx Value=%lx\n", event->reg_event.context, event->reg_event.value);
+void
+msr_write_cb(vmi_instance_t vmi, vmi_event_t * event)
+{
+    printf("MSR write happened: MSR=%lx Value=%lx\n",
+           event->reg_event.context, event->reg_event.value);
 }
 
 static int interrupted = 0;
-static void close_handler(int sig){
+static void
+close_handler(int sig)
+{
     interrupted = sig;
 }
 
-int main (int argc, char **argv) {
+int
+main(int argc, char **argv)
+{
     vmi_instance_t vmi;
     struct sigaction act;
     act.sa_handler = close_handler;
     act.sa_flags = 0;
     sigemptyset(&act.sa_mask);
-    sigaction(SIGHUP,  &act, NULL);
+    sigaction(SIGHUP, &act, NULL);
     sigaction(SIGTERM, &act, NULL);
-    sigaction(SIGINT,  &act, NULL);
+    sigaction(SIGINT, &act, NULL);
     sigaction(SIGALRM, &act, NULL);
 
     char *name = NULL;
 
-    if(argc < 2){
+    if (argc < 2) {
         fprintf(stderr, "Usage: msr_events_example <name of VM>\n");
         exit(1);
     }
-
     // Arg 1 is the VM name.
     name = argv[1];
 
     // Initialize the libvmi library.
-    if (vmi_init(&vmi, VMI_XEN | VMI_INIT_PARTIAL | VMI_INIT_EVENTS, name) == VMI_FAILURE){
+    if (vmi_init(&vmi, VMI_XEN | VMI_INIT_PARTIAL | VMI_INIT_EVENTS, name) ==
+        VMI_FAILURE) {
         printf("Failed to init LibVMI library.\n");
         return 1;
-    }
-    else{
+    } else {
         printf("LibVMI init succeeded!\n");
     }
 
@@ -81,8 +87,8 @@ int main (int argc, char **argv) {
     vmi_register_event(vmi, &msr_event);
 
     printf("Waiting for events...\n");
-    while(!interrupted){
-        vmi_events_listen(vmi,500);
+    while (!interrupted) {
+        vmi_events_listen(vmi, 500);
     }
     printf("Finished with test.\n");
 
@@ -93,8 +99,11 @@ leave:
     return 0;
 }
 #else
-int main (int argc, char **argv) {
-    fprintf(stderr, "MSR events not supported by this hypervisor platform.\n");
+int
+main(int argc, char **argv)
+{
+    fprintf(stderr,
+            "MSR events not supported by this hypervisor platform.\n");
     return 1;
 }
 #endif

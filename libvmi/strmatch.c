@@ -42,10 +42,7 @@
 #endif
 
 static void
-preBmBc(
-    unsigned char *x,
-    int m,
-    int bmBc[])
+preBmBc(unsigned char *x, int m, int bmBc[])
 {
     int i;
 
@@ -58,10 +55,7 @@ preBmBc(
 }
 
 static void
-suffixes(
-    unsigned char *x,
-    int m,
-    int *suff)
+suffixes(unsigned char *x, int m, int *suff)
 {
     int f, g, i;
 
@@ -70,8 +64,7 @@ suffixes(
     for (i = m - 2; i >= 0; --i) {
         if (i > g && suff[i + m - 1 - f] < i - g) {
             suff[i] = suff[i + m - 1 - f];
-        }
-        else {
+        } else {
             if (i < g) {
                 g = i;
             }
@@ -85,10 +78,7 @@ suffixes(
 }
 
 static void
-preBmGs(
-    unsigned char *x,
-    int m,
-    int bmGs[])
+preBmGs(unsigned char *x, int m, int bmGs[])
 {
     int i, j;
     int *suff = safe_malloc(m * sizeof(int));
@@ -121,11 +111,7 @@ preBmGs(
 // n - len(y)
 // modified to return location of first match, or -1
 int
-boyer_moore(
-    unsigned char *x,
-    int m,
-    unsigned char *y,
-    int n)
+boyer_moore(unsigned char *x, int m, unsigned char *y, int n)
 {
     int i, j, bmBc[ASIZE];
     int *bmGs = safe_malloc(m * sizeof(int));
@@ -142,8 +128,7 @@ boyer_moore(
             free(bmGs);
             return j;
             //j += bmGs[0]; // just returning the first match
-        }
-        else {
+        } else {
             j += MAX(bmGs[i], bmBc[y[i + j]] - m + 1 + i);
         }
     }
@@ -160,9 +145,7 @@ typedef struct boyer_moore_data {
 } boyer_moore_data_t;
 
 void *
-boyer_moore_init(
-    unsigned char *x,
-    int m)
+boyer_moore_init(unsigned char *x, int m)
 {
     boyer_moore_data_t *bm = safe_malloc(sizeof(boyer_moore_data_t));
 
@@ -181,8 +164,7 @@ boyer_moore_init(
 }
 
 void
-boyer_moore_fini(
-    void *bm)
+boyer_moore_fini(void *bm)
 {
     boyer_moore_data_t *_bm = (boyer_moore_data_t *) bm;
 
@@ -195,10 +177,7 @@ boyer_moore_fini(
 // n - len(y)
 // modified to return location of first match, or -1
 int
-boyer_moore2(
-    void *bm,
-    unsigned char *y,
-    int n)
+boyer_moore2(void *bm, unsigned char *y, int n)
 {
     int i, j;
     boyer_moore_data_t *_bm = (boyer_moore_data_t *) bm;
@@ -212,8 +191,7 @@ boyer_moore2(
         if (i < 0) {
             return j;
             //j += _bmGs[0]; // just returning the first match
-        }
-        else {
+        } else {
             j += MAX(_bm->bmGs[i], _bm->bmBc[y[i + j]] - m + 1 + i);
         }
     }

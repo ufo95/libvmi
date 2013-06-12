@@ -33,9 +33,7 @@
 #include "libvmi/libvmi.h"
 #include "common.h"
     int
-main(
-    int argc,
-    char **argv) 
+main(int argc, char **argv) 
 {
     vmi_instance_t vmi;
     addr_t start_address;
@@ -61,8 +59,7 @@ main(
         vmi_init(&vmi, VMI_AUTO | VMI_INIT_COMPLETE, vm);
      
         /* find address to work from */ 
-        start_address =
-        vmi_translate_ksym2v(vmi, "PsInitialSystemProcess");
+        start_address = vmi_translate_ksym2v(vmi, "PsInitialSystemProcess");
     start_address = vmi_translate_kv2p(vmi, start_address);
      for (i = 0; i < loops; ++i) {
         if (mode == 1) {

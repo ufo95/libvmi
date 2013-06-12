@@ -33,9 +33,7 @@
 #define PAGE_SIZE 1 << 12
 
 int
-main(
-    int argc,
-    char **argv)
+main(int argc, char **argv)
 {
     vmi_instance_t vmi;
     unsigned char *memory = malloc(PAGE_SIZE);
@@ -47,8 +45,7 @@ main(
     char *symbol = argv[2];
 
     /* initialize the libvmi library */
-    if (vmi_init(&vmi, VMI_AUTO | VMI_INIT_COMPLETE, name) ==
-        VMI_FAILURE) {
+    if (vmi_init(&vmi, VMI_AUTO | VMI_INIT_COMPLETE, name) == VMI_FAILURE) {
         printf("Failed to init LibVMI library.\n");
         goto error_exit;
     }

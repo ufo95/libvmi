@@ -34,9 +34,7 @@
 #define PAGE_SIZE 1 << 12
 
 int
-main(
-    int argc,
-    char **argv)
+main(int argc, char **argv)
 {
     vmi_instance_t vmi;
     char *filename = NULL;
@@ -55,8 +53,7 @@ main(
     filename = strndup(argv[2], 50);
 
     /* initialize the libvmi library */
-    if (vmi_init(&vmi, VMI_AUTO | VMI_INIT_COMPLETE, name) ==
-        VMI_FAILURE) {
+    if (vmi_init(&vmi, VMI_AUTO | VMI_INIT_COMPLETE, name) == VMI_FAILURE) {
         printf("Failed to init LibVMI library.\n");
         goto error_exit;
     }
@@ -78,8 +75,7 @@ main(
                 printf("failed to write memory to file.\n");
                 goto error_exit;
             }
-        }
-        else {
+        } else {
             /* memory not mapped, write zeros to maintain offset */
             size_t written = fwrite(zeros, 1, PAGE_SIZE, f);
 

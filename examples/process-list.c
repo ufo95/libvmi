@@ -31,7 +31,8 @@
 #include <sys/mman.h>
 #include <stdio.h>
 
-int main (int argc, char **argv)
+int
+main(int argc, char **argv)
 {
     vmi_instance_t vmi;
     unsigned char *memory = NULL;
@@ -48,7 +49,7 @@ int main (int argc, char **argv)
     if (argc != 2) {
         printf("Usage: %s <vmname>\n", argv[0]);
         return 1;
-    } // if
+    }   // if
 
     char *name = argv[1];
 
@@ -68,8 +69,7 @@ int main (int argc, char **argv)
          *  name_offset is no longer hard-coded. Rather, it is now set 
          *  via libvmi.conf.
          */
-    }
-    else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
+    } else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
         tasks_offset = vmi_get_offset(vmi, "win_tasks");
         if (0 == tasks_offset) {
             printf("Failed to find win_tasks\n");
@@ -91,7 +91,7 @@ int main (int argc, char **argv)
     if (vmi_pause_vm(vmi) != VMI_SUCCESS) {
         printf("Failed to pause VM\n");
         goto error_exit;
-    } // if
+    }   // if
 
     /* demonstrate name and id accessors */
     char *name2 = vmi_get_name(vmi);
@@ -100,8 +100,7 @@ int main (int argc, char **argv)
         unsigned long id = vmi_get_vmid(vmi);
 
         printf("Process listing for VM %s (id=%lu)\n", name2, id);
-    }
-    else {
+    } else {
         printf("Process listing for file %s\n", name2);
     }
     free(name2);
@@ -113,8 +112,7 @@ int main (int argc, char **argv)
          *  display as such.
          */
         current_process = vmi_translate_ksym2v(vmi, "init_task");
-    }
-    else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
+    } else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
 
         // find PEPROCESS PsInitialSystemProcess
         vmi_read_addr_ksym(vmi, "PsInitialSystemProcess", &current_process);
@@ -128,7 +126,7 @@ int main (int argc, char **argv)
     status = vmi_read_addr_va(vmi, current_list_entry, 0, &next_list_entry);
     if (status == VMI_FAILURE) {
         printf("Failed to read next pointer at 0x%lx before entering loop\n",
-                current_list_entry);
+               current_list_entry);
         goto error_exit;
     }
 
@@ -156,7 +154,8 @@ int main (int argc, char **argv)
         }
 
         /* print out the process name */
-        printf("[%5d] %s (struct addr:%lx)\n", pid, procname, current_process);
+        printf("[%5d] %s (struct addr:%lx)\n", pid, procname,
+               current_process);
         if (procname) {
             free(procname);
             procname = NULL;
@@ -167,15 +166,17 @@ int main (int argc, char **argv)
 
         /* follow the next pointer */
 
-        status = vmi_read_addr_va(vmi, current_list_entry, 0, &next_list_entry);
+        status =
+            vmi_read_addr_va(vmi, current_list_entry, 0, &next_list_entry);
         if (status == VMI_FAILURE) {
-            printf("Failed to read next pointer in loop at %lx\n", current_list_entry);
+            printf("Failed to read next pointer in loop at %lx\n",
+                   current_list_entry);
             goto error_exit;
         }
 
     } while (next_list_entry != list_head);
 
-    error_exit: if (procname)
+error_exit:if (procname)
         free(procname);
 
     /* resume the vm */

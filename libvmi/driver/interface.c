@@ -33,111 +33,40 @@
 #include <string.h>
 
 struct driver_instance {
-    status_t (
-    *init_ptr) (
-    vmi_instance_t);
-    void (
-    *destroy_ptr) (
-    vmi_instance_t);
-    unsigned long (
-    *get_id_from_name_ptr) (
-    vmi_instance_t,
-    char *);
-    status_t (
-    *get_name_from_id_ptr) (
-    vmi_instance_t,
-    unsigned long,
-    char **);
-    unsigned long (
-    *get_id_ptr) (
-    vmi_instance_t);
-    void (
-    *set_id_ptr) (
-    vmi_instance_t,
-    unsigned long);
-    status_t (
-    *check_id_ptr) (
-    vmi_instance_t,
-    unsigned long);
-    status_t (
-    *get_name_ptr) (
-    vmi_instance_t,
-    char **);
-    void (
-    *set_name_ptr) (
-    vmi_instance_t,
-    char *);
-    status_t (
-    *get_memsize_ptr) (
-    vmi_instance_t,
-    unsigned long *);
-    status_t (
-    *get_vcpureg_ptr) (
-    vmi_instance_t,
-    reg_t *,
-    registers_t,
-    unsigned long);
-    status_t(
-    *set_vcpureg_ptr) (
-    vmi_instance_t,
-    reg_t,
-    registers_t,
-    unsigned long);
-    status_t (
-    *get_address_width_ptr) (
-    vmi_instance_t vmi,
-    uint8_t * width);
-    void *(
-    *read_page_ptr) (
-    vmi_instance_t,
-    addr_t);
-    status_t (
-    *write_ptr) (
-    vmi_instance_t,
-    addr_t,
-    void *,
-    uint32_t);
-    int (
-    *is_pv_ptr) (
-    vmi_instance_t);
-    status_t (
-    *pause_vm_ptr) (
-    vmi_instance_t);
-    status_t (
-    *resume_vm_ptr) (
-    vmi_instance_t);
-    status_t (
-    *events_listen_ptr)(
-    vmi_instance_t,
-    uint32_t);
-    status_t (
-    *set_reg_access_ptr)(
-    vmi_instance_t,
-    reg_event_t);
-    status_t (
-    *set_mem_access_ptr)(
-    vmi_instance_t,
-    mem_event_t,
-    vmi_mem_access_t);
-    status_t (
-    *start_single_step_ptr)(
-    vmi_instance_t,
-    single_step_event_t);
-    status_t (
-    *stop_single_step_ptr)(
-    vmi_instance_t,
-    uint32_t);
-    status_t (
-    *shutdown_single_step_ptr)(
-    vmi_instance_t);
+    status_t (*init_ptr) (vmi_instance_t);
+    void (*destroy_ptr) (vmi_instance_t);
+    unsigned long (*get_id_from_name_ptr) (vmi_instance_t, char *);
+    status_t (*get_name_from_id_ptr) (vmi_instance_t, unsigned long, char **);
+    unsigned long (*get_id_ptr) (vmi_instance_t);
+    void (*set_id_ptr) (vmi_instance_t, unsigned long);
+    status_t (*check_id_ptr) (vmi_instance_t, unsigned long);
+    status_t (*get_name_ptr) (vmi_instance_t, char **);
+    void (*set_name_ptr) (vmi_instance_t, char *);
+    status_t (*get_memsize_ptr) (vmi_instance_t, unsigned long *);
+    status_t (*get_vcpureg_ptr) (vmi_instance_t,
+                                 reg_t *, registers_t, unsigned long);
+    status_t (*set_vcpureg_ptr) (vmi_instance_t,
+                                 reg_t, registers_t, unsigned long);
+    status_t (*get_address_width_ptr) (vmi_instance_t vmi, uint8_t * width);
+    void *(*read_page_ptr) (vmi_instance_t, addr_t);
+    status_t (*write_ptr) (vmi_instance_t, addr_t, void *, uint32_t);
+    int (*is_pv_ptr) (vmi_instance_t);
+    status_t (*pause_vm_ptr) (vmi_instance_t);
+    status_t (*resume_vm_ptr) (vmi_instance_t);
+    status_t (*events_listen_ptr) (vmi_instance_t, uint32_t);
+    status_t (*set_reg_access_ptr) (vmi_instance_t, reg_event_t);
+    status_t (*set_mem_access_ptr) (vmi_instance_t,
+                                    mem_event_t, vmi_mem_access_t);
+    status_t (*start_single_step_ptr) (vmi_instance_t, single_step_event_t);
+    status_t (*stop_single_step_ptr) (vmi_instance_t, uint32_t);
+    status_t (*shutdown_single_step_ptr) (vmi_instance_t);
 };
 typedef struct driver_instance *driver_instance_t;
 
 static driver_instance_t instance = NULL;
 
 static void
-driver_xen_setup(
-    vmi_instance_t vmi)
+driver_xen_setup(vmi_instance_t vmi)
 {
     vmi->driver = safe_malloc(sizeof(xen_instance_t));
     memset(vmi->driver, 0, sizeof(xen_instance_t));
@@ -170,8 +99,7 @@ driver_xen_setup(
 }
 
 static void
-driver_kvm_setup(
-    vmi_instance_t vmi)
+driver_kvm_setup(vmi_instance_t vmi)
 {
     vmi->driver = safe_malloc(sizeof(kvm_instance_t));
     memset(vmi->driver, 0, sizeof(kvm_instance_t));
@@ -202,18 +130,17 @@ driver_kvm_setup(
 }
 
 static void
-driver_file_setup(
-    vmi_instance_t vmi)
+driver_file_setup(vmi_instance_t vmi)
 {
     vmi->driver = safe_malloc(sizeof(file_instance_t));
     memset(vmi->driver, 0, sizeof(file_instance_t));
     instance->init_ptr = &file_init;
     instance->destroy_ptr = &file_destroy;
-    instance->get_id_from_name_ptr = NULL;  //TODO add get_id_from_name_ptr
-    instance->get_name_from_id_ptr = NULL;  //TODO add get_name_from_id_ptr
-    instance->get_id_ptr = NULL;    //TODO add get_id_ptr
-    instance->set_id_ptr = NULL;    //TODO add set_id_ptr
-    instance->check_id_ptr = NULL;     //TODO add check_id_ptr
+    instance->get_id_from_name_ptr = NULL;      //TODO add get_id_from_name_ptr
+    instance->get_name_from_id_ptr = NULL;      //TODO add get_name_from_id_ptr
+    instance->get_id_ptr = NULL;        //TODO add get_id_ptr
+    instance->set_id_ptr = NULL;        //TODO add set_id_ptr
+    instance->check_id_ptr = NULL;      //TODO add check_id_ptr
     instance->get_name_ptr = &file_get_name;
     instance->set_name_ptr = &file_set_name;
     instance->get_memsize_ptr = &file_get_memsize;
@@ -234,8 +161,7 @@ driver_file_setup(
 }
 
 static void
-driver_null_setup(
-    vmi_instance_t vmi)
+driver_null_setup(vmi_instance_t vmi)
 {
     vmi->driver = NULL;
     instance->init_ptr = NULL;
@@ -264,28 +190,23 @@ driver_null_setup(
 }
 
 static driver_instance_t
-driver_get_instance(
-    vmi_instance_t vmi)
+driver_get_instance(vmi_instance_t vmi)
 {
     if (NULL == vmi->driver || NULL == instance) {
         /* allocate memory for the function pointers, if needed */
         if (NULL == instance) {
-            instance =
-                (driver_instance_t)
+            instance = (driver_instance_t)
                 safe_malloc(sizeof(struct driver_instance));
         }
 
         /* assign the function pointers */
         if (VMI_XEN == vmi->mode) {
             driver_xen_setup(vmi);
-        }
-        else if (VMI_KVM == vmi->mode) {
+        } else if (VMI_KVM == vmi->mode) {
             driver_kvm_setup(vmi);
-        }
-        else if (VMI_FILE == vmi->mode) {
+        } else if (VMI_FILE == vmi->mode) {
             driver_file_setup(vmi);
-        }
-        else {
+        } else {
             driver_null_setup(vmi);
         }
 
@@ -294,10 +215,7 @@ driver_get_instance(
 }
 
 status_t
-driver_init_mode(
-    vmi_instance_t vmi,
-    unsigned long id,
-    char *name)
+driver_init_mode(vmi_instance_t vmi, unsigned long id, char *name)
 {
     unsigned long count = 0;
 
@@ -323,35 +241,30 @@ driver_init_mode(
         errprint("Could not find a VMM or file to use.\n");
         errprint("Opening a live VMM requires root access.\n");
         return VMI_FAILURE;
-    }
-    else if (count > 1) {
+    } else if (count > 1) {
         errprint
             ("Found more than one VMM or file to use,\nplease specify what you want instead of using VMI_AUTO.\n");
         return VMI_FAILURE;
-    }
-    else {  // count == 1
+    } else {    // count == 1
         return VMI_SUCCESS;
     }
 }
 
 status_t
-driver_init(
-    vmi_instance_t vmi)
+driver_init(vmi_instance_t vmi)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->init_ptr) {
         return ptrs->init_ptr(vmi);
-    }
-    else {
+    } else {
         dbprint("WARNING: driver_init function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
 void
-driver_destroy(
-    vmi_instance_t vmi)
+driver_destroy(vmi_instance_t vmi)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
@@ -359,24 +272,20 @@ driver_destroy(
         ptrs->destroy_ptr(vmi);
         free(vmi->driver);
         return;
-    }
-    else {
+    } else {
         dbprint("WARNING: driver_destroy function not implemented.\n");
         return;
     }
 }
 
 unsigned long
-driver_get_id_from_name(
-    vmi_instance_t vmi,
-    char *name)
+driver_get_id_from_name(vmi_instance_t vmi, char *name)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->get_id_from_name_ptr) {
         return ptrs->get_id_from_name_ptr(vmi, name);
-    }
-    else {
+    } else {
         dbprint
             ("WARNING: driver_get_id_from_name function not implemented.\n");
         return 0;
@@ -384,17 +293,13 @@ driver_get_id_from_name(
 }
 
 status_t
-driver_get_name_from_id(
-    vmi_instance_t vmi,
-    unsigned long domid,
-    char **name)
+driver_get_name_from_id(vmi_instance_t vmi, unsigned long domid, char **name)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->get_name_from_id_ptr) {
         return ptrs->get_name_from_id_ptr(vmi, domid, name);
-    }
-    else {
+    } else {
         dbprint
             ("WARNING: driver_get_name_from_id function not implemented.\n");
         return 0;
@@ -402,149 +307,119 @@ driver_get_name_from_id(
 }
 
 unsigned long
-driver_get_id(
-    vmi_instance_t vmi)
+driver_get_id(vmi_instance_t vmi)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->get_id_ptr) {
         return ptrs->get_id_ptr(vmi);
-    }
-    else {
+    } else {
         dbprint("WARNING: driver_get_id function not implemented.\n");
         return 0;
     }
 }
 
 void
-driver_set_id(
-    vmi_instance_t vmi,
-    unsigned long id)
+driver_set_id(vmi_instance_t vmi, unsigned long id)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->set_id_ptr) {
         return ptrs->set_id_ptr(vmi, id);
-    }
-    else {
+    } else {
         dbprint("WARNING: driver_set_id function not implemented.\n");
         return;
     }
 }
 
 void
-driver_check_id(
-    vmi_instance_t vmi,
-    unsigned long id)
+driver_check_id(vmi_instance_t vmi, unsigned long id)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->check_id_ptr) {
         ptrs->check_id_ptr(vmi, id);
         return;
-    }
-    else {
+    } else {
         dbprint("WARNING: driver_check_id function not implemented.\n");
         return;
     }
 }
 
 status_t
-driver_get_name(
-    vmi_instance_t vmi,
-    char **name)
+driver_get_name(vmi_instance_t vmi, char **name)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->get_name_ptr) {
         return ptrs->get_name_ptr(vmi, name);
-    }
-    else {
+    } else {
         dbprint("WARNING: driver_get_name function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
 void
-driver_set_name(
-    vmi_instance_t vmi,
-    char *name)
+driver_set_name(vmi_instance_t vmi, char *name)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->set_name_ptr) {
         return ptrs->set_name_ptr(vmi, name);
-    }
-    else {
+    } else {
         dbprint("WARNING: driver_set_name function not implemented.\n");
         return;
     }
 }
 
 status_t
-driver_get_memsize(
-    vmi_instance_t vmi,
-    unsigned long *size)
+driver_get_memsize(vmi_instance_t vmi, unsigned long *size)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->get_memsize_ptr) {
         return ptrs->get_memsize_ptr(vmi, size);
-    }
-    else {
-        dbprint
-            ("WARNING: driver_get_memsize function not implemented.\n");
+    } else {
+        dbprint("WARNING: driver_get_memsize function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
 status_t
-driver_get_vcpureg(
-    vmi_instance_t vmi,
-    reg_t *value,
-    registers_t reg,
-    unsigned long vcpu)
+driver_get_vcpureg(vmi_instance_t vmi,
+                   reg_t *value, registers_t reg, unsigned long vcpu)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->get_vcpureg_ptr) {
         return ptrs->get_vcpureg_ptr(vmi, value, reg, vcpu);
-    }
-    else {
-        dbprint
-            ("WARNING: driver_get_vcpureg function not implemented.\n");
+    } else {
+        dbprint("WARNING: driver_get_vcpureg function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
 status_t
-driver_set_vcpureg(
-    vmi_instance_t vmi,
-    reg_t value,
-    registers_t reg,
-    unsigned long vcpu)
+driver_set_vcpureg(vmi_instance_t vmi,
+                   reg_t value, registers_t reg, unsigned long vcpu)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
-    if (NULL != ptrs && NULL != ptrs->set_vcpureg_ptr){
+    if (NULL != ptrs && NULL != ptrs->set_vcpureg_ptr) {
         return ptrs->set_vcpureg_ptr(vmi, value, reg, vcpu);
-    }
-    else{
+    } else {
         dbprint("WARNING: driver_set_vcpureg function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
 status_t
-driver_get_address_width(
-    vmi_instance_t vmi,
-    uint8_t * width)
+driver_get_address_width(vmi_instance_t vmi, uint8_t * width)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->get_address_width_ptr) {
         return ptrs->get_address_width_ptr(vmi, width);
-    }
-    else {
+    } else {
         dbprint
             ("WARNING: driver_get_address_width function not implemented.\n");
         return VMI_FAILURE;
@@ -552,166 +427,143 @@ driver_get_address_width(
 }
 
 void *
-driver_read_page(
-    vmi_instance_t vmi,
-    addr_t page)
+driver_read_page(vmi_instance_t vmi, addr_t page)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->read_page_ptr) {
         return ptrs->read_page_ptr(vmi, page);
-    }
-    else {
-        dbprint
-            ("WARNING: driver_read_page function not implemented.\n");
+    } else {
+        dbprint("WARNING: driver_read_page function not implemented.\n");
         return NULL;
     }
 }
 
 status_t
-driver_write(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    void *buf,
-    uint32_t length)
+driver_write(vmi_instance_t vmi, addr_t paddr, void *buf, uint32_t length)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->write_ptr) {
         return ptrs->write_ptr(vmi, paddr, buf, length);
-    }
-    else {
+    } else {
         dbprint("WARNING: driver_write function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
 int
-driver_is_pv(
-    vmi_instance_t vmi)
+driver_is_pv(vmi_instance_t vmi)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->is_pv_ptr) {
         return ptrs->is_pv_ptr(vmi);
-    }
-    else {
+    } else {
         dbprint("WARNING: driver_is_pv function not implemented.\n");
         return 0;
     }
 }
 
 status_t
-driver_pause_vm(
-    vmi_instance_t vmi)
+driver_pause_vm(vmi_instance_t vmi)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->pause_vm_ptr) {
         return ptrs->pause_vm_ptr(vmi);
-    }
-    else {
+    } else {
         dbprint("WARNING: driver_pause_vm function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
 status_t
-driver_resume_vm(
-    vmi_instance_t vmi)
+driver_resume_vm(vmi_instance_t vmi)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
 
     if (NULL != ptrs && NULL != ptrs->resume_vm_ptr) {
         return ptrs->resume_vm_ptr(vmi);
-    }
-    else {
-        dbprint
-            ("WARNING: driver_resume_vm function not implemented.\n");
+    } else {
+        dbprint("WARNING: driver_resume_vm function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
-status_t driver_events_listen(
-    vmi_instance_t vmi,
-    uint32_t timeout)
+status_t
+driver_events_listen(vmi_instance_t vmi, uint32_t timeout)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
-    if (NULL != ptrs && NULL != ptrs->events_listen_ptr){
+    if (NULL != ptrs && NULL != ptrs->events_listen_ptr) {
         return ptrs->events_listen_ptr(vmi, timeout);
-    }
-    else{
+    } else {
         dbprint("WARNING: driver_events_listen function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
-status_t driver_set_reg_access(
-    vmi_instance_t vmi,
-    reg_event_t event)
+status_t
+driver_set_reg_access(vmi_instance_t vmi, reg_event_t event)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
-    if (NULL != ptrs && NULL != ptrs->set_reg_access_ptr){
+    if (NULL != ptrs && NULL != ptrs->set_reg_access_ptr) {
         return ptrs->set_reg_access_ptr(vmi, event);
-    }
-    else{
-        dbprint("WARNING: driver_set_reg_w_access function not implemented.\n");
+    } else {
+        dbprint
+            ("WARNING: driver_set_reg_w_access function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
-status_t driver_set_mem_access(
-    vmi_instance_t vmi,
-    mem_event_t event,
-    vmi_mem_access_t page_access_flag)
+status_t
+driver_set_mem_access(vmi_instance_t vmi,
+                      mem_event_t event, vmi_mem_access_t page_access_flag)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
-    if (NULL != ptrs && NULL != ptrs->set_mem_access_ptr){
+    if (NULL != ptrs && NULL != ptrs->set_mem_access_ptr) {
         return ptrs->set_mem_access_ptr(vmi, event, page_access_flag);
-    }
-    else{
+    } else {
         dbprint("WARNING: driver_set_mem_access function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
-status_t driver_start_single_step(
-    vmi_instance_t vmi, 
-    single_step_event_t event)
+status_t
+driver_start_single_step(vmi_instance_t vmi, single_step_event_t event)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
-    if (NULL != ptrs && NULL != ptrs->start_single_step_ptr){
+    if (NULL != ptrs && NULL != ptrs->start_single_step_ptr) {
         return ptrs->start_single_step_ptr(vmi, event);
-    }
-    else{
-        dbprint("WARNING: driver_start_single_step function not implemented.\n");
+    } else {
+        dbprint
+            ("WARNING: driver_start_single_step function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
-status_t driver_stop_single_step(
-    vmi_instance_t vmi, 
-    unsigned long vcpu)
+status_t
+driver_stop_single_step(vmi_instance_t vmi, unsigned long vcpu)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
-    if (NULL != ptrs && NULL != ptrs->stop_single_step_ptr){
+    if (NULL != ptrs && NULL != ptrs->stop_single_step_ptr) {
         return ptrs->stop_single_step_ptr(vmi, vcpu);
-    }
-    else{
-        dbprint("WARNING: driver_stop_single_step function not implemented.\n");
+    } else {
+        dbprint
+            ("WARNING: driver_stop_single_step function not implemented.\n");
         return VMI_FAILURE;
     }
 }
 
-status_t driver_shutdown_single_step(
-    vmi_instance_t vmi)
+status_t
+driver_shutdown_single_step(vmi_instance_t vmi)
 {
     driver_instance_t ptrs = driver_get_instance(vmi);
-    if (NULL != ptrs && NULL != ptrs->shutdown_single_step_ptr){
+    if (NULL != ptrs && NULL != ptrs->shutdown_single_step_ptr) {
         return ptrs->shutdown_single_step_ptr(vmi);
-    }
-    else{
-        dbprint("WARNING: driver_shutdown_single_step function not implemented.\n");
+    } else {
+        dbprint
+            ("WARNING: driver_shutdown_single_step function not implemented.\n");
         return VMI_FAILURE;
     }
 }

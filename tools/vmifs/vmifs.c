@@ -33,33 +33,33 @@
 static const char *mem_path = "/mem";
 vmi_instance_t vmi;
 
-static int vmifs_getattr(const char *path, struct stat *stbuf)
+static int
+vmifs_getattr(const char *path, struct stat *stbuf)
 {
     int res = 0;
 
     memset(stbuf, 0, sizeof(struct stat));
-    if(strcmp(path, "/") == 0) {
+    if (strcmp(path, "/") == 0) {
         stbuf->st_mode = S_IFDIR | 0755;
         stbuf->st_nlink = 2;
-    }
-    else if(strcmp(path, mem_path) == 0) {
+    } else if (strcmp(path, mem_path) == 0) {
         stbuf->st_mode = S_IFREG | 0444;
         stbuf->st_nlink = 1;
         stbuf->st_size = vmi_get_memsize(vmi);
-    }
-    else
+    } else
         res = -ENOENT;
 
     return res;
 }
 
-static int vmifs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
-                         off_t offset, struct fuse_file_info *fi)
+static int
+vmifs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+              off_t offset, struct fuse_file_info *fi)
 {
     (void) offset;
     (void) fi;
 
-    if(strcmp(path, "/") != 0)
+    if (strcmp(path, "/") != 0)
         return -ENOENT;
 
     filler(buf, ".", NULL, 0);
@@ -69,34 +69,36 @@ static int vmifs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     return 0;
 }
 
-static int vmifs_open(const char *path, struct fuse_file_info *fi)
+static int
+vmifs_open(const char *path, struct fuse_file_info *fi)
 {
-    if(strcmp(path, mem_path) != 0)
+    if (strcmp(path, mem_path) != 0)
         return -ENOENT;
 
     uint32_t accmod = O_RDONLY | O_WRONLY | O_RDWR;
-    if((fi->flags & accmod) != O_RDONLY)
+    if ((fi->flags & accmod) != O_RDONLY)
         return -EACCES;
 
     return 0;
 }
 
-static int vmifs_read(const char *path, char *buf, size_t size, off_t offset,
-                      struct fuse_file_info *fi)
+static int
+vmifs_read(const char *path, char *buf, size_t size, off_t offset,
+           struct fuse_file_info *fi)
 {
     (void) fi;
-    if(strcmp(path, mem_path) != 0)
+    if (strcmp(path, mem_path) != 0)
         return -ENOENT;
 
     unsigned long memsize = vmi_get_memsize(vmi);
-    if(offset < memsize && size) {
-        if(offset + size > memsize)
-            size = memsize-offset;
+    if (offset < memsize && size) {
+        if (offset + size > memsize)
+            size = memsize - offset;
 
-        uint8_t *buffer = g_malloc0(sizeof(uint8_t)*size);
+        uint8_t *buffer = g_malloc0(sizeof(uint8_t) * size);
         size_t size_read = vmi_read_pa(vmi, offset, buffer, size);
 
-        if(size != size_read) {
+        if (size != size_read) {
             g_free(buffer);
         } else {
             memcpy(buf, buffer, size);
@@ -110,19 +112,22 @@ static int vmifs_read(const char *path, char *buf, size_t size, off_t offset,
     return size;
 }
 
-void vmifs_destroy() {
+void
+vmifs_destroy()
+{
     vmi_destroy(vmi);
 }
 
 static struct fuse_operations vmifs_oper = {
-    .getattr    = vmifs_getattr,
-    .readdir    = vmifs_readdir,
-    .open   = vmifs_open,
-    .read   = vmifs_read,
-    .destroy   = vmifs_destroy,
+    .getattr = vmifs_getattr,
+    .readdir = vmifs_readdir,
+    .open = vmifs_open,
+    .read = vmifs_read,
+    .destroy = vmifs_destroy,
 };
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
     /* this is the VM or file that we are looking at */
     if (argc != 4) {
@@ -133,10 +138,9 @@ int main(int argc, char *argv[])
     uint32_t domid = VMI_INVALID_DOMID;
     GHashTable *config = g_hash_table_new(g_str_hash, g_str_equal);
 
-    if(strcmp(argv[1],"name")==0) {
+    if (strcmp(argv[1], "name") == 0) {
         g_hash_table_insert(config, "name", argv[2]);
-    } else
-    if(strcmp(argv[1],"domid")==0) {
+    } else if (strcmp(argv[1], "domid") == 0) {
         domid = atoi(argv[2]);
         g_hash_table_insert(config, "domid", &domid);
     } else {
@@ -145,7 +149,9 @@ int main(int argc, char *argv[])
     }
 
     /* initialize the libvmi library */
-    if (vmi_init_custom(&vmi, VMI_AUTO | VMI_INIT_PARTIAL | VMI_CONFIG_GHASHTABLE, (vmi_config_t)config) == VMI_FAILURE) {
+    if (vmi_init_custom
+        (&vmi, VMI_AUTO | VMI_INIT_PARTIAL | VMI_CONFIG_GHASHTABLE,
+         (vmi_config_t) config) == VMI_FAILURE) {
         printf("Failed to init LibVMI library.\n");
         return 1;
     }

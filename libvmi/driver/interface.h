@@ -27,84 +27,38 @@
 #include "libvmi.h"
 #include <stdlib.h>
 
-status_t driver_init_mode(
-    vmi_instance_t vmi,
-    unsigned long id,
-    char *name);
-status_t driver_init(
-    vmi_instance_t vmi);
-void driver_destroy(
-    vmi_instance_t vmi);
-unsigned long driver_get_id_from_name(
-    vmi_instance_t vmi,
-    char *name);
-status_t driver_get_name_from_id(
-    vmi_instance_t vmi,
-    unsigned long domid,
-    char **name);
-unsigned long driver_get_id(
-    vmi_instance_t vmi);
-void driver_set_id(
-    vmi_instance_t vmi,
-    unsigned long id);
-status_t driver_check_id(
-    vmi_instance_t vmi,
-    unsigned long id);
-status_t driver_get_name(
-    vmi_instance_t vmi,
-    char **name);
-void driver_set_name(
-    vmi_instance_t vmi,
-    char *name);
-status_t driver_get_memsize(
-    vmi_instance_t vmi,
-    unsigned long *size);
-status_t driver_get_vcpureg(
-    vmi_instance_t vmi,
-    reg_t *value,
-    registers_t reg,
-    unsigned long vcpu);
-status_t driver_set_vcpureg(
-    vmi_instance_t vmi,
-    reg_t value,
-    registers_t reg,
-    unsigned long vcpu);
-status_t xen_get_address_width(
-    vmi_instance_t vmi,
-    uint8_t * width);
-void *driver_read_page(
-    vmi_instance_t vmi,
-    addr_t page);
-status_t driver_write(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    void *buf,
-    uint32_t length);
-int driver_is_pv(
-    vmi_instance_t vmi);
-status_t driver_pause_vm(
-    vmi_instance_t vmi);
-status_t driver_resume_vm(
-    vmi_instance_t vmi);
-status_t driver_events_listen(
-    vmi_instance_t vmi,
-    uint32_t timeout);
-status_t driver_set_mem_access(
-    vmi_instance_t vmi,
-    mem_event_t event,
-    vmi_mem_access_t page_access_flag);
-status_t driver_set_reg_access(
-    vmi_instance_t vmi,
-    reg_event_t event);
-status_t driver_start_single_step(
-    vmi_instance_t vmi, 
-    single_step_event_t event);
-status_t driver_stop_single_step(
-    vmi_instance_t vmi, 
-    unsigned long vcpu);
-status_t driver_shutdown_single_step(
-    vmi_instance_t vmi);
+status_t driver_init_mode(vmi_instance_t vmi, unsigned long id, char *name);
+status_t driver_init(vmi_instance_t vmi);
+void driver_destroy(vmi_instance_t vmi);
+unsigned long driver_get_id_from_name(vmi_instance_t vmi, char *name);
+status_t driver_get_name_from_id(vmi_instance_t vmi,
+                                 unsigned long domid, char **name);
+unsigned long driver_get_id(vmi_instance_t vmi);
+void driver_set_id(vmi_instance_t vmi, unsigned long id);
+status_t driver_check_id(vmi_instance_t vmi, unsigned long id);
+status_t driver_get_name(vmi_instance_t vmi, char **name);
+void driver_set_name(vmi_instance_t vmi, char *name);
+status_t driver_get_memsize(vmi_instance_t vmi, unsigned long *size);
+status_t driver_get_vcpureg(vmi_instance_t vmi,
+                            reg_t *value,
+                            registers_t reg, unsigned long vcpu);
+status_t driver_set_vcpureg(vmi_instance_t vmi,
+                            reg_t value, registers_t reg, unsigned long vcpu);
+status_t xen_get_address_width(vmi_instance_t vmi, uint8_t * width);
+void *driver_read_page(vmi_instance_t vmi, addr_t page);
+status_t driver_write(vmi_instance_t vmi,
+                      addr_t paddr, void *buf, uint32_t length);
+int driver_is_pv(vmi_instance_t vmi);
+status_t driver_pause_vm(vmi_instance_t vmi);
+status_t driver_resume_vm(vmi_instance_t vmi);
+status_t driver_events_listen(vmi_instance_t vmi, uint32_t timeout);
+status_t driver_set_mem_access(vmi_instance_t vmi,
+                               mem_event_t event,
+                               vmi_mem_access_t page_access_flag);
+status_t driver_set_reg_access(vmi_instance_t vmi, reg_event_t event);
+status_t driver_start_single_step(vmi_instance_t vmi,
+                                  single_step_event_t event);
+status_t driver_stop_single_step(vmi_instance_t vmi, unsigned long vcpu);
+status_t driver_shutdown_single_step(vmi_instance_t vmi);
 status_t
-driver_get_address_width(
-    vmi_instance_t vmi,
-    uint8_t * width);
+ driver_get_address_width(vmi_instance_t vmi, uint8_t * width);

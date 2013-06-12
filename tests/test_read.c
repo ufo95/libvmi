@@ -27,31 +27,33 @@
 #include "../libvmi/libvmi.h"
 #include "check_tests.h"
 
-char *get_sym (vmi_instance_t vmi)
+char *
+get_sym(vmi_instance_t vmi)
 {
     char *sym = NULL;
     if (VMI_OS_LINUX == vmi_get_ostype(vmi)) {
         sym = "init_task";
-    }
-    else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
+    } else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
         sym = "PsInitialSystemProcess";
     }
     return sym;
 }
 
-addr_t get_vaddr (vmi_instance_t vmi)
+addr_t
+get_vaddr(vmi_instance_t vmi)
 {
     char *sym = get_sym(vmi);
     return vmi_translate_ksym2v(vmi, sym);
 }
 
-addr_t get_paddr (vmi_instance_t vmi)
+addr_t
+get_paddr(vmi_instance_t vmi)
 {
     addr_t va = get_vaddr(vmi);
     return vmi_translate_kv2p(vmi, va);
 }
 
-START_TEST (test_vmi_read_ksym)
+START_TEST(test_vmi_read_ksym)
 {
     vmi_instance_t vmi = NULL;
     char *sym = NULL;
@@ -64,9 +66,9 @@ START_TEST (test_vmi_read_ksym)
     free(buf);
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_va)
+END_TEST
+START_TEST(test_vmi_read_va)
 {
     vmi_instance_t vmi = NULL;
     addr_t va = 0;
@@ -79,9 +81,9 @@ START_TEST (test_vmi_read_va)
     free(buf);
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_pa)
+END_TEST
+START_TEST(test_vmi_read_pa)
 {
     vmi_instance_t vmi = NULL;
     addr_t pa = 0;
@@ -94,9 +96,9 @@ START_TEST (test_vmi_read_pa)
     free(buf);
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_8_ksym)
+END_TEST
+START_TEST(test_vmi_read_8_ksym)
 {
     vmi_instance_t vmi = NULL;
     char *sym = NULL;
@@ -108,9 +110,9 @@ START_TEST (test_vmi_read_8_ksym)
     fail_unless(status == VMI_SUCCESS, "vmi_read_8_ksym failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_16_ksym)
+END_TEST
+START_TEST(test_vmi_read_16_ksym)
 {
     vmi_instance_t vmi = NULL;
     char *sym = NULL;
@@ -122,9 +124,9 @@ START_TEST (test_vmi_read_16_ksym)
     fail_unless(status == VMI_SUCCESS, "vmi_read_16_ksym failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_32_ksym)
+END_TEST
+START_TEST(test_vmi_read_32_ksym)
 {
     vmi_instance_t vmi = NULL;
     char *sym = NULL;
@@ -136,9 +138,9 @@ START_TEST (test_vmi_read_32_ksym)
     fail_unless(status == VMI_SUCCESS, "vmi_read_32_ksym failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_64_ksym)
+END_TEST
+START_TEST(test_vmi_read_64_ksym)
 {
     vmi_instance_t vmi = NULL;
     char *sym = NULL;
@@ -150,9 +152,9 @@ START_TEST (test_vmi_read_64_ksym)
     fail_unless(status == VMI_SUCCESS, "vmi_read_64_ksym failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_8_va)
+END_TEST
+START_TEST(test_vmi_read_8_va)
 {
     vmi_instance_t vmi = NULL;
     addr_t va = 0;
@@ -164,9 +166,9 @@ START_TEST (test_vmi_read_8_va)
     fail_unless(status == VMI_SUCCESS, "vmi_read_8_va failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_16_va)
+END_TEST
+START_TEST(test_vmi_read_16_va)
 {
     vmi_instance_t vmi = NULL;
     addr_t va = 0;
@@ -178,9 +180,9 @@ START_TEST (test_vmi_read_16_va)
     fail_unless(status == VMI_SUCCESS, "vmi_read_16_va failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_32_va)
+END_TEST
+START_TEST(test_vmi_read_32_va)
 {
     vmi_instance_t vmi = NULL;
     addr_t va = 0;
@@ -192,9 +194,9 @@ START_TEST (test_vmi_read_32_va)
     fail_unless(status == VMI_SUCCESS, "vmi_read_32_va failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_64_va)
+END_TEST
+START_TEST(test_vmi_read_64_va)
 {
     vmi_instance_t vmi = NULL;
     addr_t va = 0;
@@ -206,9 +208,9 @@ START_TEST (test_vmi_read_64_va)
     fail_unless(status == VMI_SUCCESS, "vmi_read_64_va failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_8_pa)
+END_TEST
+START_TEST(test_vmi_read_8_pa)
 {
     vmi_instance_t vmi = NULL;
     addr_t pa = 0;
@@ -220,9 +222,9 @@ START_TEST (test_vmi_read_8_pa)
     fail_unless(status == VMI_SUCCESS, "vmi_read_8_pa failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_16_pa)
+END_TEST
+START_TEST(test_vmi_read_16_pa)
 {
     vmi_instance_t vmi = NULL;
     addr_t pa = 0;
@@ -234,9 +236,9 @@ START_TEST (test_vmi_read_16_pa)
     fail_unless(status == VMI_SUCCESS, "vmi_read_16_pa failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_32_pa)
+END_TEST
+START_TEST(test_vmi_read_32_pa)
 {
     vmi_instance_t vmi = NULL;
     addr_t pa = 0;
@@ -248,9 +250,9 @@ START_TEST (test_vmi_read_32_pa)
     fail_unless(status == VMI_SUCCESS, "vmi_read_32_pa failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-START_TEST (test_vmi_read_64_pa)
+END_TEST
+START_TEST(test_vmi_read_64_pa)
 {
     vmi_instance_t vmi = NULL;
     addr_t pa = 0;
@@ -262,10 +264,10 @@ START_TEST (test_vmi_read_64_pa)
     fail_unless(status == VMI_SUCCESS, "vmi_read_64_pa failed");
     vmi_destroy(vmi);
 }
-END_TEST
 
-/* read test cases */
-TCase *read_tcase (void)
+END_TEST
+    /* read test cases */
+    TCase * read_tcase(void)
 {
     TCase *tc_read = tcase_create("LibVMI Read");
     tcase_add_test(tc_read, test_vmi_read_ksym);
@@ -288,13 +290,13 @@ TCase *read_tcase (void)
     // vmi_read_unicode_str_va
     // vmi_convert_str_encoding
     // vmi_free_unicode_str
-   
+
     tcase_add_test(tc_read, test_vmi_read_8_pa);
     tcase_add_test(tc_read, test_vmi_read_16_pa);
     tcase_add_test(tc_read, test_vmi_read_32_pa);
     tcase_add_test(tc_read, test_vmi_read_64_pa);
     // vmi_read_addr_pa
     // vmi_read_str_pa
-  
+
     return tc_read;
 }

@@ -29,7 +29,7 @@
 #include "check_tests.h"
 
 
-START_TEST (test_vmi_get_name)
+START_TEST(test_vmi_get_name)
 {
     vmi_instance_t vmi = NULL;
     char *name = NULL;
@@ -41,10 +41,10 @@ START_TEST (test_vmi_get_name)
     free(name);
     vmi_destroy(vmi);
 }
-END_TEST
 
-/* accessor test cases */
-TCase *accessor_tcase (void)
+END_TEST
+    /* accessor test cases */
+    TCase * accessor_tcase(void)
 {
     TCase *tc_accessor = tcase_create("LibVMI Accessor");
 

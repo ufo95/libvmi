@@ -34,9 +34,7 @@
 /* Nothing */
 #else
 void
-dbprint(
-    char *format,
-    ...)
+dbprint(char *format, ...)
 {
     va_list args;
 
@@ -48,9 +46,7 @@ dbprint(
 
 /* prints an error message to stderr */
 void
-errprint(
-    char *format,
-    ...)
+errprint(char *format, ...)
 {
     va_list args;
 
@@ -62,9 +58,7 @@ errprint(
 
 /* prints a warning message to stderr */
 void
-warnprint(
-    char *format,
-    ...)
+warnprint(char *format, ...)
 {
     va_list args;
 
@@ -75,10 +69,7 @@ warnprint(
 }
 
 void *
-safe_malloc_(
-    size_t size,
-    char const *file,
-    int line)
+safe_malloc_(size_t size, char const *file, int line)
 {
     void *p = malloc(size);
 
@@ -91,31 +82,25 @@ safe_malloc_(
 }
 
 unsigned long
-get_reg32(
-    reg_t r)
+get_reg32(reg_t r)
 {
     return (unsigned long) r;
 }
 
 int
-vmi_get_bit(
-    reg_t reg,
-    int bit)
+vmi_get_bit(reg_t reg, int bit)
 {
     reg_t mask = 1 << bit;
 
     if (reg & mask) {
         return 1;
-    }
-    else {
+    } else {
         return 0;
     }
 }
 
 addr_t
-aligned_addr(
-    vmi_instance_t vmi,
-    addr_t addr)
+aligned_addr(vmi_instance_t vmi, addr_t addr)
 {
     addr_t mask = ~((addr_t) vmi->page_size - 1);
     addr_t aligned = (addr_t) addr & (addr_t) mask;
@@ -126,16 +111,13 @@ aligned_addr(
 }
 
 int
-is_addr_aligned(
-    vmi_instance_t vmi,
-    addr_t addr)
+is_addr_aligned(vmi_instance_t vmi, addr_t addr)
 {
     return (addr == aligned_addr(vmi, addr));
 }
 
 void
-vmi_free_unicode_str(
-    unicode_string_t *p_us)
+vmi_free_unicode_str(unicode_string_t *p_us)
 {
     if (p_us->contents)
         free(p_us->contents);

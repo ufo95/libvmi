@@ -163,10 +163,12 @@ struct vmi_instance {
 typedef struct memevent_page {
 
     vmi_mem_access_t access_flag; /**< combined page access flag */
+
     vmi_event_t *event; /**< page event registered */
+
     addr_t key; /**< page # */
 
-    GHashTable  *byte_events; /**< byte events */
+    GHashTable *byte_events;  /**< byte events */
 
 } memevent_page_t;
 
@@ -182,7 +184,7 @@ typedef struct _windows_unicode_string32 {
     typedef struct _windows_unicode_string64 {
         uint16_t length;
         uint16_t maximum_length;
-        uint64_t pBuffer;   // pointer to string contents
+        uint64_t pBuffer;       // pointer to string contents
     } __attribute__ ((packed))
     win64_unicode_string_t;
 
@@ -192,179 +194,91 @@ typedef struct _windows_unicode_string32 {
 #ifndef VMI_DEBUG
 #define dbprint(format, args...) ((void)0)
 #else
-    void dbprint(
-    char *format,
-    ...) __attribute__((format(printf,1,2)));
+    void dbprint(char *format, ...) __attribute__ ((format(printf, 1, 2)));
 #endif
-    void errprint(
-    char *format,
-    ...) __attribute__((format(printf,1,2)));
-    void warnprint(
-    char *format,
-    ...) __attribute__((format(printf,1,2)));
+    void errprint(char *format, ...) __attribute__ ((format(printf, 1, 2)));
+    void warnprint(char *format, ...) __attribute__ ((format(printf, 1, 2)));
 
 #define safe_malloc(size) safe_malloc_ (size, __FILE__, __LINE__)
-    void *safe_malloc_(
-    size_t size,
-    char const *file,
-    int line);
-    unsigned long get_reg32(
-    reg_t r);
-    int vmi_get_bit(
-    reg_t reg,
-    int bit);
-    addr_t aligned_addr(
-    vmi_instance_t vmi,
-    addr_t addr);
-    int is_addr_aligned(
-    vmi_instance_t vmi,
-    addr_t addr);
+    void *safe_malloc_(size_t size, char const *file, int line);
+    unsigned long get_reg32(reg_t r);
+    int vmi_get_bit(reg_t reg, int bit);
+    addr_t aligned_addr(vmi_instance_t vmi, addr_t addr);
+    int is_addr_aligned(vmi_instance_t vmi, addr_t addr);
 
 /*-------------------------------------
  * cache.c
  */
-    void pid_cache_init(
-    vmi_instance_t vmi);
-    void pid_cache_destroy(
-    vmi_instance_t vmi);
-    status_t pid_cache_get(
-    vmi_instance_t vmi,
-    int pid,
-    addr_t *dtb);
-    void pid_cache_set(
-    vmi_instance_t vmi,
-    int pid,
-    addr_t dtb);
-    status_t pid_cache_del(
-    vmi_instance_t vmi,
-    int pid);
-    void pid_cache_flush(
-    vmi_instance_t vmi);
+    void pid_cache_init(vmi_instance_t vmi);
+    void pid_cache_destroy(vmi_instance_t vmi);
+    status_t pid_cache_get(vmi_instance_t vmi, int pid, addr_t *dtb);
+    void pid_cache_set(vmi_instance_t vmi, int pid, addr_t dtb);
+    status_t pid_cache_del(vmi_instance_t vmi, int pid);
+    void pid_cache_flush(vmi_instance_t vmi);
 
-    void sym_cache_init(
-    vmi_instance_t vmi);
-    void sym_cache_destroy(
-    vmi_instance_t vmi);
-    status_t sym_cache_get(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    char *sym,
-    addr_t *va);
-    void sym_cache_set(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    char *sym,
-    addr_t va);
-    status_t sym_cache_del(
-    vmi_instance_t vmi,
-    addr_t base_addr,
-    uint32_t pid,
-    char *sym);
-    void sym_cache_flush(
-    vmi_instance_t vmi);
+    void sym_cache_init(vmi_instance_t vmi);
+    void sym_cache_destroy(vmi_instance_t vmi);
+    status_t sym_cache_get(vmi_instance_t vmi,
+                           addr_t base_addr,
+                           uint32_t pid, char *sym, addr_t *va);
+    void sym_cache_set(vmi_instance_t vmi,
+                       addr_t base_addr, uint32_t pid, char *sym, addr_t va);
+    status_t sym_cache_del(vmi_instance_t vmi,
+                           addr_t base_addr, uint32_t pid, char *sym);
+    void sym_cache_flush(vmi_instance_t vmi);
 
-    void v2p_cache_init(
-    vmi_instance_t vmi);
-    void v2p_cache_destroy(
-    vmi_instance_t vmi);
-    status_t v2p_cache_get(
-    vmi_instance_t vmi,
-    addr_t va,
-    addr_t dtb,
-    addr_t *pa);
-    void v2p_cache_set(
-    vmi_instance_t vmi,
-    addr_t va,
-    addr_t dtb,
-    addr_t pa);
-    status_t v2p_cache_del(
-    vmi_instance_t vmi,
-    addr_t va,
-    addr_t dtb);
-    void v2p_cache_flush(
-    vmi_instance_t vmi);
+    void v2p_cache_init(vmi_instance_t vmi);
+    void v2p_cache_destroy(vmi_instance_t vmi);
+    status_t v2p_cache_get(vmi_instance_t vmi,
+                           addr_t va, addr_t dtb, addr_t *pa);
+    void v2p_cache_set(vmi_instance_t vmi, addr_t va, addr_t dtb, addr_t pa);
+    status_t v2p_cache_del(vmi_instance_t vmi, addr_t va, addr_t dtb);
+    void v2p_cache_flush(vmi_instance_t vmi);
 
 /*-----------------------------------------
  * core.c
  */
     status_t
-    get_memory_layout(
-    vmi_instance_t vmi,
-    page_mode_t *set_pm,
-    reg_t *set_cr3,
-    int *set_pae,
-    int *set_pse,
-    int *set_lme);
+     get_memory_layout(vmi_instance_t vmi,
+                       page_mode_t *set_pm,
+                       reg_t *set_cr3,
+                       int *set_pae, int *set_pse, int *set_lme);
 
 /*-----------------------------------------
  * memory.c
  */
-    void *vmi_read_page(
-    vmi_instance_t vmi,
-    addr_t frame_num);
+    void *vmi_read_page(vmi_instance_t vmi, addr_t frame_num);
 
 /*-----------------------------------------
  * os/linux/...
  */
-    status_t linux_init(
-    vmi_instance_t instance);
-    status_t linux_system_map_symbol_to_address(
-    vmi_instance_t instance,
-    char *symbol,
-    addr_t *address);
-    addr_t linux_pid_to_pgd(
-    vmi_instance_t vmi,
-    int pid);
-    int linux_pgd_to_pid(
-    vmi_instance_t vmi,
-    addr_t pgd);
+    status_t linux_init(vmi_instance_t instance);
+    status_t linux_system_map_symbol_to_address(vmi_instance_t instance,
+                                                char *symbol,
+                                                addr_t *address);
+    addr_t linux_pid_to_pgd(vmi_instance_t vmi, int pid);
+    int linux_pgd_to_pid(vmi_instance_t vmi, addr_t pgd);
 
 /*-----------------------------------------
  * os/windows/...
  */
-    typedef int (
-    *check_magic_func) (
-    uint32_t);
+    typedef int (*check_magic_func) (uint32_t);
 
-    status_t windows_init(
-    vmi_instance_t instance);
-    addr_t windows_find_eprocess(
-    vmi_instance_t instance,
-    char *name);
-    status_t windows_export_to_rva(
-    vmi_instance_t,
-    char *,
-    addr_t,
-    uint32_t,
-    addr_t *);
-    status_t windows_kpcr_lookup(
-    vmi_instance_t vmi,
-    char *symbol,
-    addr_t *address);
-    addr_t windows_find_cr3(
-    vmi_instance_t vmi);
-    int find_pname_offset(
-    vmi_instance_t vmi,
-    check_magic_func check);
-    win_ver_t find_windows_version(
-    vmi_instance_t vmi,
-    addr_t KdVersionBlock);
-    status_t validate_pe_image(
-    const uint8_t * const image,
-    size_t len);
-    addr_t windows_pid_to_pgd(
-    vmi_instance_t vmi,
-    int pid);
-    int windows_pgd_to_pid(
-    vmi_instance_t vmi,
-    addr_t pgd);
+    status_t windows_init(vmi_instance_t instance);
+    addr_t windows_find_eprocess(vmi_instance_t instance, char *name);
+    status_t windows_export_to_rva(vmi_instance_t,
+                                   char *, addr_t, uint32_t, addr_t *);
+    status_t windows_kpcr_lookup(vmi_instance_t vmi,
+                                 char *symbol, addr_t *address);
+    addr_t windows_find_cr3(vmi_instance_t vmi);
+    int find_pname_offset(vmi_instance_t vmi, check_magic_func check);
+    win_ver_t find_windows_version(vmi_instance_t vmi, addr_t KdVersionBlock);
+    status_t validate_pe_image(const uint8_t * const image, size_t len);
+    addr_t windows_pid_to_pgd(vmi_instance_t vmi, int pid);
+    int windows_pgd_to_pid(vmi_instance_t vmi, addr_t pgd);
     status_t
-    windows_symbol_to_address(
-    vmi_instance_t vmi,
-    char *symbol,
-    addr_t *address);
+     windows_symbol_to_address(vmi_instance_t vmi,
+                               char *symbol, addr_t *address);
 
     addr_t windows_find_eprocess_list_pid(vmi_instance_t vmi, int pid);
     addr_t windows_find_eprocess_list_pgd(vmi_instance_t vmi, addr_t pgd);
@@ -373,43 +287,26 @@ typedef struct _windows_unicode_string32 {
  * strmatch.c
  */
 
-    void *boyer_moore_init(
-    unsigned char *x,
-    int m);
-    int boyer_moore2(
-    void *bm,
-    unsigned char *y,
-    int n);
-    void boyer_moore_fini(
-    void *bm);
+    void *boyer_moore_init(unsigned char *x, int m);
+    int boyer_moore2(void *bm, unsigned char *y, int n);
+    void boyer_moore_fini(void *bm);
 
-    int boyer_moore(
-    unsigned char *x,
-    int m,
-    unsigned char *y,
-    int n);
+    int boyer_moore(unsigned char *x, int m, unsigned char *y, int n);
 
 /*-----------------------------------------
  * performance.c
  */
-    void timer_start(
-    );
-    void timer_stop(
-    const char *id);
+    void timer_start();
+    void timer_stop(const char *id);
 
 /*----------------------------------------------
  * events.c
  */
-    void events_init(
-        vmi_instance_t vmi);
-    void events_destroy(
-        vmi_instance_t vmi);
-    gboolean event_entry_free (
-        gpointer key,
-        gpointer value,
-        gpointer data);
+    void events_init(vmi_instance_t vmi);
+    void events_destroy(vmi_instance_t vmi);
+    gboolean event_entry_free(gpointer key, gpointer value, gpointer data);
     typedef GHashTableIter event_iter_t;
-    #define for_each_event(vmi, iter, table, key, val) \
+#define for_each_event(vmi, iter, table, key, val) \
         g_hash_table_iter_init(&iter, table); \
         while(g_hash_table_iter_next(&iter,(void**)key,(void**)val))
 

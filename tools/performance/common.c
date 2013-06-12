@@ -27,10 +27,8 @@
 #include <stdlib.h>
 #include <math.h>
     void
-print_measurement(
-    struct timeval ktv_start,
-    struct timeval ktv_end,
-    long int *diff) 
+print_measurement(struct timeval ktv_start,
+                  struct timeval ktv_end, long int *diff) 
 {
     *diff =
         (((long int) ktv_end.tv_usec - (long int) ktv_start.tv_usec) +
@@ -43,9 +41,7 @@ print_measurement(
               (long int) ktv_end.tv_usec, *diff);
 }  static double
 
-stddev(
-    long int *data,
-    int count) 
+stddev(long int *data, int count) 
 {
     double *sq_data = malloc(count * sizeof(double));
     double total = 0.0;
@@ -67,9 +63,7 @@ stddev(
 }
 
  void
-avg_measurement(
-    long int *data,
-    int loops) 
+avg_measurement(long int *data, int loops) 
 {
     int i = 0;
     long int sum = 0;
@@ -78,8 +72,7 @@ avg_measurement(
         sum += data[i];
     }
     printf("mean %f, stdev %f\n",
-            (double) ((double) sum / (double) loops), stddev(data,
-                                                             loops));
+            (double) ((double) sum / (double) loops), stddev(data, loops));
      
         // repeat avg for all but first measurement
         sum = 0;

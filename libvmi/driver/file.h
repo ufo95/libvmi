@@ -35,38 +35,17 @@ typedef struct file_instance {
     void *map;           /**< memory mapped file */
 } file_instance_t;
 
-status_t file_init(
-    vmi_instance_t vmi);
-void file_destroy(
-    vmi_instance_t vmi);
-status_t file_get_name(
-    vmi_instance_t vmi,
-    char **name);
-void file_set_name(
-    vmi_instance_t vmi,
-    char *name);
-status_t file_get_memsize(
-    vmi_instance_t vmi,
-    unsigned long *size);
-status_t file_get_vcpureg(
-    vmi_instance_t vmi,
-    reg_t *value,
-    registers_t reg,
-    unsigned long vcpu);
-void *file_read_page(
-    vmi_instance_t vmi,
-    addr_t page);
-status_t file_write(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    void *buf,
-    uint32_t length);
-int file_is_pv(
-    vmi_instance_t vmi);
-status_t file_test(
-    unsigned long id,
-    char *name);
-status_t file_pause_vm(
-    vmi_instance_t vmi);
-status_t file_resume_vm(
-    vmi_instance_t vmi);
+status_t file_init(vmi_instance_t vmi);
+void file_destroy(vmi_instance_t vmi);
+status_t file_get_name(vmi_instance_t vmi, char **name);
+void file_set_name(vmi_instance_t vmi, char *name);
+status_t file_get_memsize(vmi_instance_t vmi, unsigned long *size);
+status_t file_get_vcpureg(vmi_instance_t vmi,
+                          reg_t *value, registers_t reg, unsigned long vcpu);
+void *file_read_page(vmi_instance_t vmi, addr_t page);
+status_t file_write(vmi_instance_t vmi,
+                    addr_t paddr, void *buf, uint32_t length);
+int file_is_pv(vmi_instance_t vmi);
+status_t file_test(unsigned long id, char *name);
+status_t file_pause_vm(vmi_instance_t vmi);
+status_t file_resume_vm(vmi_instance_t vmi);

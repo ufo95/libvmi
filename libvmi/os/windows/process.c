@@ -33,18 +33,15 @@
 #include <sys/mman.h>
 
 char *
-windows_get_eprocess_name(
-    vmi_instance_t vmi,
-    addr_t paddr)
+windows_get_eprocess_name(vmi_instance_t vmi, addr_t paddr)
 {
-    int name_length = 16;   //TODO verify that this is correct for all versions
+    int name_length = 16;       //TODO verify that this is correct for all versions
     addr_t name_paddr = paddr + vmi->os.windows_instance.pname_offset;
     char *name = (char *) safe_malloc(name_length);
 
     if (name_length == vmi_read_pa(vmi, name_paddr, name, name_length)) {
         return name;
-    }
-    else {
+    } else {
         free(name);
         return NULL;
     }
@@ -54,57 +51,49 @@ windows_get_eprocess_name(
 #define MAGIC2 0x200003
 #define MAGIC3 0x580003
 static inline int
-check_magic_2k(
-    uint32_t a)
+check_magic_2k(uint32_t a)
 {
     return (a == MAGIC1);
 }
 
 static inline int
-check_magic_xp(
-    uint32_t a)
+check_magic_xp(uint32_t a)
 {
     return (a == MAGIC1);
 }
 
 static inline int
-check_magic_2k3(
-    uint32_t a)
+check_magic_2k3(uint32_t a)
 {
     return (a == MAGIC1);
 }
 
 static inline int
-check_magic_vista(
-    uint32_t a)
+check_magic_vista(uint32_t a)
 {
     return (a == MAGIC2);
 }
 
 static inline int
-check_magic_2k8(
-    uint32_t a)
+check_magic_2k8(uint32_t a)
 {
     return (a == MAGIC1 || a == MAGIC2 || a == MAGIC3);
 }  // not sure what this is, check all
 
 static inline int
-check_magic_7(
-    uint32_t a)
+check_magic_7(uint32_t a)
 {
     return (a == MAGIC3);
 }
 
 static inline int
-check_magic_unknown(
-    uint32_t a)
+check_magic_unknown(uint32_t a)
 {
     return (a == MAGIC1 || a == MAGIC2 || a == MAGIC3);
 }
 
 static check_magic_func
-get_check_magic_func(
-    vmi_instance_t vmi)
+get_check_magic_func(vmi_instance_t vmi)
 {
     check_magic_func rtn = NULL;
 
@@ -142,9 +131,7 @@ get_check_magic_func(
 }
 
 int
-find_pname_offset(
-    vmi_instance_t vmi,
-    check_magic_func check)
+find_pname_offset(vmi_instance_t vmi, check_magic_func check)
 {
     addr_t block_pa = 0;
     addr_t offset = 0;
@@ -172,14 +159,12 @@ find_pname_offset(
 
             if (check(value)) { // look for specific magic #
                 dbprint
-                    ("--%s: found magic value 0x%.8"PRIx32" @ offset 0x%.8"PRIx64"\n",
-                     __FUNCTION__, value, block_pa + offset);
+                    ("--%s: found magic value 0x%.8" PRIx32 " @ offset 0x%.8"
+                     PRIx64 "\n", __FUNCTION__, value, block_pa + offset);
 
                 unsigned char haystack[0x500];
 
-                read =
-                    vmi_read_pa(vmi, block_pa + offset, haystack,
-                                0x500);
+                read = vmi_read_pa(vmi, block_pa + offset, haystack, 0x500);
                 if (0x500 != read) {
                     continue;
                 }
@@ -188,13 +173,11 @@ find_pname_offset(
 
                 if (-1 == i) {
                     continue;
-                }
-                else {
-                    vmi->init_task =
-                        block_pa + offset;
+                } else {
+                    vmi->init_task = block_pa + offset;
                     dbprint
-                        ("--%s: found Idle process at 0x%.8"PRIx64" + 0x%x\n",
-                         __FUNCTION__, block_pa + offset, i);
+                        ("--%s: found Idle process at 0x%.8" PRIx64
+                         " + 0x%x\n", __FUNCTION__, block_pa + offset, i);
                     boyer_moore_fini(bm);
                     return i;
                 }
@@ -206,11 +189,9 @@ find_pname_offset(
 }
 
 static addr_t
-find_process_by_name(
-    vmi_instance_t vmi,
-    check_magic_func check,
-    addr_t start_address,
-    const char *name)
+find_process_by_name(vmi_instance_t vmi,
+                     check_magic_func check,
+                     addr_t start_address, const char *name)
 {
     addr_t block_pa = 0;
     addr_t offset = 0;
@@ -252,40 +233,31 @@ find_process_by_name(
 }
 
 addr_t
-windows_find_eprocess(
-    vmi_instance_t vmi,
-    char *name)
+windows_find_eprocess(vmi_instance_t vmi, char *name)
 {
     addr_t start_address = 0;
     check_magic_func check = get_check_magic_func(vmi);
 
     if (vmi->os.windows_instance.pname_offset == 0) {
-        vmi->os.windows_instance.pname_offset =
-            find_pname_offset(vmi, check);
+        vmi->os.windows_instance.pname_offset = find_pname_offset(vmi, check);
         if (vmi->os.windows_instance.pname_offset == 0) {
             dbprint("--failed to find pname_offset\n");
             return 0;
-        }
-        else {
+        } else {
             dbprint("**set os.windows_instance.pname_offset (0x%x)\n",
                     vmi->os.windows_instance.pname_offset);
         }
     }
 
     if (vmi->init_task) {
-        start_address =
-            vmi->init_task;
+        start_address = vmi->init_task;
     }
 
     return find_process_by_name(vmi, check, start_address, name);
 }
 
 addr_t
-eprocess_list_search(
-        vmi_instance_t vmi,
-        int offset,
-        size_t len,
-        void *value)
+eprocess_list_search(vmi_instance_t vmi, int offset, size_t len, void *value)
 {
     addr_t next_process, list_head;
     int tasks_offset;
@@ -303,7 +275,7 @@ eprocess_list_search(
     }
     list_head = next_process;
 
-    while(1) {
+    while (1) {
         addr_t tmp_next = 0;
         vmi_read_addr_va(vmi, next_process, 0, &tmp_next);
         if (list_head == tmp_next) {
@@ -322,9 +294,7 @@ exit:
 }
 
 addr_t
-windows_find_eprocess_list_pid(
-        vmi_instance_t vmi,
-        int pid)
+windows_find_eprocess_list_pid(vmi_instance_t vmi, int pid)
 {
     int pid_offset = vmi->os.windows_instance.pid_offset;
     size_t len = sizeof(int);
@@ -332,17 +302,14 @@ windows_find_eprocess_list_pid(
 }
 
 addr_t
-windows_find_eprocess_list_pgd(
-        vmi_instance_t vmi,
-        addr_t pgd)
+windows_find_eprocess_list_pgd(vmi_instance_t vmi, addr_t pgd)
 {
     int pdbase_offset = vmi->os.windows_instance.pdbase_offset;
     size_t len;
-    if(vmi->page_mode == VMI_PM_LEGACY || vmi->page_mode == VMI_PM_PAE)
+    if (vmi->page_mode == VMI_PM_LEGACY || vmi->page_mode == VMI_PM_PAE)
         len = sizeof(uint32_t);
     else
         len = sizeof(addr_t);
 
     return eprocess_list_search(vmi, pdbase_offset, len, &pgd);
 }
-

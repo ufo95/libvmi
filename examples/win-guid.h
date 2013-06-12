@@ -39,27 +39,26 @@
 #define IMAGE_DEBUG_TYPE_CLSID            11
 
 struct image_debug_directory {
-    uint32_t   characteristics;
-    uint32_t   time_date_stamp;
-    uint16_t   major_version;
-    uint16_t   minor_version;
-    uint32_t   type;
-    uint32_t   size_of_data;
-    uint32_t   address_of_raw_data;
-    uint32_t   pointer_to_raw_data;
+    uint32_t characteristics;
+    uint32_t time_date_stamp;
+    uint16_t major_version;
+    uint16_t minor_version;
+    uint32_t type;
+    uint32_t size_of_data;
+    uint32_t address_of_raw_data;
+    uint32_t pointer_to_raw_data;
 } __attribute__ ((packed));
 
 struct guid {
     uint32_t data1;
     uint16_t data2;
     uint16_t data3;
-    uint8_t  data4[8];
+    uint8_t data4[8];
 } __attribute__ ((packed));
 
 struct cv_info_pdb70 {
-  uint32_t      cv_signature;
-  struct guid   signature;
-  uint32_t      age;
-  uint8_t       pdb_file_name[];
+    uint32_t cv_signature;
+    struct guid signature;
+    uint32_t age;
+    uint8_t pdb_file_name[];
 } __attribute__ ((packed));
-

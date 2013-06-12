@@ -41,22 +41,14 @@ struct memory_cache_entry {
     void *data;
 };
 typedef struct memory_cache_entry *memory_cache_entry_t;
-static void *(
-    *get_data_callback) (
-    vmi_instance_t,
-    addr_t,
-    uint32_t) = NULL;
-static void (
-    *release_data_callback) (
-    void *,
-    size_t) = NULL;
+static void *(*get_data_callback) (vmi_instance_t, addr_t, uint32_t) = NULL;
+static void (*release_data_callback) (void *, size_t) = NULL;
 
 //---------------------------------------------------------
 // Internal implementation functions
 
 static void
-memory_cache_entry_free(
-    gpointer data)
+memory_cache_entry_free(gpointer data)
 {
     memory_cache_entry_t entry = (memory_cache_entry_t) data;
 
@@ -67,18 +59,13 @@ memory_cache_entry_free(
 }
 
 static void *
-get_memory_data(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    uint32_t length)
+get_memory_data(vmi_instance_t vmi, addr_t paddr, uint32_t length)
 {
     return get_data_callback(vmi, paddr, length);
 }
 
 static void
-remove_entry(
-    gpointer key,
-    gpointer cache)
+remove_entry(gpointer key, gpointer cache)
 {
     GHashTable *memory_cache = cache;
 
@@ -87,8 +74,7 @@ remove_entry(
 }
 
 static void
-clean_cache(
-    vmi_instance_t vmi)
+clean_cache(vmi_instance_t vmi)
 {
     GList *list = NULL;
 
@@ -109,22 +95,20 @@ clean_cache(
 }
 
 static void *
-validate_and_return_data(
-    vmi_instance_t vmi,
-    memory_cache_entry_t entry)
+validate_and_return_data(vmi_instance_t vmi, memory_cache_entry_t entry)
 {
     time_t now = time(NULL);
 
     if (vmi->memory_cache_age &&
         (now - entry->last_updated > vmi->memory_cache_age)) {
-        dbprint("--MEMORY cache refresh 0x%"PRIx64"\n", entry->paddr);
+        dbprint("--MEMORY cache refresh 0x%" PRIx64 "\n", entry->paddr);
         release_data_callback(entry->data, entry->length);
         entry->data = get_memory_data(vmi, entry->paddr, entry->length);
         entry->last_updated = now;
 
-        GList* lru_entry = g_list_find_custom(vmi->memory_cache_lru,
-                &entry->paddr, g_int64_equal);
-        gint64* key = lru_entry->data;
+        GList *lru_entry = g_list_find_custom(vmi->memory_cache_lru,
+                                              &entry->paddr, g_int64_equal);
+        gint64 *key = lru_entry->data;
         vmi->memory_cache_lru = g_list_remove(vmi->memory_cache_lru, key);
         vmi->memory_cache_lru = g_list_prepend(vmi->memory_cache_lru, key);
     }
@@ -132,8 +116,8 @@ validate_and_return_data(
     return entry->data;
 }
 
-static memory_cache_entry_t create_new_entry (vmi_instance_t vmi, addr_t paddr,
-        uint32_t length)
+static memory_cache_entry_t
+create_new_entry(vmi_instance_t vmi, addr_t paddr, uint32_t length)
 {
 
     // sanity check - are we getting memory outside of the physical memory range?
@@ -146,15 +130,14 @@ static memory_cache_entry_t create_new_entry (vmi_instance_t vmi, addr_t paddr,
     // TODO: perform other reasonable checks
 
     if (vmi->hvm && (paddr + length - 1 > vmi->size)) {
-        errprint("--requesting PA [0x%"PRIx64"] beyond memsize [0x%"PRIx64"]\n",
-                paddr + length, vmi->size);
-        errprint("\tpaddr: %"PRIx64", length %"PRIx32", vmi->size %"PRIx64"\n", paddr, length,
-                vmi->size);
+        errprint("--requesting PA [0x%" PRIx64 "] beyond memsize [0x%" PRIx64
+                 "]\n", paddr + length, vmi->size);
+        errprint("\tpaddr: %" PRIx64 ", length %" PRIx32 ", vmi->size %"
+                 PRIx64 "\n", paddr, length, vmi->size);
         return 0;
     }
 
-    memory_cache_entry_t entry =
-        (memory_cache_entry_t)
+    memory_cache_entry_t entry = (memory_cache_entry_t)
         safe_malloc(sizeof(struct memory_cache_entry));
 
     entry->paddr = paddr;
@@ -173,19 +156,16 @@ static memory_cache_entry_t create_new_entry (vmi_instance_t vmi, addr_t paddr,
 //---------------------------------------------------------
 // External API functions
 void
-memory_cache_init(
-    vmi_instance_t vmi,
-    void *(*get_data) (vmi_instance_t,
-                       addr_t,
-                       uint32_t),
-    void (*release_data) (void *,
-                          size_t),
-    unsigned long age_limit)
+memory_cache_init(vmi_instance_t vmi,
+                  void *(*get_data) (vmi_instance_t,
+                                     addr_t,
+                                     uint32_t),
+                  void (*release_data) (void *,
+                                        size_t), unsigned long age_limit)
 {
     vmi->memory_cache =
         g_hash_table_new_full(g_int64_hash, g_int64_equal,
-                              g_free,
-                              memory_cache_entry_free);
+                              g_free, memory_cache_entry_free);
     vmi->memory_cache_lru = NULL;
     vmi->memory_cache_age = age_limit;
     vmi->memory_cache_size = 0;
@@ -196,9 +176,7 @@ memory_cache_init(
 
 #if ENABLE_PAGE_CACHE == 1
 void *
-memory_cache_insert(
-    vmi_instance_t vmi,
-    addr_t paddr)
+memory_cache_insert(vmi_instance_t vmi, addr_t paddr)
 {
     memory_cache_entry_t entry = NULL;
     addr_t paddr_aligned = paddr & ~(((addr_t) vmi->page_size) - 1);
@@ -210,11 +188,10 @@ memory_cache_insert(
 
     gint64 *key = &paddr;
     if ((entry = g_hash_table_lookup(vmi->memory_cache, key)) != NULL) {
-        dbprint("--MEMORY cache hit 0x%"PRIx64"\n", paddr);
+        dbprint("--MEMORY cache hit 0x%" PRIx64 "\n", paddr);
         return validate_and_return_data(vmi, entry);
-    }
-    else {
-        dbprint("--MEMORY cache set 0x%"PRIx64"\n", paddr);
+    } else {
+        dbprint("--MEMORY cache set 0x%" PRIx64 "\n", paddr);
 
         entry = create_new_entry(vmi, paddr, vmi->page_size);
         if (!entry) {
@@ -229,8 +206,7 @@ memory_cache_insert(
         gint64 *key2 = safe_malloc(sizeof(gint64));
 
         *key2 = paddr;
-        vmi->memory_cache_lru =
-            g_list_prepend(vmi->memory_cache_lru, key2);
+        vmi->memory_cache_lru = g_list_prepend(vmi->memory_cache_lru, key2);
         vmi->memory_cache_size++;
 
         return entry->data;
@@ -238,17 +214,14 @@ memory_cache_insert(
 }
 #else
 void *
-memory_cache_insert(
-    vmi_instance_t vmi,
-    addr_t paddr)
+memory_cache_insert(vmi_instance_t vmi, addr_t paddr)
 {
     return get_memory_data(vmi, paddr, vmi->page_size);
 }
 #endif
 
 void
-memory_cache_destroy(
-    vmi_instance_t vmi)
+memory_cache_destroy(vmi_instance_t vmi)
 {
     uint32_t tmp = vmi->memory_cache_size_max;
 

@@ -32,11 +32,7 @@
 
 // takes an rva and looks up a null terminated string at that location
 char *
-rva_to_string(
-    vmi_instance_t vmi,
-    addr_t rva,
-    addr_t base_addr,
-    uint32_t pid)
+rva_to_string(vmi_instance_t vmi, addr_t rva, addr_t base_addr, uint32_t pid)
 {
     addr_t vaddr = base_addr + rva;
 
@@ -44,11 +40,8 @@ rva_to_string(
 }
 
 void
-dump_exports(
-    vmi_instance_t vmi,
-    struct export_table *et,
-    addr_t base_addr,
-    uint32_t pid)
+dump_exports(vmi_instance_t vmi,
+             struct export_table *et, addr_t base_addr, uint32_t pid)
 {
     addr_t base1 = base_addr + et->address_of_names;
     addr_t base2 = base_addr + et->address_of_name_ordinals;
@@ -70,7 +63,7 @@ dump_exports(
                                &ordinal);
                 vmi_read_32_va(vmi, base3 + ordinal + sizeof(uint32_t),
                                pid, &loc);
-                printf("%s:%d:0x%"PRIx32"\n", str, ordinal, loc);
+                printf("%s:%d:0x%" PRIx32 "\n", str, ordinal, loc);
                 free(str);
             }
         }
@@ -78,17 +71,13 @@ dump_exports(
 }
 
 status_t
-get_export_rva(
-    vmi_instance_t vmi,
-    addr_t *rva,
-    int aof_index,
-    struct export_table *et,
-    addr_t base_addr,
-    uint32_t pid)
+get_export_rva(vmi_instance_t vmi,
+               addr_t *rva,
+               int aof_index,
+               struct export_table *et, addr_t base_addr, uint32_t pid)
 {
     addr_t rva_loc =
-        base_addr + et->address_of_functions +
-        aof_index * sizeof(uint32_t);
+        base_addr + et->address_of_functions + aof_index * sizeof(uint32_t);
 
     uint32_t tmp = 0;
     status_t ret = vmi_read_32_va(vmi, rva_loc, pid, &tmp);
@@ -98,12 +87,9 @@ get_export_rva(
 }
 
 int
-get_aof_index(
-    vmi_instance_t vmi,
-    int aon_index,
-    struct export_table *et,
-    addr_t base_addr,
-    uint32_t pid)
+get_aof_index(vmi_instance_t vmi,
+              int aon_index,
+              struct export_table *et, addr_t base_addr, uint32_t pid)
 {
     addr_t aof_index_loc =
         base_addr + et->address_of_name_ordinals +
@@ -111,23 +97,18 @@ get_aof_index(
 
     uint16_t aof_index = 0;
 
-    if (vmi_read_16_va(vmi, aof_index_loc, pid, &aof_index) ==
-        VMI_SUCCESS) {
+    if (vmi_read_16_va(vmi, aof_index_loc, pid, &aof_index) == VMI_SUCCESS) {
         return (int) aof_index;
-    }
-    else {
+    } else {
         return -1;
     }
 }
 
 // Finds the index of the exported symbol specified - linear search
 int
-get_aon_index_linear(
-    vmi_instance_t vmi,
-    char *symbol,
-    struct export_table *et,
-    addr_t base_addr,
-    uint32_t pid)
+get_aon_index_linear(vmi_instance_t vmi,
+                     char *symbol,
+                     struct export_table *et, addr_t base_addr, uint32_t pid)
 {
     uint32_t i = 0;
 
@@ -156,19 +137,15 @@ get_aon_index_linear(
 
 // binary search function for get_aon_index_binary()
 static int
-find_aon_idx_bin(
-    vmi_instance_t vmi,
-    char *symbol,
-    addr_t aon_base_va,
-    int low,
-    int high,
-    addr_t base_addr,
-    uint32_t pid)
+find_aon_idx_bin(vmi_instance_t vmi,
+                 char *symbol,
+                 addr_t aon_base_va,
+                 int low, int high, addr_t base_addr, uint32_t pid)
 {
     int mid, cmp;
     addr_t str_rva_loc; // location of curr name's RVA
     uint32_t str_rva;   // RVA of curr name
-    char *name = 0; // curr name
+    char *name = 0;     // curr name
 
     if (high < low)
         goto not_found;
@@ -187,14 +164,14 @@ find_aon_idx_bin(
     cmp = strcmp(symbol, name);
     free(name);
 
-    if (cmp < 0) {  // symbol < name ==> try lower region
-        return find_aon_idx_bin(vmi, symbol, aon_base_va, low, mid - 1, base_addr, pid);
-    }
-    else if (cmp > 0) { // symbol > name ==> try higher region
-        return find_aon_idx_bin(vmi, symbol, aon_base_va, mid + 1, high, base_addr, pid);
-    }
-    else {  // symbol == name
-        return mid; // found
+    if (cmp < 0) {      // symbol < name ==> try lower region
+        return find_aon_idx_bin(vmi, symbol, aon_base_va, low, mid - 1,
+                                base_addr, pid);
+    } else if (cmp > 0) {       // symbol > name ==> try higher region
+        return find_aon_idx_bin(vmi, symbol, aon_base_va, mid + 1, high,
+                                base_addr, pid);
+    } else {    // symbol == name
+        return mid;     // found
     }
 
 not_found:
@@ -203,32 +180,26 @@ not_found:
 
 // Finds the index of the exported symbol specified - binary search
 int
-get_aon_index_binary(
-    vmi_instance_t vmi,
-    char *symbol,
-    struct export_table *et,
-    addr_t base_addr,
-    uint32_t pid)
+get_aon_index_binary(vmi_instance_t vmi,
+                     char *symbol,
+                     struct export_table *et, addr_t base_addr, uint32_t pid)
 {
     addr_t aon_base_addr = base_addr + et->address_of_names;
     int name_ct = et->number_of_names;
 
-    return find_aon_idx_bin(vmi, symbol, aon_base_addr, 0, name_ct - 1, base_addr, pid);
+    return find_aon_idx_bin(vmi, symbol, aon_base_addr, 0, name_ct - 1,
+                            base_addr, pid);
 }
 
 int
-get_aon_index(
-    vmi_instance_t vmi,
-    char *symbol,
-    struct export_table *et,
-    addr_t base_addr,
-    uint32_t pid)
+get_aon_index(vmi_instance_t vmi,
+              char *symbol,
+              struct export_table *et, addr_t base_addr, uint32_t pid)
 {
     int index = get_aon_index_binary(vmi, symbol, et, base_addr, pid);
 
     if (-1 == index) {
-        dbprint
-            ("--PEParse: Falling back to linear search for aon index\n");
+        dbprint("--PEParse: Falling back to linear search for aon index\n");
         // This could be useful for malformed PE headers where the list isn't
         // in alpha order (e.g., malware)
         index = get_aon_index_linear(vmi, symbol, et, base_addr, pid);
@@ -237,14 +208,11 @@ get_aon_index(
 }
 
 status_t
-peparse_validate_pe_image(
-    const uint8_t * const image,
-    size_t len)
+peparse_validate_pe_image(const uint8_t * const image, size_t len)
 {
     struct dos_header *dos_header = (struct dos_header *) image;
     uint32_t fixed_header_sz =
-        sizeof(struct optional_header_pe32plus) +
-        sizeof(struct pe_header);
+        sizeof(struct optional_header_pe32plus) + sizeof(struct pe_header);
 
     //vmi_print_hex (image, MAX_HEADER_BYTES);
 
@@ -260,13 +228,11 @@ peparse_validate_pe_image(
         return VMI_FAILURE;
     }
 
-    struct pe_header *pe_header =
-        (struct pe_header *) (image + ofs_to_pe);
+    struct pe_header *pe_header = (struct pe_header *) (image + ofs_to_pe);
     if (IMAGE_NT_SIGNATURE != pe_header->signature) {
         dbprint("--PEPARSE: PE header signature invalid\n");
         return VMI_FAILURE;
     }
-
     // just get the magic # - we don't care here whether its PE or PE+
     struct optional_header_pe32 *pe_opt_header =
         (struct optional_header_pe32 *)
@@ -282,24 +248,23 @@ peparse_validate_pe_image(
 }
 
 status_t
-peparse_get_image_phys(
-    vmi_instance_t vmi,
-    addr_t base_paddr,
-    size_t len,
-    const uint8_t * const image)
+peparse_get_image_phys(vmi_instance_t vmi,
+                       addr_t base_paddr,
+                       size_t len, const uint8_t * const image)
 {
 
-    uint32_t nbytes = vmi_read_pa(vmi, base_paddr, (void *)image, len);
+    uint32_t nbytes = vmi_read_pa(vmi, base_paddr, (void *) image, len);
 
-    if(nbytes != len) {
+    if (nbytes != len) {
         dbprint("--PEPARSE: failed to read a continuous PE header\n");
         return VMI_FAILURE;
     }
 
-    if(VMI_SUCCESS != peparse_validate_pe_image(image, len)) {
+    if (VMI_SUCCESS != peparse_validate_pe_image(image, len)) {
         dbprint("--PEPARSE: failed to validate a continuous PE header\n");
-        if(vmi->init_mode & VMI_INIT_COMPLETE) {
-            dbprint("--PEPARSE: You might want to use peparse_get_image_virt here!\n");
+        if (vmi->init_mode & VMI_INIT_COMPLETE) {
+            dbprint
+                ("--PEPARSE: You might want to use peparse_get_image_virt here!\n");
         }
 
         return VMI_FAILURE;
@@ -309,22 +274,19 @@ peparse_get_image_phys(
 }
 
 status_t
-peparse_get_image_virt(
-    vmi_instance_t vmi,
-    addr_t base_vaddr,
-    uint32_t pid,
-    size_t len,
-    const uint8_t * const image)
+peparse_get_image_virt(vmi_instance_t vmi,
+                       addr_t base_vaddr,
+                       uint32_t pid, size_t len, const uint8_t * const image)
 {
 
-    uint32_t nbytes = vmi_read_va(vmi, base_vaddr, pid, (void *)image, len);
+    uint32_t nbytes = vmi_read_va(vmi, base_vaddr, pid, (void *) image, len);
 
-    if(nbytes != len) {
+    if (nbytes != len) {
         dbprint("--PEPARSE: failed to read PE header\n");
         return VMI_FAILURE;
     }
 
-    if(VMI_SUCCESS != peparse_validate_pe_image(image, len)) {
+    if (VMI_SUCCESS != peparse_validate_pe_image(image, len)) {
         dbprint("--PEPARSE: failed to validate PE header(s)\n");
         return VMI_FAILURE;
     }
@@ -333,86 +295,85 @@ peparse_get_image_virt(
 }
 
 void
-peparse_assign_headers(
-    const uint8_t * const image,
-    struct dos_header **dos_header,
-    struct pe_header **pe_header,
-    uint16_t *optional_header_type,
-    void **optional_pe_header,
-    struct optional_header_pe32 **oh_pe32,
-    struct optional_header_pe32plus **oh_pe32plus)
+peparse_assign_headers(const uint8_t * const image,
+                       struct dos_header **dos_header,
+                       struct pe_header **pe_header,
+                       uint16_t * optional_header_type,
+                       void **optional_pe_header,
+                       struct optional_header_pe32 **oh_pe32,
+                       struct optional_header_pe32plus **oh_pe32plus)
 {
 
     struct dos_header *dos_h_t = (struct dos_header *) image;
-    if(dos_header != NULL) {
-        *dos_header=dos_h_t;
+    if (dos_header != NULL) {
+        *dos_header = dos_h_t;
     }
 
-    struct pe_header *pe_h_t = (struct pe_header *) (image + dos_h_t->offset_to_pe);
-    if(pe_header != NULL) {
-        *pe_header=pe_h_t;
+    struct pe_header *pe_h_t =
+        (struct pe_header *) (image + dos_h_t->offset_to_pe);
+    if (pe_header != NULL) {
+        *pe_header = pe_h_t;
     }
 
     void *op_h_t = (void *) ((uint8_t *) pe_h_t + sizeof(struct pe_header));
-    if(optional_pe_header != NULL) {
+    if (optional_pe_header != NULL) {
         *optional_pe_header = op_h_t;
     }
 
     uint16_t magic = *((uint16_t *) op_h_t);
-    if(optional_header_type != NULL) {
+    if (optional_header_type != NULL) {
         *optional_header_type = magic;
     }
 
-    dbprint("--PEParse: magic is 0x%"PRIx16"\n", magic);
+    dbprint("--PEParse: magic is 0x%" PRIx16 "\n", magic);
 
-    if(magic == IMAGE_PE32_MAGIC && oh_pe32 != NULL) {
+    if (magic == IMAGE_PE32_MAGIC && oh_pe32 != NULL) {
         *oh_pe32 = (struct optional_header_pe32 *) op_h_t;
-    } else
-    if(magic == IMAGE_PE32_PLUS_MAGIC && oh_pe32plus != NULL) {
+    } else if (magic == IMAGE_PE32_PLUS_MAGIC && oh_pe32plus != NULL) {
         *oh_pe32plus = (struct optional_header_pe32plus *) op_h_t;
     }
 }
 
 addr_t
-peparse_get_idd_rva(
-    uint32_t entry_id,
-    uint16_t *optional_header_type,
-    void *optional_header,
-    struct optional_header_pe32 *oh_pe32,
-    struct optional_header_pe32plus *oh_pe32plus)
+peparse_get_idd_rva(uint32_t entry_id,
+                    uint16_t * optional_header_type,
+                    void *optional_header,
+                    struct optional_header_pe32 *oh_pe32,
+                    struct optional_header_pe32plus *oh_pe32plus)
 {
 
     addr_t rva = 0;
 
-    if(optional_header_type == NULL) {
+    if (optional_header_type == NULL) {
 
-        if(oh_pe32 != NULL) {
+        if (oh_pe32 != NULL) {
             rva = oh_pe32->idd[entry_id].virtual_address;
             goto done;
         }
 
-        if(oh_pe32plus != NULL) {
+        if (oh_pe32plus != NULL) {
             rva = oh_pe32plus->idd[entry_id].virtual_address;
             goto done;
         }
-    } else
-    if(optional_header != NULL) {
+    } else if (optional_header != NULL) {
 
-        if(*optional_header_type == IMAGE_PE32_MAGIC) {
-            struct optional_header_pe32 *oh_pe32_t = (struct optional_header_pe32 *)optional_header;
+        if (*optional_header_type == IMAGE_PE32_MAGIC) {
+            struct optional_header_pe32 *oh_pe32_t =
+                (struct optional_header_pe32 *) optional_header;
             rva = oh_pe32_t->idd[entry_id].virtual_address;
             goto done;
         }
 
-        if(*optional_header_type == IMAGE_PE32_PLUS_MAGIC) {
-            struct optional_header_pe32plus *oh_pe32plus_t = (struct optional_header_pe32plus *)optional_header;
+        if (*optional_header_type == IMAGE_PE32_PLUS_MAGIC) {
+            struct optional_header_pe32plus *oh_pe32plus_t =
+                (struct optional_header_pe32plus *) optional_header;
             rva = oh_pe32plus_t->idd[entry_id].virtual_address;
             goto done;
         }
     }
 
 done:
-    if(rva == 0) {
+    if (rva == 0) {
         // Could this be legit? If not, we might want to switch this to a status_t function
         dbprint("--PEParse: Image data directory RVA is 0\n");
     }
@@ -421,38 +382,38 @@ done:
 }
 
 size_t
-peparse_get_idd_size(
-    uint32_t entry_id,
-    uint16_t *optional_header_type,
-    void *optional_header,
-    struct optional_header_pe32 *oh_pe32,
-    struct optional_header_pe32plus *oh_pe32plus)
+peparse_get_idd_size(uint32_t entry_id,
+                     uint16_t * optional_header_type,
+                     void *optional_header,
+                     struct optional_header_pe32 * oh_pe32,
+                     struct optional_header_pe32plus * oh_pe32plus)
 {
 
     size_t size = 0;
 
-    if(optional_header_type == NULL) {
+    if (optional_header_type == NULL) {
 
-        if(oh_pe32 != NULL) {
+        if (oh_pe32 != NULL) {
             size = oh_pe32->idd[entry_id].size;
             goto done;
         }
 
-        if(oh_pe32plus != NULL) {
+        if (oh_pe32plus != NULL) {
             size = oh_pe32plus->idd[entry_id].size;
             goto done;
         }
-    } else
-    if(optional_header != NULL) {
+    } else if (optional_header != NULL) {
 
-        if(*optional_header_type == IMAGE_PE32_MAGIC) {
-            struct optional_header_pe32 *oh_pe32_t = (struct optional_header_pe32 *)optional_header;
+        if (*optional_header_type == IMAGE_PE32_MAGIC) {
+            struct optional_header_pe32 *oh_pe32_t =
+                (struct optional_header_pe32 *) optional_header;
             size = oh_pe32_t->idd[entry_id].size;
             goto done;
         }
 
-        if(*optional_header_type == IMAGE_PE32_PLUS_MAGIC) {
-            struct optional_header_pe32plus *oh_pe32plus_t = (struct optional_header_pe32plus *)optional_header;
+        if (*optional_header_type == IMAGE_PE32_PLUS_MAGIC) {
+            struct optional_header_pe32plus *oh_pe32plus_t =
+                (struct optional_header_pe32plus *) optional_header;
             size = oh_pe32plus_t->idd[entry_id].size;
             goto done;
         }
@@ -463,13 +424,11 @@ done:
 }
 
 status_t
-peparse_get_export_table(
-    vmi_instance_t vmi,
-    addr_t base_vaddr,
-    uint32_t pid,
-    struct export_table *et,
-    addr_t *export_table_rva,
-    size_t *export_table_size)
+peparse_get_export_table(vmi_instance_t vmi,
+                         addr_t base_vaddr,
+                         uint32_t pid,
+                         struct export_table *et,
+                         addr_t *export_table_rva, size_t * export_table_size)
 {
     // Note: this function assumes a "normal" PE where all the headers are in
     // the first page of the PE and the field DosHeader.OffsetToPE points to
@@ -483,32 +442,39 @@ peparse_get_export_table(
 #define MAX_HEADER_BYTES 1024   // keep under 1 page
     uint8_t image[MAX_HEADER_BYTES];
 
-    if(VMI_FAILURE == peparse_get_image_virt(vmi, base_vaddr, pid, MAX_HEADER_BYTES, image)) {
+    if (VMI_FAILURE ==
+        peparse_get_image_virt(vmi, base_vaddr, pid, MAX_HEADER_BYTES,
+                               image)) {
         return VMI_FAILURE;
     }
 
     void *optional_header = NULL;
     uint16_t magic = 0;
 
-    peparse_assign_headers(image, NULL, NULL, &magic, &optional_header, NULL, NULL);
-    export_header_rva = peparse_get_idd_rva(IMAGE_DIRECTORY_ENTRY_EXPORT, &magic, optional_header, NULL, NULL);
-    export_header_size = peparse_get_idd_size(IMAGE_DIRECTORY_ENTRY_EXPORT, &magic, optional_header, NULL, NULL);
+    peparse_assign_headers(image, NULL, NULL, &magic, &optional_header, NULL,
+                           NULL);
+    export_header_rva =
+        peparse_get_idd_rva(IMAGE_DIRECTORY_ENTRY_EXPORT, &magic,
+                            optional_header, NULL, NULL);
+    export_header_size =
+        peparse_get_idd_size(IMAGE_DIRECTORY_ENTRY_EXPORT, &magic,
+                             optional_header, NULL, NULL);
 
-    if(export_table_rva) {
-        *export_table_rva=export_header_rva;
+    if (export_table_rva) {
+        *export_table_rva = export_header_rva;
     }
 
-    if(export_table_size) {
-        *export_table_size=export_header_size;
+    if (export_table_size) {
+        *export_table_size = export_header_size;
     }
 
     /* Find & read the export header; assume a different page than the headers */
     export_header_va = base_vaddr + export_header_rva;
 
     dbprint
-        ("--PEParse: found export table at [VA] 0x%.16"PRIx64" = 0x%.16"PRIx64" + 0x%"PRIx64"\n",
-         export_header_va, vmi->os.windows_instance.ntoskrnl_va,
-         export_header_rva);
+        ("--PEParse: found export table at [VA] 0x%.16" PRIx64 " = 0x%.16"
+         PRIx64 " + 0x%" PRIx64 "\n", export_header_va,
+         vmi->os.windows_instance.ntoskrnl_va, export_header_rva);
 
     nbytes = vmi_read_va(vmi, export_header_va, pid, et, sizeof(*et));
     if (nbytes != sizeof(struct export_table)) {
@@ -527,12 +493,9 @@ peparse_get_export_table(
 
 /* returns the rva value for a windows PE export */
 status_t
-windows_export_to_rva(
-    vmi_instance_t vmi,
-    char *symbol,
-    addr_t base_vaddr,
-    uint32_t pid,
-    addr_t *rva)
+windows_export_to_rva(vmi_instance_t vmi,
+                      char *symbol,
+                      addr_t base_vaddr, uint32_t pid, addr_t *rva)
 {
     struct export_table et;
     addr_t et_rva;
@@ -541,31 +504,32 @@ windows_export_to_rva(
     int aof_index = -1;
 
     // get export table structure
-    if (peparse_get_export_table(vmi, base_vaddr, pid, &et, &et_rva, &et_size) != VMI_SUCCESS) {
+    if (peparse_get_export_table(vmi, base_vaddr, pid, &et, &et_rva, &et_size)
+        != VMI_SUCCESS) {
         dbprint("--PEParse: failed to get export table\n");
         return VMI_FAILURE;
     }
-
     // find AddressOfNames index for export symbol
     if ((aon_index = get_aon_index(vmi, symbol, &et, base_vaddr, pid)) == -1) {
         dbprint("--PEParse: failed to get aon index\n");
         return VMI_FAILURE;
     }
-
     // find AddressOfFunctions index for export symbol
-    if ((aof_index = get_aof_index(vmi, aon_index, &et, base_vaddr, pid)) == -1) {
+    if ((aof_index =
+         get_aof_index(vmi, aon_index, &et, base_vaddr, pid)) == -1) {
         dbprint("--PEParse: failed to get aof index\n");
         return VMI_FAILURE;
     }
-
     // find RVA value for export symbol
-    if(VMI_SUCCESS==get_export_rva(vmi, rva, aof_index, &et, base_vaddr, pid)) {
+    if (VMI_SUCCESS ==
+        get_export_rva(vmi, rva, aof_index, &et, base_vaddr, pid)) {
 
         // handle forwarded functions
         // If the function's RVA is inside the exports section (as given by the
         // VirtualAddress and Size fields in the idd), the symbol is forwarded.
-        if(*rva>=et_rva && *rva < et_rva+et_size) {
-            dbprint("--PEParse: %s @ %u:0x%"PRIx64" is forwarded\n", symbol, pid, base_vaddr);
+        if (*rva >= et_rva && *rva < et_rva + et_size) {
+            dbprint("--PEParse: %s @ %u:0x%" PRIx64 " is forwarded\n", symbol,
+                    pid, base_vaddr);
             return VMI_FAILURE;
         } else {
             return VMI_SUCCESS;
@@ -575,14 +539,10 @@ windows_export_to_rva(
     }
 }
 
-/* returns a windows PE export from an RVA*/
+/* returns a windows PE export from an RVA */
 status_t
-windows_rva_to_export(
-    vmi_instance_t vmi,
-    addr_t rva,
-    addr_t base_vaddr,
-    uint32_t pid,
-    char **sym)
+windows_rva_to_export(vmi_instance_t vmi,
+                      addr_t rva, addr_t base_vaddr, uint32_t pid, char **sym)
 {
     struct export_table et;
     addr_t et_rva;
@@ -591,13 +551,15 @@ windows_rva_to_export(
     int aof_index = -1;
 
     // get export table structure
-    if (peparse_get_export_table(vmi, base_vaddr, pid, &et, &et_rva, &et_size) != VMI_SUCCESS) {
+    if (peparse_get_export_table(vmi, base_vaddr, pid, &et, &et_rva, &et_size)
+        != VMI_SUCCESS) {
         dbprint("--PEParse: failed to get export table\n");
         return VMI_FAILURE;
     }
 
-    if(rva>=et_rva && rva < et_rva+et_size) {
-        dbprint("--PEParse: symbol @ %u:0x%"PRIx64" is forwarded\n", pid, base_vaddr+rva);
+    if (rva >= et_rva && rva < et_rva + et_size) {
+        dbprint("--PEParse: symbol @ %u:0x%" PRIx64 " is forwarded\n", pid,
+                base_vaddr + rva);
         return VMI_FAILURE;
     }
 
@@ -612,24 +574,31 @@ windows_rva_to_export(
         uint16_t ordinal = 0;
         uint32_t loc = 0;
 
-        if(VMI_FAILURE==vmi_read_16_va(vmi, base2 + i * sizeof(uint16_t), pid, &ordinal))
+        if (VMI_FAILURE ==
+            vmi_read_16_va(vmi, base2 + i * sizeof(uint16_t), pid, &ordinal))
             continue;
-        if(VMI_FAILURE==vmi_read_32_va(vmi, base3 + ordinal + sizeof(uint32_t), pid, &loc))
+        if (VMI_FAILURE ==
+            vmi_read_32_va(vmi, base3 + ordinal + sizeof(uint32_t), pid,
+                           &loc))
             continue;
 
-        if(loc==rva) {
+        if (loc == rva) {
 
-            if(i < et.number_of_names && VMI_SUCCESS==vmi_read_32_va(vmi, base1 + i * sizeof(uint32_t), pid, &name_rva) && name_rva) {
-                if(NULL != (*sym = rva_to_string(vmi, (addr_t) name_rva, base_vaddr, pid)))
+            if (i < et.number_of_names &&
+                VMI_SUCCESS == vmi_read_32_va(vmi,
+                                              base1 + i * sizeof(uint32_t),
+                                              pid, &name_rva) && name_rva) {
+                if (NULL !=
+                    (*sym =
+                     rva_to_string(vmi, (addr_t) name_rva, base_vaddr, pid)))
                     return VMI_SUCCESS;
             }
 
-            dbprint("--PEParse: symbol @ %u:0x%"PRIx64" is exported by ordinal only\n", pid, base_vaddr+rva);
+            dbprint("--PEParse: symbol @ %u:0x%" PRIx64
+                    " is exported by ordinal only\n", pid, base_vaddr + rva);
             break;
         }
     }
 
     return VMI_FAILURE;
 }
-
-

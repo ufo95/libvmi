@@ -32,9 +32,7 @@
 #include <stdio.h>
 
 int
-main(
-    int argc,
-    char **argv)
+main(int argc, char **argv)
 {
     vmi_instance_t vmi;
     uint32_t offset;
@@ -44,8 +42,7 @@ main(
     char *name = argv[1];
 
     /* initialize the libvmi library */
-    if (vmi_init(&vmi, VMI_AUTO | VMI_INIT_COMPLETE, name) ==
-        VMI_FAILURE) {
+    if (vmi_init(&vmi, VMI_AUTO | VMI_INIT_COMPLETE, name) == VMI_FAILURE) {
         printf("Failed to init LibVMI library.\n");
         return 1;
     }
@@ -56,8 +53,7 @@ main(
     /* get the head of the module list */
     if (VMI_OS_LINUX == vmi_get_ostype(vmi)) {
         vmi_read_addr_ksym(vmi, "modules", &next_module);
-    }
-    else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
+    } else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
         vmi_read_addr_ksym(vmi, "PsLoadedModuleList", &next_module);
     }
     list_head = next_module;
@@ -84,16 +80,14 @@ main(
         if (VMI_OS_LINUX == vmi_get_ostype(vmi)) {
             char *modname = NULL;
 
-            if (VMI_PM_IA32E == vmi_get_page_mode(vmi)) {   // 64-bit paging
+            if (VMI_PM_IA32E == vmi_get_page_mode(vmi)) {       // 64-bit paging
                 modname = vmi_read_str_va(vmi, next_module + 16, 0);
-            }
-            else {
+            } else {
                 modname = vmi_read_str_va(vmi, next_module + 8, 0);
             }
             printf("%s\n", modname);
             free(modname);
-        }
-        else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
+        } else if (VMI_OS_WINDOWS == vmi_get_ostype(vmi)) {
             /*TODO don't use a hard-coded offsets here */
             /* this offset works with WinXP SP2 */
             unicode_string_t *us =
@@ -101,8 +95,7 @@ main(
             unicode_string_t out = { 0 };
             //         both of these work
             if (us &&
-                VMI_SUCCESS == vmi_convert_str_encoding(us, &out,
-                                                        "UTF-8")) {
+                VMI_SUCCESS == vmi_convert_str_encoding(us, &out, "UTF-8")) {
                 printf("%s\n", out.contents);
                 //            if (us && 
                 //                VMI_SUCCESS == vmi_convert_string_encoding (us, &out, "WCHAR_T")) {

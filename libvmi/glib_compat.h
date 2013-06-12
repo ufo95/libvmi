@@ -41,16 +41,13 @@
  *  employ any other (more pleasant) tricks that rely upon the pre-processor.
  */
 static guint
-g_int64_hash(
-    gconstpointer v)
+g_int64_hash(gconstpointer v)
 {
     return (guint) * (const gint64 *) v;
 }
 
 static gboolean
-g_int64_equal(
-    gconstpointer v1,
-    gconstpointer v2)
+g_int64_equal(gconstpointer v1, gconstpointer v2)
 {
     return *((const gint64 *) v1) == *((const gint64 *) v2);
 }

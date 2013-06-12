@@ -78,12 +78,14 @@ typedef struct xen_instance {
     uint8_t addr_width;     /**< guest's address width in bytes: 4 or 8 */
 
 #ifdef HAVE_LIBXENSTORE
+
     struct xs_handle *xshandle;  /**< handle to xenstore daemon */
 #endif
 
     char *name;
 
 #if ENABLE_XEN_EVENTS==1
+
     xen_events_t *events; /**< handle to events data */
 #endif
 } xen_instance_t;
@@ -95,66 +97,30 @@ typedef struct xen_instance {
 
 #endif /* ENABLE_XEN */
 
-status_t xen_init(
-    vmi_instance_t vmi);
-void xen_destroy(
-    vmi_instance_t vmi);
-unsigned long xen_get_domainid_from_name(
-    vmi_instance_t vmi,
-    char *name);
-status_t xen_get_name_from_domainid(
-    vmi_instance_t vmi,
-    unsigned long domid,
-    char **name);
-unsigned long xen_get_domainid(
-    vmi_instance_t vmi);
-void xen_set_domainid(
-    vmi_instance_t vmi,
-    unsigned long domainid);
-status_t xen_check_domainid(
-    vmi_instance_t vmi,
-    unsigned long domainid);
-status_t xen_get_domainname(
-    vmi_instance_t vmi,
-    char **name);
-void xen_set_domainname(
-    vmi_instance_t vmi,
-    char *name);
-status_t xen_get_memsize(
-    vmi_instance_t vmi,
-    unsigned long *size);
-status_t xen_get_vcpureg(
-    vmi_instance_t vmi,
-    reg_t *value,
-    registers_t reg,
-    unsigned long vcpu);
+status_t xen_init(vmi_instance_t vmi);
+void xen_destroy(vmi_instance_t vmi);
+unsigned long xen_get_domainid_from_name(vmi_instance_t vmi, char *name);
+status_t xen_get_name_from_domainid(vmi_instance_t vmi,
+                                    unsigned long domid, char **name);
+unsigned long xen_get_domainid(vmi_instance_t vmi);
+void xen_set_domainid(vmi_instance_t vmi, unsigned long domainid);
+status_t xen_check_domainid(vmi_instance_t vmi, unsigned long domainid);
+status_t xen_get_domainname(vmi_instance_t vmi, char **name);
+void xen_set_domainname(vmi_instance_t vmi, char *name);
+status_t xen_get_memsize(vmi_instance_t vmi, unsigned long *size);
+status_t xen_get_vcpureg(vmi_instance_t vmi,
+                         reg_t *value, registers_t reg, unsigned long vcpu);
 status_t
-xen_set_vcpureg(
-    vmi_instance_t vmi,
-    reg_t value,
-    registers_t reg,
-    unsigned long vcpu);
-status_t xen_get_address_width(
-    vmi_instance_t vmi,
-    uint8_t * width_in_bytes);
-void *xen_read_page(
-    vmi_instance_t vmi,
-    addr_t page);
-status_t xen_write(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    void *buf,
-    uint32_t length);
-int xen_is_pv(
-    vmi_instance_t vmi);
-status_t xen_test(
-    unsigned long id,
-    char *name);
-status_t xen_pause_vm(
-    vmi_instance_t vmi);
-status_t xen_resume_vm(
-    vmi_instance_t vmi);
-status_t xen_set_domain_debug_control(
-    vmi_instance_t vmi,
-    unsigned long vcpu,
-    int enable);
+
+xen_set_vcpureg(vmi_instance_t vmi,
+                reg_t value, registers_t reg, unsigned long vcpu);
+status_t xen_get_address_width(vmi_instance_t vmi, uint8_t * width_in_bytes);
+void *xen_read_page(vmi_instance_t vmi, addr_t page);
+status_t xen_write(vmi_instance_t vmi,
+                   addr_t paddr, void *buf, uint32_t length);
+int xen_is_pv(vmi_instance_t vmi);
+status_t xen_test(unsigned long id, char *name);
+status_t xen_pause_vm(vmi_instance_t vmi);
+status_t xen_resume_vm(vmi_instance_t vmi);
+status_t xen_set_domain_debug_control(vmi_instance_t vmi,
+                                      unsigned long vcpu, int enable);

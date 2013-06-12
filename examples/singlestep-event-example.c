@@ -32,34 +32,37 @@
 vmi_event_t single_event;
 
 static int interrupted = 0;
-static void close_handler(int sig){
+static void
+close_handler(int sig)
+{
     interrupted = sig;
 }
 
-void single_step_callback(vmi_instance_t vmi, vmi_event_t *event){
-    printf("Single-step event: VCPU:%u  GFN %"PRIx64" GLA %016"PRIx64"\n",
-        event->vcpu_id,
-        event->ss_event.gfn,
-        event->ss_event.gla);
+void
+single_step_callback(vmi_instance_t vmi, vmi_event_t * event)
+{
+    printf("Single-step event: VCPU:%u  GFN %" PRIx64 " GLA %016" PRIx64 "\n",
+           event->vcpu_id, event->ss_event.gfn, event->ss_event.gla);
     reg_t rip;
-    
+
     vmi_get_vcpureg(vmi, &rip, RIP, event->vcpu_id);
-    printf("\tRIP: %"PRIx64"\n", rip);
-    
+    printf("\tRIP: %" PRIx64 "\n", rip);
+
 }
 
-int main (int argc, char **argv) {
+int
+main(int argc, char **argv)
+{
     vmi_instance_t vmi;
 
     struct sigaction act;
 
     char *name = NULL;
 
-    if(argc < 2){
+    if (argc < 2) {
         fprintf(stderr, "Usage: single_step_example <name of VM> \n");
         exit(1);
     }
-
     // Arg 1 is the VM name.
     name = argv[1];
 
@@ -67,29 +70,29 @@ int main (int argc, char **argv) {
     act.sa_handler = close_handler;
     act.sa_flags = 0;
     sigemptyset(&act.sa_mask);
-    sigaction(SIGHUP,  &act, NULL);
+    sigaction(SIGHUP, &act, NULL);
     sigaction(SIGTERM, &act, NULL);
-    sigaction(SIGINT,  &act, NULL);
+    sigaction(SIGINT, &act, NULL);
     sigaction(SIGALRM, &act, NULL);
 
     // Initialize the libvmi library.
-    if (vmi_init(&vmi, VMI_XEN | VMI_INIT_PARTIAL | VMI_INIT_EVENTS, name) == VMI_FAILURE){
+    if (vmi_init(&vmi, VMI_XEN | VMI_INIT_PARTIAL | VMI_INIT_EVENTS, name) ==
+        VMI_FAILURE) {
         printf("Failed to init LibVMI library.\n");
         return 1;
-    }
-    else{
+    } else {
         printf("LibVMI init succeeded!\n");
     }
-    
+
     //Single step setup
     memset(&single_event, 0, sizeof(vmi_event_t));
     single_event.type = VMI_EVENT_SINGLESTEP;
     single_event.callback = single_step_callback;
     SET_VCPU_SINGLESTEP(single_event.ss_event, 0);
     vmi_register_event(vmi, &single_event);
-    while(!interrupted ){
+    while (!interrupted) {
         printf("Waiting for events...\n");
-        vmi_events_listen(vmi,500);
+        vmi_events_listen(vmi, 500);
     }
     printf("Finished with test.\n");
 

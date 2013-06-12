@@ -28,13 +28,13 @@
 
 #include "libvmi.h"
 
-xen_instance_t *xen_get_instance (vmi_instance_t vmi); 
+xen_instance_t *xen_get_instance(vmi_instance_t vmi);
 
 #ifdef XENCTRL_HAS_XC_INTERFACE // Xen >= 4.1
 xc_interface *
 #else
 int
 #endif
-xen_get_xchandle (vmi_instance_t vmi);
+ xen_get_xchandle(vmi_instance_t vmi);
 
 #endif

@@ -33,9 +33,7 @@
 #include "libvmi/libvmi.h"
 #include "common.h"
     int
-main(
-    int argc,
-    char **argv) 
+main(int argc, char **argv) 
 {
     vmi_instance_t vmi;
     addr_t paddr, vaddr;

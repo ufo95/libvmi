@@ -40,9 +40,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #if HAVE_XENSTORE_H
-  #include <xenstore.h>
+#include <xenstore.h>
 #elif HAVE_XS_H
-  #include <xs.h>
+#include <xs.h>
 #endif
 #include <xen/hvm/save.h>
 
@@ -53,25 +53,20 @@
 // Xen-Specific Interface Functions (no direct mapping to driver_*)
 
 xen_instance_t *
-xen_get_instance(
-    vmi_instance_t vmi)
+xen_get_instance(vmi_instance_t vmi)
 {
     return ((xen_instance_t *) vmi->driver);
 }
 
 libvmi_xenctrl_handle_t
-xen_get_xchandle(
-    vmi_instance_t vmi)
+xen_get_xchandle(vmi_instance_t vmi)
 {
     return xen_get_instance(vmi)->xchandle;
 }
 
 //TODO assuming length == page size is safe for now, but isn't the most clean approach
 void *
-xen_get_memory_pfn(
-    vmi_instance_t vmi,
-    addr_t pfn,
-    int prot)
+xen_get_memory_pfn(vmi_instance_t vmi, addr_t pfn, int prot)
 {
     void *memory = xc_map_foreign_range(xen_get_xchandle(vmi),
                                         xen_get_domainid(vmi),
@@ -80,10 +75,9 @@ xen_get_memory_pfn(
                                         (unsigned long) pfn);
 
     if (MAP_FAILED == memory || NULL == memory) {
-        dbprint("--xen_get_memory_pfn failed on pfn=0x%"PRIx64"\n", pfn);
+        dbprint("--xen_get_memory_pfn failed on pfn=0x%" PRIx64 "\n", pfn);
         return NULL;
     }
-
 #ifdef VMI_DEBUG
     // copy memory to local address space - handy for examination
     uint8_t buf[XC_PAGE_SIZE];
@@ -95,10 +89,7 @@ xen_get_memory_pfn(
 }
 
 void *
-xen_get_memory(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    uint32_t length)
+xen_get_memory(vmi_instance_t vmi, addr_t paddr, uint32_t length)
 {
     addr_t pfn = paddr >> vmi->page_shift;
 
@@ -107,19 +98,13 @@ xen_get_memory(
 }
 
 void
-xen_release_memory(
-    void *memory,
-    size_t length)
+xen_release_memory(void *memory, size_t length)
 {
     munmap(memory, length);
 }
 
 status_t
-xen_put_memory(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    uint32_t count,
-    void *buf)
+xen_put_memory(vmi_instance_t vmi, addr_t paddr, uint32_t count, void *buf)
 {
     unsigned char *memory = NULL;
     addr_t phys_address = 0;
@@ -142,8 +127,7 @@ xen_put_memory(
         /* determine how much we can write */
         if ((offset + count) > vmi->page_size) {
             write_len = vmi->page_size - offset;
-        }
-        else {
+        } else {
             write_len = count;
         }
 
@@ -166,12 +150,10 @@ xen_put_memory(
 
 // formerly vmi_get_domain_id
 unsigned long
-xen_get_domainid_from_name(
-    vmi_instance_t vmi,
-    char *name)
+xen_get_domainid_from_name(vmi_instance_t vmi, char *name)
 {
 
-// This function is only usable with xenstore
+    // This function is only usable with xenstore
 #ifndef HAVE_LIBXENSTORE
     return VMI_INVALID_DOMID;
 #else
@@ -197,14 +179,13 @@ xen_get_domainid_from_name(
         /* read in name */
         char *idStr = domains[i];
 
-        tmp = malloc(snprintf(NULL, 0, "/local/domain/%s/name", idStr)+1);
+        tmp = malloc(snprintf(NULL, 0, "/local/domain/%s/name", idStr) + 1);
         sprintf(tmp, "/local/domain/%s/name", idStr);
         char *nameCandidate = xs_read(xsh, xth, tmp, NULL);
         free(tmp);
 
         // if name matches, then return number
-        if (nameCandidate != NULL &&
-            strncmp(name, nameCandidate, 100) == 0) {
+        if (nameCandidate != NULL && strncmp(name, nameCandidate, 100) == 0) {
             int idNum = atoi(idStr);
 
             domainid = (unsigned long) idNum;
@@ -228,13 +209,11 @@ _bail:
 }
 
 status_t
-xen_get_name_from_domainid(
-    vmi_instance_t vmi,
-    unsigned long domid,
-    char **name)
+xen_get_name_from_domainid(vmi_instance_t vmi,
+                           unsigned long domid, char **name)
 {
 
-// This function is only usable with xenstore
+    // This function is only usable with xenstore
 #ifndef HAVE_LIBXENSTORE
     return VMI_FAILURE;
 #else
@@ -255,7 +234,8 @@ xen_get_name_from_domainid(
     if (!xsh)
         goto _bail;
 
-    char *tmp = malloc(snprintf(NULL, 0, "/local/domain/%lu/name", domid)+1);
+    char *tmp =
+        malloc(snprintf(NULL, 0, "/local/domain/%lu/name", domid) + 1);
     sprintf(tmp, "/local/domain/%lu/name", domid);
     char *nameCandidate = xs_read(xsh, xth, tmp, NULL);
     free(tmp);
@@ -273,24 +253,20 @@ _bail:
 }
 
 unsigned long
-xen_get_domainid(
-    vmi_instance_t vmi)
+xen_get_domainid(vmi_instance_t vmi)
 {
     return xen_get_instance(vmi)->domainid;
 }
 
 void
-xen_set_domainid(
-    vmi_instance_t vmi,
-    unsigned long domainid)
+xen_set_domainid(vmi_instance_t vmi, unsigned long domainid)
 {
     xen_get_instance(vmi)->domainid = domainid;
 }
 
 status_t
-xen_check_domainid(
-    vmi_instance_t vmi,
-    unsigned long domainid) {
+xen_check_domainid(vmi_instance_t vmi, unsigned long domainid)
+{
 
     status_t ret = VMI_FAILURE;
     libvmi_xenctrl_handle_t xchandle = XENCTRL_HANDLE_INVALID;
@@ -303,14 +279,14 @@ xen_check_domainid(
         );
 
     if (XENCTRL_HANDLE_INVALID == xchandle) {
-       goto _done;
+        goto _done;
     }
 
     xc_dominfo_t info;
     int rc = xc_domain_getinfo(xchandle, domainid, 1,
-                           &info);
+                               &info);
 
-    if(rc==1 && info.domid==(uint32_t)domainid) {
+    if (rc == 1 && info.domid == (uint32_t) domainid) {
         ret = VMI_SUCCESS;
     }
 
@@ -321,8 +297,7 @@ _done:
 }
 
 static status_t
-xen_discover_guest_addr_width(
-    vmi_instance_t vmi)
+xen_discover_guest_addr_width(vmi_instance_t vmi)
 {
     int rc;
     status_t ret = VMI_FAILURE;
@@ -332,19 +307,16 @@ xen_discover_guest_addr_width(
     if (xen_get_instance(vmi)->hvm) {   // HVM
         struct hvm_hw_cpu hw_ctxt = { 0 };
 
-        rc = xc_domain_hvm_getcontext_partial(xen_get_xchandle(vmi), xen_get_domainid(vmi), HVM_SAVE_CODE(CPU), 0,  //vcpu,
-                                              &hw_ctxt,
-                                              sizeof(hw_ctxt));
+        rc = xc_domain_hvm_getcontext_partial(xen_get_xchandle(vmi), xen_get_domainid(vmi), HVM_SAVE_CODE(CPU), 0,      //vcpu,
+                                              &hw_ctxt, sizeof(hw_ctxt));
         if (rc != 0) {
-            errprint
-                ("Failed to get context information (HVM domain).\n");
+            errprint("Failed to get context information (HVM domain).\n");
             ret = VMI_FAILURE;
             goto _bail;
         }
         xen_get_instance(vmi)->addr_width =
             (vmi_get_bit(hw_ctxt.msr_efer, 8) == 0 ? 4 : 8);
-    }
-    else {  // PV
+    } else {    // PV
         xen_domctl_t domctl = { 0 };
         domctl.domain = xen_get_domainid(vmi);
 
@@ -361,11 +333,10 @@ xen_discover_guest_addr_width(
                 ("Failed to get domain address width (#1), value retrieved %d\n",
                  domctl.u.address_size.size);
             goto _bail;
-        }   // if
+        }       // if
 
         // translate width to bytes from bits
-        xen_get_instance(vmi)->addr_width =
-            domctl.u.address_size.size / 8;
+        xen_get_instance(vmi)->addr_width = domctl.u.address_size.size / 8;
 
         if (8 != xen_get_instance(vmi)->addr_width &&
             4 != xen_get_instance(vmi)->addr_width) {
@@ -386,8 +357,7 @@ _bail:
 }
 
 status_t
-xen_init(
-    vmi_instance_t vmi)
+xen_init(vmi_instance_t vmi)
 {
     status_t ret = VMI_FAILURE;
     libvmi_xenctrl_handle_t xchandle = XENCTRL_HANDLE_INVALID;
@@ -415,7 +385,6 @@ xen_init(
         errprint("Failed to get domain info for Xen.\n");
         goto _bail;
     }
-
 #ifdef HAVE_LIBXENSTORE
     xen_get_instance(vmi)->xshandle = OPEN_XS_DAEMON();
     if (!xen_get_instance(vmi)->xshandle) {
@@ -428,13 +397,11 @@ xen_init(
     vmi->num_vcpus = xen_get_instance(vmi)->info.max_vcpu_id + 1;
 
     /* determine if target is hvm or pv */
-    vmi->hvm = xen_get_instance(vmi)->hvm =
-        xen_get_instance(vmi)->info.hvm;
+    vmi->hvm = xen_get_instance(vmi)->hvm = xen_get_instance(vmi)->info.hvm;
 #ifdef VMI_DEBUG
     if (xen_get_instance(vmi)->hvm) {
         dbprint("**set hvm to true (HVM).\n");
-    }
-    else {
+    } else {
         dbprint("**set hvm to false (PV).\n");
     }
 #endif /* VMI_DEBUG */
@@ -443,8 +410,8 @@ xen_init(
     /* Only enable events IFF(mode & VMI_INIT_EVENTS) 
      * Additional checks performed within xen_events_init
      */
-    if(vmi->init_mode & VMI_INIT_EVENTS){
-        if(xen_events_init(vmi)==VMI_FAILURE){
+    if (vmi->init_mode & VMI_INIT_EVENTS) {
+        if (xen_events_init(vmi) == VMI_FAILURE) {
             errprint("Failed to initialize xen events.\n");
             goto _bail;
         }
@@ -461,11 +428,10 @@ _bail:
 }
 
 void
-xen_destroy(
-    vmi_instance_t vmi)
+xen_destroy(vmi_instance_t vmi)
 {
 #if ENABLE_XEN_EVENTS==1
-    if(xen_get_instance(vmi)->hvm && (vmi->init_mode & VMI_INIT_EVENTS)){
+    if (xen_get_instance(vmi)->hvm && (vmi->init_mode & VMI_INIT_EVENTS)) {
         xen_events_destroy(vmi);
     }
 #endif
@@ -473,12 +439,11 @@ xen_destroy(
     xen_get_instance(vmi)->domainid = VMI_INVALID_DOMID;
 
     libvmi_xenctrl_handle_t xchandle = xen_get_xchandle(vmi);
-    if(xchandle != XENCTRL_HANDLE_INVALID) {
+    if (xchandle != XENCTRL_HANDLE_INVALID) {
         xc_interface_close(xchandle);
     }
-
 #ifdef HAVE_LIBXENSTORE
-    if(xen_get_instance(vmi)->xshandle) {
+    if (xen_get_instance(vmi)->xshandle) {
         CLOSE_XS_DAEMON(xen_get_instance(vmi)->xshandle);
     }
 #endif
@@ -488,12 +453,10 @@ xen_destroy(
 }
 
 status_t
-xen_get_domainname(
-    vmi_instance_t vmi,
-    char **name)
+xen_get_domainname(vmi_instance_t vmi, char **name)
 {
 
-// This function is only usable with Xenstore
+    // This function is only usable with Xenstore
 #ifndef HAVE_LIBXENSTORE
     return VMI_FAILURE;
 #else
@@ -506,7 +469,10 @@ xen_get_domainname(
         goto _bail;
     }
 
-    char *tmp = malloc(snprintf(NULL, 0, "/local/domain/%lu/name", xen_get_domainid(vmi))+1);
+    char *tmp =
+        malloc(snprintf
+               (NULL, 0, "/local/domain/%lu/name",
+                xen_get_domainid(vmi)) + 1);
     sprintf(tmp, "/local/domain/%lu/name", xen_get_domainid(vmi));
     *name = xs_read(xen_get_instance(vmi)->xshandle, xth, tmp, NULL);
     free(tmp);
@@ -524,23 +490,19 @@ _bail:
 }
 
 void
-xen_set_domainname(
-    vmi_instance_t vmi,
-    char *name)
+xen_set_domainname(vmi_instance_t vmi, char *name)
 {
     xen_get_instance(vmi)->name = strndup(name, 500);
 }
 
 status_t
-xen_get_memsize(
-    vmi_instance_t vmi,
-    unsigned long *size)
+xen_get_memsize(vmi_instance_t vmi, unsigned long *size)
 {
     // note: may also available through xen_get_instance(vmi)->info.max_memkb
     // or xenstore /local/domain/%d/memory/target
     status_t ret = VMI_FAILURE;
 
-    if(xen_get_instance(vmi)->info.nr_pages > 0) {
+    if (xen_get_instance(vmi)->info.nr_pages > 0) {
         *size = XC_PAGE_SIZE * xen_get_instance(vmi)->info.nr_pages;
         ret = VMI_SUCCESS;
     }
@@ -549,11 +511,8 @@ xen_get_memsize(
 }
 
 static status_t
-xen_get_vcpureg_hvm(
-    vmi_instance_t vmi,
-    reg_t *value,
-    registers_t reg,
-    unsigned long vcpu)
+xen_get_vcpureg_hvm(vmi_instance_t vmi,
+                    reg_t *value, registers_t reg, unsigned long vcpu)
 {
     status_t ret = VMI_SUCCESS;
     struct hvm_hw_cpu hw_ctxt = { 0 };
@@ -823,24 +782,21 @@ _bail:
 }
 
 static status_t
-xen_set_vcpureg_hvm(
-    vmi_instance_t vmi,
-    reg_t value,
-    registers_t reg,
-    unsigned long vcpu)
+xen_set_vcpureg_hvm(vmi_instance_t vmi,
+                    reg_t value, registers_t reg, unsigned long vcpu)
 {
     uint32_t size = 0;
     uint32_t off = 0;
     uint8_t *buf = NULL;
     status_t ret = VMI_SUCCESS;
-    HVM_SAVE_TYPE(CPU) *cpu = NULL;
+    HVM_SAVE_TYPE(CPU) * cpu = NULL;
     struct hvm_save_descriptor *desc = NULL;
 
     /* calling with no arguments --> return is the size of buffer required
-     *	for storing the HVM context
+     *  for storing the HVM context
      */
     size = xc_domain_hvm_getcontext
-           (xen_get_xchandle(vmi), xen_get_domainid(vmi), 0, 0);
+        (xen_get_xchandle(vmi), xen_get_domainid(vmi), 0, 0);
 
     if (size <= 0) {
         errprint("Failed to fetch HVM context buffer size.\n");
@@ -856,36 +812,36 @@ xen_set_vcpureg_hvm(
     }
 
     /* Locate runtime CPU registers in the context record, using the full  
-     *	version of xc_domain_hvm_getcontext rather than the partial
+     *  version of xc_domain_hvm_getcontext rather than the partial
      *  variant, because there is no equivalent setcontext_partial.
      * NOTE: to avoid inducing race conditions/errors, run while VM is paused.
      */
     if (xc_domain_hvm_getcontext
-           (xen_get_xchandle(vmi), xen_get_domainid(vmi), buf, size) < 0) {
+        (xen_get_xchandle(vmi), xen_get_domainid(vmi), buf, size) < 0) {
 
         errprint("Failed to fetch HVM context buffer.\n");
         ret = VMI_FAILURE;
-	goto _bail;
+        goto _bail;
     }
 
     off = 0;
     while (off < size) {
-        desc = (struct hvm_save_descriptor *)(buf + off);
+        desc = (struct hvm_save_descriptor *) (buf + off);
 
-        off += sizeof (struct hvm_save_descriptor);
+        off += sizeof(struct hvm_save_descriptor);
 
         if (desc->typecode == HVM_SAVE_CODE(CPU) && desc->instance == vcpu) {
-            cpu = (HVM_SAVE_TYPE(CPU) *)(buf + off);
+            cpu = (HVM_SAVE_TYPE(CPU) *) (buf + off);
             break;
-	}
+        }
 
         off += desc->length;
     }
 
-    if(cpu == NULL){
+    if (cpu == NULL) {
         errprint("Failed to locate HVM cpu context.\n");
         ret = VMI_FAILURE;
-	goto _bail;
+        goto _bail;
     }
 
     switch (reg) {
@@ -1140,8 +1096,8 @@ xen_set_vcpureg_hvm(
         break;
     }
 
-    if(xc_domain_hvm_setcontext(
-        xen_get_xchandle(vmi), xen_get_domainid(vmi), buf, size)){
+    if (xc_domain_hvm_setcontext
+        (xen_get_xchandle(vmi), xen_get_domainid(vmi), buf, size)) {
         errprint("Failed to set context information (HVM domain).\n");
         ret = VMI_FAILURE;
         goto _bail;
@@ -1155,11 +1111,8 @@ _bail:
 }
 
 static status_t
-xen_get_vcpureg_pv64(
-    vmi_instance_t vmi,
-    reg_t *value,
-    registers_t reg,
-    unsigned long vcpu)
+xen_get_vcpureg_pv64(vmi_instance_t vmi,
+                     reg_t *value, registers_t reg, unsigned long vcpu)
 {
     status_t ret = VMI_SUCCESS;
     vcpu_guest_context_any_t ctx = { 0 };
@@ -1264,7 +1217,7 @@ xen_get_vcpureg_pv64(
     case FS_BASE:
         *value = (reg_t) ctx.x64.fs_base;
         break;
-    case GS_BASE:  // TODO: distinguish between kernel & user
+    case GS_BASE:      // TODO: distinguish between kernel & user
         *value = (reg_t) ctx.x64.gs_base_kernel;
         break;
     case LDTR_BASE:
@@ -1280,19 +1233,15 @@ _bail:
 }
 
 static status_t
-xen_set_vcpureg_pv64(
-    vmi_instance_t vmi,
-    reg_t value,
-    registers_t reg,
-    unsigned long vcpu)
+xen_set_vcpureg_pv64(vmi_instance_t vmi,
+                     reg_t value, registers_t reg, unsigned long vcpu)
 {
     status_t ret = VMI_SUCCESS;
-    vcpu_guest_context_any_t ctx = {0};
-    xen_domctl_t domctl = {0};
+    vcpu_guest_context_any_t ctx = { 0 };
+    xen_domctl_t domctl = { 0 };
 
-    if (xc_vcpu_getcontext (xen_get_xchandle(vmi),
-                            xen_get_domainid(vmi),
-                            vcpu, &ctx)          ) {
+    if (xc_vcpu_getcontext(xen_get_xchandle(vmi),
+                           xen_get_domainid(vmi), vcpu, &ctx)) {
         errprint("Failed to get context information (PV domain).\n");
         ret = VMI_FAILURE;
         goto _bail;
@@ -1390,7 +1339,7 @@ xen_set_vcpureg_pv64(
     case FS_BASE:
         ctx.x64.fs_base = value;
         break;
-    case GS_BASE: // TODO: distinguish between kernel & user
+    case GS_BASE:      // TODO: distinguish between kernel & user
         ctx.x64.gs_base_kernel = value;
         break;
     case LDTR_BASE:
@@ -1414,11 +1363,8 @@ _bail:
 }
 
 static status_t
-xen_get_vcpureg_pv32(
-    vmi_instance_t vmi,
-    reg_t *value,
-    registers_t reg,
-    unsigned long vcpu)
+xen_get_vcpureg_pv32(vmi_instance_t vmi,
+                     reg_t *value, registers_t reg, unsigned long vcpu)
 {
     status_t ret = VMI_SUCCESS;
     vcpu_guest_context_any_t ctx = { 0 };
@@ -1509,11 +1455,8 @@ _bail:
 }
 
 static status_t
-xen_set_vcpureg_pv32(
-    vmi_instance_t vmi,
-    reg_t value,
-    registers_t reg,
-    unsigned long vcpu)
+xen_set_vcpureg_pv32(vmi_instance_t vmi,
+                     reg_t value, registers_t reg, unsigned long vcpu)
 {
     status_t ret = VMI_SUCCESS;
     vcpu_guest_context_any_t ctx = { 0 };
@@ -1604,17 +1547,13 @@ _bail:
 }
 
 status_t
-xen_get_vcpureg(
-    vmi_instance_t vmi,
-    reg_t *value,
-    registers_t reg,
-    unsigned long vcpu)
+xen_get_vcpureg(vmi_instance_t vmi,
+                reg_t *value, registers_t reg, unsigned long vcpu)
 {
     if (!xen_get_instance(vmi)->hvm) {
         if (8 == xen_get_instance(vmi)->addr_width) {
             return xen_get_vcpureg_pv64(vmi, value, reg, vcpu);
-        }
-        else {
+        } else {
             return xen_get_vcpureg_pv32(vmi, value, reg, vcpu);
         }
     }
@@ -1623,11 +1562,8 @@ xen_get_vcpureg(
 }
 
 status_t
-xen_set_vcpureg(
-    vmi_instance_t vmi,
-    reg_t value,
-    registers_t reg,
-    unsigned long vcpu)
+xen_set_vcpureg(vmi_instance_t vmi,
+                reg_t value, registers_t reg, unsigned long vcpu)
 {
     if (!xen_get_instance(vmi)->hvm) {
         if (8 == xen_get_instance(vmi)->addr_width) {
@@ -1637,22 +1573,18 @@ xen_set_vcpureg(
         }
     }
 
-    return xen_set_vcpureg_hvm (vmi, value, reg, vcpu);
+    return xen_set_vcpureg_hvm(vmi, value, reg, vcpu);
 }
 
 status_t
-xen_get_address_width(
-    vmi_instance_t vmi,
-    uint8_t * width)
+xen_get_address_width(vmi_instance_t vmi, uint8_t * width)
 {
     *width = xen_get_instance(vmi)->addr_width;
     return VMI_SUCCESS;
 }
 
 void *
-xen_read_page(
-    vmi_instance_t vmi,
-    addr_t page)
+xen_read_page(vmi_instance_t vmi, addr_t page)
 {
     addr_t paddr = page << vmi->page_shift;
 
@@ -1660,26 +1592,19 @@ xen_read_page(
 }
 
 status_t
-xen_write(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    void *buf,
-    uint32_t length)
+xen_write(vmi_instance_t vmi, addr_t paddr, void *buf, uint32_t length)
 {
     return xen_put_memory(vmi, paddr, length, buf);
 }
 
 int
-xen_is_pv(
-    vmi_instance_t vmi)
+xen_is_pv(vmi_instance_t vmi)
 {
     return !xen_get_instance(vmi)->hvm;
 }
 
 status_t
-xen_test(
-    unsigned long id,
-    char *name)
+xen_test(unsigned long id, char *name)
 {
     // Only way this could fail on Xen is when LibVMI is running in a domU
     // and the XSM policy doesn't allow the getdomaininfo hypercall.
@@ -1688,43 +1613,37 @@ xen_test(
 }
 
 status_t
-xen_pause_vm(
-    vmi_instance_t vmi)
+xen_pause_vm(vmi_instance_t vmi)
 {
-    if (-1 ==
-        xc_domain_pause(xen_get_xchandle(vmi), xen_get_domainid(vmi))) {
+    if (-1 == xc_domain_pause(xen_get_xchandle(vmi), xen_get_domainid(vmi))) {
         return VMI_FAILURE;
     }
     return VMI_SUCCESS;
 }
 
 status_t
-xen_resume_vm(
-    vmi_instance_t vmi)
+xen_resume_vm(vmi_instance_t vmi)
 {
-    if (-1 ==
-        xc_domain_unpause(xen_get_xchandle(vmi),
-                          xen_get_domainid(vmi))) {
+    if (-1 == xc_domain_unpause(xen_get_xchandle(vmi), xen_get_domainid(vmi))) {
         return VMI_FAILURE;
     }
     return VMI_SUCCESS;
 }
 
 status_t
-xen_set_domain_debug_control(
-    vmi_instance_t vmi,
-    unsigned long vcpu,
-    int enable)
+xen_set_domain_debug_control(vmi_instance_t vmi,
+                             unsigned long vcpu, int enable)
 {
     status_t ret = VMI_FAILURE;
     int rc = -1;
-    
-    uint32_t op = (enable) ? 
-        XEN_DOMCTL_DEBUG_OP_SINGLE_STEP_ON : XEN_DOMCTL_DEBUG_OP_SINGLE_STEP_OFF;
 
-    ret = xc_domain_debug_control(
-        xen_get_xchandle(vmi), xen_get_domainid(vmi), 
-        op, vcpu);
+    uint32_t op = (enable) ?
+        XEN_DOMCTL_DEBUG_OP_SINGLE_STEP_ON :
+        XEN_DOMCTL_DEBUG_OP_SINGLE_STEP_OFF;
+
+    ret =
+        xc_domain_debug_control(xen_get_xchandle(vmi), xen_get_domainid(vmi),
+                                op, vcpu);
 
     return ret;
 }
@@ -1733,163 +1652,125 @@ xen_set_domain_debug_control(
 #else
 
 status_t
-xen_init(
-    vmi_instance_t vmi)
+xen_init(vmi_instance_t vmi)
 {
     return VMI_FAILURE;
 }
 
 void
-xen_destroy(
-    vmi_instance_t vmi)
+xen_destroy(vmi_instance_t vmi)
 {
     return;
 }
 
 unsigned long
-xen_get_domainid_from_name(
-    vmi_instance_t vmi,
-    char *name)
+xen_get_domainid_from_name(vmi_instance_t vmi, char *name)
 {
     return 0;
 }
 
 status_t
-xen_get_name_from_domainid(
-    vmi_instance_t vmi,
-    unsigned long domid,
-    char **name)
+xen_get_name_from_domainid(vmi_instance_t vmi,
+                           unsigned long domid, char **name)
 {
     return VMI_FAILURE;
 }
 
 unsigned long
-xen_get_domainid(
-    vmi_instance_t vmi)
+xen_get_domainid(vmi_instance_t vmi)
 {
     return 0;
 }
 
 void
-xen_set_domainid(
-    vmi_instance_t vmi,
-    unsigned long domainid)
+xen_set_domainid(vmi_instance_t vmi, unsigned long domainid)
 {
     return;
 }
 
 status_t
-xen_check_domainid(
-    vmi_instance_t vmi,
-    unsigned long domainid)
+xen_check_domainid(vmi_instance_t vmi, unsigned long domainid)
 {
     return VMI_FAILURE;
 }
 
 status_t
-xen_get_domainname(
-    vmi_instance_t vmi,
-    char **name)
+xen_get_domainname(vmi_instance_t vmi, char **name)
 {
     return VMI_FAILURE;
 }
 
 void
-xen_set_domainname(
-    vmi_instance_t vmi,
-    char *name)
+xen_set_domainname(vmi_instance_t vmi, char *name)
 {
     return;
 }
 
 status_t
-xen_get_memsize(
-    vmi_instance_t vmi,
-    unsigned long *size)
+xen_get_memsize(vmi_instance_t vmi, unsigned long *size)
 {
     return VMI_FAILURE;
 }
 
 status_t
-xen_get_vcpureg(
-    vmi_instance_t vmi,
-    reg_t *value,
-    registers_t reg,
-    unsigned long vcpu)
+xen_get_vcpureg(vmi_instance_t vmi,
+                reg_t *value, registers_t reg, unsigned long vcpu)
 {
     return VMI_FAILURE;
 }
 
 status_t
-xen_set_vcpureg(
-    vmi_instance_t vmi,
-    reg_t value,
-    registers_t reg,
-    unsigned long vcpu)
+xen_set_vcpureg(vmi_instance_t vmi,
+                reg_t value, registers_t reg, unsigned long vcpu)
 {
     return VMI_FAILURE;
 }
 
 status_t
-xen_get_address_width(
-    vmi_instance_t vmi,
-    uint8_t * width)
+xen_get_address_width(vmi_instance_t vmi, uint8_t * width)
 {
     return VMI_FAILURE;
 }
 
 void *
-xen_read_page(
-    vmi_instance_t vmi,
-    addr_t page)
+xen_read_page(vmi_instance_t vmi, addr_t page)
 {
     return NULL;
 }
 
 status_t
-xen_write(
-    vmi_instance_t vmi,
-    addr_t paddr,
-    void *buf,
-    uint32_t length)
+xen_write(vmi_instance_t vmi, addr_t paddr, void *buf, uint32_t length)
 {
     return VMI_FAILURE;
 }
 
 int
-xen_is_pv(
-    vmi_instance_t vmi)
+xen_is_pv(vmi_instance_t vmi)
 {
     return 0;
 }
 
 status_t
-xen_test(
-    unsigned long id,
-    char *name)
+xen_test(unsigned long id, char *name)
 {
     return VMI_FAILURE;
 }
 
 status_t
-xen_pause_vm(
-    vmi_instance_t vmi)
+xen_pause_vm(vmi_instance_t vmi)
 {
     return VMI_FAILURE;
 }
 
 status_t
-xen_resume_vm(
-    vmi_instance_t vmi)
+xen_resume_vm(vmi_instance_t vmi)
 {
     return VMI_FAILURE;
 }
 
 status_t
-xen_set_domain_debug_control(
-    vmi_instance_t vmi,
-    unsigned long vcpu,
-    int enable)
+xen_set_domain_debug_control(vmi_instance_t vmi,
+                             unsigned long vcpu, int enable)
 {
     return VMI_FAILURE;
 }

@@ -29,13 +29,14 @@
 
 char *testvm = NULL;
 
-char *get_testvm (void)
+char *
+get_testvm(void)
 {
     return testvm;
 }
 
 int
-main (void)
+main(void)
 {
     /* get the vm name to test against */
     //TODO allow a list of names in this variable
@@ -67,8 +68,7 @@ main (void)
     srunner_free(sr);
     if (number_failed == 0) {
         return EXIT_SUCCESS;
-    }
-    else {
+    } else {
         return EXIT_FAILURE;
     }
 }
