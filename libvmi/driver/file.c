@@ -37,12 +37,13 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/sysinfo.h>
 #include <unistd.h>
 #include <limits.h>
 
 // Use mmap() if this evaluates to true; otherwise, use a file pointer with
 // seek/read
-#define USE_MMAP 1
+#define USE_MMAP 0
 
 // Avoid errors on systems that don't have MAP_POPULATE defined
 #ifndef MAP_POPULATE
@@ -223,7 +224,20 @@ file_get_memsize(
         errprint("Failed to stat file.\n");
         goto error_exit;
     }
-    *size = s.st_size;
+
+    if (S_ISREG(s.st_mode)) {
+        // find size of regular file
+        *size = (unsigned long) s.st_size;
+    }
+    else {
+        // find size of character device
+        struct sysinfo info;
+        if (sysinfo(&info) != 0) {
+            errprint("Failed to get sysinfo.\n");
+            goto error_exit;
+        }
+        *size = info.totalram;
+    }
     ret = VMI_SUCCESS;
 
 error_exit:
@@ -302,7 +316,9 @@ file_test(
     if (fstat(fileno(f), &s) == -1) {
         goto error_exit;
     }
-    if (!s.st_size) {
+    if (S_ISREG(s.st_mode) && !s.st_size) {
+        goto error_exit;
+    } else if (!S_ISCHR(s.st_mode)) {
         goto error_exit;
     }
     ret = VMI_SUCCESS;
