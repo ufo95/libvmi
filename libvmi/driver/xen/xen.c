@@ -407,6 +407,40 @@ xen_teardown_shm_snapshot_mode(
 }
 #endif
 
+/* convert a pfn to a mfn based on the live mapping tables */
+addr_t helper_p2m (vmi_instance_t vmi, addr_t pfn)
+{
+    addr_t mfn = (addr_t) ~0U;  // invalid_mfn
+
+    // use of meminfo stuct requires xen >= 4.4.0
+    // but the feature had memory leaks until 4.5.0
+    // so we should require 4.5.0 here for stability
+    // see commit 5faf7c1455b0edf96a563ab08461f62fdb19395a
+    struct xc_domain_meminfo minfo;
+    memset(&minfo, 0, sizeof(minfo));
+    if (xc_map_domain_meminfo(xen_get_xchandle(vmi),
+                              xen_get_instance(vmi)->domainid,
+                              &minfo))
+    {
+        printf("Failed to map the meminfo!\n");
+        return mfn;
+    }
+
+    // logic here from xc_pfn_to_mfn func in libxc/xg_private.h
+    if (minfo.guest_width == sizeof(uint64_t))
+    {
+        mfn = ((uint64_t *) minfo.p2m_table)[pfn];
+    }
+    else
+    {
+        mfn = ((uint32_t *) minfo.p2m_table)[pfn];
+    } 
+
+    xc_unmap_domain_meminfo(xen_get_xchandle(vmi), &minfo);
+
+    return mfn;
+}
+
 //TODO assuming length == page size is safe for now, but isn't the most clean approach
 void *
 xen_get_memory_pfn(
@@ -414,6 +448,8 @@ xen_get_memory_pfn(
     addr_t pfn,
     int prot)
 {
+
+    pfn = helper_p2m(vmi, pfn);
 
     void *memory = xc_map_foreign_range(xen_get_xchandle(vmi),
                                         xen_get_instance(vmi)->domainid,

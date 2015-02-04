@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <xenctrl.h>
+#include <xenguest.h>
 #if HAVE_XENSTORE_H
   #include <xenstore.h>
 #elif HAVE_XS_H
