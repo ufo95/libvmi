@@ -147,7 +147,11 @@ void process_response ( event_response_t response, vmi_event_t* event, vm_event_
                         }
                         break;
                     case VMI_EVENT_RESPONSE_SET_REGISTERS:
+                    #if defined(I386) || defined(X86_64)
                         memcpy(&rsp->data.regs.x86, event->x86_regs, sizeof(struct regs_x86));
+                    #else //ARM
+                        memcpy(&rsp->data.regs.arm, event->arm_regs, sizeof(struct regs_arm));
+                    #endif
                         break;
                 };
 
@@ -186,12 +190,22 @@ status_t process_interrupt_event(vmi_instance_t vmi,
             event->interrupt_event.type = req->u.interrupt.x86.type;
             event->interrupt_event.cr2 = req->u.interrupt.x86.cr2;
             break;
-    };
+        case INT_SMC:
+            event->interrupt_event.gfn = req->u.software_breakpoint.gfn;
+            event->interrupt_event.reinject = -1;
+            event->interrupt_event.insn_length = req->u.software_breakpoint.insn_length;
+            break;
+        };
 
+#if defined(I386) || defined(X86_64)
     event->interrupt_event.offset = req->data.regs.x86.rip & VMI_BIT_MASK(0,11);
     event->interrupt_event.gla = req->data.regs.x86.rip;
-
     event->x86_regs = (x86_registers_t *)&req->data.regs.x86;
+#else //ARM
+    event->interrupt_event.offset = req->data.regs.arm.pc & VMI_BIT_MASK(0,11);
+    event->interrupt_event.gla = req->data.regs.arm.pc;
+    event->arm_regs = (arm_registers_t *)&req->data.regs.arm;
+#endif
     event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
     event->vcpu_id = req->vcpu_id;
 
@@ -275,6 +289,16 @@ status_t process_interrupt_event(vmi_instance_t vmi,
         }
         case INT_NEXT:
             return VMI_SUCCESS;
+
+        case INT_SMC:
+                /* Reinject (callback may decide) */
+                if(1 == event->interrupt_event.reinject) {
+                    errprint("%s: CANNOT REINJECT SMC YET\n", __FUNCTION__);
+                    break;
+                }
+
+            return VMI_SUCCESS;
+
         default:
             errprint("%s : Xen event - unknown interrupt %d\n", __FUNCTION__, intr);
             break;
@@ -329,7 +353,11 @@ status_t process_register(vmi_instance_t vmi,
 
     event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
     event->vcpu_id = req->vcpu_id;
+#if defined(I386) || defined(X86_64)
     event->x86_regs = (x86_registers_t *)&req->data.regs.x86;
+#else //ARM
+    event->arm_regs = (arm_registers_t *)&req->data.regs.arm;
+#endif
 
     vmi->event_callback = 1;
     process_response ( event->callback(vmi, event), event, rsp );
@@ -428,11 +456,18 @@ status_t process_single_step_event(vmi_instance_t vmi,
     }
 
     event->ss_event.gfn = req->u.singlestep.gfn;
+    event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
+    event->vcpu_id = req->vcpu_id;
+
+#if defined(I386) || defined(X86_64)
     event->ss_event.offset = req->data.regs.x86.rip & VMI_BIT_MASK(0,11);
     event->ss_event.gla = req->data.regs.x86.rip;
     event->x86_regs = (x86_registers_t *)&req->data.regs.x86;
-    event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
-    event->vcpu_id = req->vcpu_id;
+#else //ARM
+    event->ss_event.offset = req->data.regs.arm.pc & VMI_BIT_MASK(0,11);
+    event->ss_event.gla = req->data.regs.arm.pc;
+    event->arm_regs = (arm_registers_t *)&req->data.regs.arm;
+#endif
 
     vmi->event_callback = 1;
     process_response ( event->callback(vmi, event), event, rsp );
@@ -452,7 +487,11 @@ static status_t process_guest_requested_event(vmi_instance_t vmi,
         return VMI_FAILURE;
     }
 
+#if defined(I386) || defined(X86_64)
     event->x86_regs = (x86_registers_t *)&req->data.regs.x86;
+#else //ARM
+    event->arm_regs = (arm_registers_t *)&req->data.regs.arm;
+#endif
     event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
     event->vcpu_id = req->vcpu_id;
 
@@ -559,11 +598,27 @@ status_t process_privcall_event(vmi_instance_t vmi,
     event->arm_regs = (arm_registers_t *)&req->data.regs.arm;
     event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
     event->vcpu_id = req->vcpu_id;
+    event->interrupt_event.offset = req->data.regs.arm.pc & VMI_BIT_MASK(0,11);
+    event->interrupt_event.gla = req->data.regs.arm.pc;
+    vmi_translate_kv2p(vmi, req->data.regs.arm.pc, &event->interrupt_event.gfn);
+    event->interrupt_event.gfn = event->interrupt_event.gfn >> 12;
 
     vmi->event_callback = 1;
     process_response ( event->callback(vmi, event),
-                       event, rsp );
+	                   event, rsp );
     vmi->event_callback = 0;
+
+    if(-1 == vmi->privcall_event->interrupt_event.reinject) {
+        errprint("%s Need to specify reinjection behaviour!\n", __FUNCTION__);
+        return VMI_FAILURE;
+    }
+
+    /* Reinject (callback may decide) */
+    if(1 == vmi->privcall_event->interrupt_event.reinject) {
+        
+        errprint("%s: CANNOT REINJECT SMC YET\n", __FUNCTION__);
+        return VMI_FAILURE;
+    }
 
     return VMI_SUCCESS;
 }
@@ -964,6 +1019,41 @@ static status_t xen_set_int3_access(vmi_instance_t vmi, bool enable)
     return VMI_SUCCESS;
 }
 
+static status_t xen_set_privcall_access(vmi_instance_t vmi, bool enable)
+{
+    xc_interface * xch = xen_get_xchandle(vmi);
+    domid_t dom = xen_get_domainid(vmi);
+    xen_events_t *xe = xen_get_events(vmi);
+    xen_instance_t *xen = xen_get_instance(vmi);
+
+    if ( !xch )
+    {
+        errprint("%s error: invalid xc_interface handle\n", __FUNCTION__);
+        return VMI_FAILURE;
+    }
+
+    if ( dom == (domid_t)VMI_INVALID_DOMID )
+    {
+        errprint("%s error: invalid domid\n", __FUNCTION__);
+        return VMI_FAILURE;
+    }
+
+    if ( !(xe->vm_event.monitor_capabilities & (1u << XEN_DOMCTL_MONITOR_EVENT_PRIVILEGED_CALL)) )
+    {
+        errprint("%s error: no system support for event type\n", __FUNCTION__);
+        return VMI_FAILURE;
+    }
+
+    if ( enable == xe->vm_event.monitor_privcall_on )
+        return VMI_FAILURE;
+
+    if ( xen->libxcw.xc_monitor_privileged_call(xch, dom, enable) )
+        return VMI_FAILURE;
+
+    xe->vm_event.monitor_privcall_on = enable;
+    return VMI_SUCCESS;
+}
+
 status_t xen_set_intr_access_48(vmi_instance_t vmi, interrupt_event_t *event, bool enabled)
 {
     switch ( event->intr ) {
@@ -971,6 +1061,8 @@ status_t xen_set_intr_access_48(vmi_instance_t vmi, interrupt_event_t *event, bo
             return xen_set_int3_access(vmi, enabled);
         case INT_NEXT:
             return VMI_SUCCESS;
+        case INT_SMC:
+            return xen_set_privcall_access(vmi, enabled); 
         default:
             errprint("Xen driver does not support enabling events for interrupt: %"PRIu32"\n", event->intr);
             break;
@@ -998,7 +1090,13 @@ status_t xen_start_single_step_48(vmi_instance_t vmi, single_step_event_t *event
     int rc;
     uint32_t i;
 
-    if ( !(xe->vm_event.monitor_capabilities & (1u << XEN_DOMCTL_MONITOR_EVENT_SINGLESTEP)) ) {
+#if defined(I386) || defined(X86_64)
+    if ( !(xe->vm_event.monitor_capabilities & (1u << XEN_DOMCTL_MONITOR_EVENT_SINGLESTEP)) )
+#else //ARM
+    if ( !(xe->vm_event.monitor_capabilities & (1u << XEN_DOMCTL_MONITOR_EVENT_SINGLESTEP)) ||
+         !(xe->vm_event.monitor_capabilities & (1u << XEN_DOMCTL_MONITOR_EVENT_PRIVILEGED_CALL)) )
+#endif
+    {
         errprint("%s error: no system support for event type\n", __FUNCTION__);
         return VMI_FAILURE;
     }

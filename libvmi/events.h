@@ -297,6 +297,7 @@ typedef uint8_t interrupts_t;
 #define INT_INVALID     0
 #define INT3            1   /**< Software breakpoint (INT3/0xCC) */
 #define INT_NEXT        2   /**< Catch-all when next interrupt is reported */
+#define INT_SMC         3
 
 typedef struct {
     /* CONST IN */
@@ -336,6 +337,16 @@ typedef struct {
     addr_t gfn;         /**< (Guest Frame Number) == 'physical' page where trap occurred */
     addr_t offset;      /**< Offset in bytes (relative to GFN) */
 } interrupt_event_t;
+
+typedef struct {
+    
+    int8_t reinject;
+
+    /* OUT */
+    addr_t gla;         /**< (Global Linear Address) == PC of the trapped instruction */
+    addr_t gfn;         /**< (Guest Frame Number) == 'physical' page where trap occurred */
+    addr_t offset;      /**< Offset in bytes (relative to GFN) */
+} privcall_event_t;
 
 typedef struct {
     /* CONST IN */
@@ -593,6 +604,15 @@ struct vmi_event {
             (_event)->version = VMI_EVENTS_VERSION; \
             (_event)->type = VMI_EVENT_INTERRUPT; \
             (_event)->interrupt_event.intr = INT3; \
+            (_event)->interrupt_event.reinject = _reinject; \
+            (_event)->callback = _callback; \
+        } while(0)
+
+#define SETUP_PRIVCALL_EVENT(_event, _reinject, _callback) \
+        do { \
+            (_event)->version = VMI_EVENTS_VERSION; \
+            (_event)->type = VMI_EVENT_PRIVILEGED_CALL; \
+            (_event)->interrupt_event.intr = INT_SMC; \
             (_event)->interrupt_event.reinject = _reinject; \
             (_event)->callback = _callback; \
         } while(0)

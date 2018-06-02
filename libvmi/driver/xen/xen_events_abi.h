@@ -150,6 +150,10 @@ typedef enum {
 #define XEN_DOMCTL_MONITOR_EVENT_GUEST_REQUEST         4
 #define XEN_DOMCTL_MONITOR_EVENT_DEBUG_EXCEPTION       5
 #define XEN_DOMCTL_MONITOR_EVENT_CPUID                 6
+#define XEN_DOMCTL_MONITOR_EVENT_PRIVILEGED_CALL       7
+#define XEN_DOMCTL_MONITOR_EVENT_INTERRUPT             8
+#define XEN_DOMCTL_MONITOR_EVENT_DESC_ACCESS           9
+
 
 typedef struct mem_event_st_42 {
     uint32_t flags;
@@ -226,7 +230,10 @@ typedef struct mem_event_st_45 {
     uint16_t fault_in_gpt:1;
     uint16_t available:10;
     uint16_t reason;
-    struct regs_x86 x86_regs;
+    union {
+        struct regs_x86 x86_regs;
+        struct regs_arm arm;
+    } regs;
 } mem_event_45_request_t, mem_event_45_response_t;
 
 struct vm_event_mem_access {
@@ -331,6 +338,7 @@ typedef struct vm_event_st_46 {
     union {
         union {
             struct regs_x86 x86;
+            struct regs_arm arm;
         } regs;
 
         struct vm_event_emul_read_data emul_read_data;
