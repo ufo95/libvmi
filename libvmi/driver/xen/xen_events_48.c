@@ -150,7 +150,11 @@ void process_response ( event_response_t response, vmi_event_t* event, vm_event_
                         }
                         break;
                     case VMI_EVENT_RESPONSE_SET_REGISTERS:
+                    #if defined(I386) || defined(X86_64)
                         memcpy(&rsp->data.regs.x86, event->x86_regs, sizeof(struct regs_x86));
+                    #elif defined(ARM32) || defined(ARM64)
+                        memcpy(&rsp->data.regs.arm, event->arm_regs, sizeof(struct regs_arm));
+                    #endif
                         break;
                 };
 
@@ -170,8 +174,10 @@ status_t process_interrupt_event(vmi_instance_t vmi,
     gint lookup         = intr;
     vmi_event_t * event = g_hash_table_lookup(vmi->interrupt_events, &lookup);
 
-    if ( !event )
+    if ( !event ) {
+        errprint("%s, could not find the event\n", __FUNCTION__);
         return VMI_FAILURE;
+    }
 
     switch ( intr ) {
         case INT3:
@@ -332,7 +338,11 @@ status_t process_register(vmi_instance_t vmi,
 
     event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
     event->vcpu_id = req->vcpu_id;
+#if defined(I386) || defined(X86_64)
     event->x86_regs = (x86_registers_t *)&req->data.regs.x86;
+#elif defined(ARM32) || defined(ARM64)
+    event->arm_regs = (arm_registers_t *)&req->data.regs.arm;
+#endif
 
     vmi->event_callback = 1;
     process_response ( event->callback(vmi, event), event, rsp );
@@ -431,11 +441,17 @@ status_t process_single_step_event(vmi_instance_t vmi,
     }
 
     event->ss_event.gfn = req->u.singlestep.gfn;
+    event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
+    event->vcpu_id = req->vcpu_id;
+#if defined(I386) || defined(X86_64)
     event->ss_event.offset = req->data.regs.x86.rip & VMI_BIT_MASK(0,11);
     event->ss_event.gla = req->data.regs.x86.rip;
     event->x86_regs = (x86_registers_t *)&req->data.regs.x86;
-    event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
-    event->vcpu_id = req->vcpu_id;
+#elif defined(ARM32) || defined(ARM64)
+    event->ss_event.offset = req->data.regs.arm.pc & VMI_BIT_MASK(0,11);
+    event->ss_event.gla = req->data.regs.arm.pc;
+    event->arm_regs = (arm_registers_t *)&req->data.regs.arm;
+#endif
 
     vmi->event_callback = 1;
     process_response ( event->callback(vmi, event), event, rsp );
@@ -455,7 +471,11 @@ static status_t process_guest_requested_event(vmi_instance_t vmi,
         return VMI_FAILURE;
     }
 
+#if defined(I386) || defined(X86_64)
     event->x86_regs = (x86_registers_t *)&req->data.regs.x86;
+#elif defined(ARM32) || defined(ARM64)
+    event->arm_regs = (arm_registers_t *)&req->data.regs.arm;
+#endif
     event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
     event->vcpu_id = req->vcpu_id;
 
@@ -1001,7 +1021,14 @@ status_t xen_start_single_step_48(vmi_instance_t vmi, single_step_event_t *event
     int rc;
     uint32_t i;
 
-    if ( !(xe->vm_event.monitor_capabilities & (1u << XEN_DOMCTL_MONITOR_EVENT_SINGLESTEP)) ) {
+#if defined(I386) || defined(X86_64)
+    if ( !(xe->vm_event.monitor_capabilities & (1u << XEN_DOMCTL_MONITOR_EVENT_SINGLESTEP)) )
+#elif defined(ARM32) || defined(ARM64)
+    //XEN_DOMCTL_MONITOR_EVENT_SINGLESTEP is not yet supported by Xen.
+    if ( !(xe->vm_event.monitor_capabilities & (1u << XEN_DOMCTL_MONITOR_EVENT_SINGLESTEP)) ||
+         !(xe->vm_event.monitor_capabilities & (1u << XEN_DOMCTL_MONITOR_EVENT_PRIVILEGED_CALL)) )
+#endif
+    {
         errprint("%s error: no system support for event type\n", __FUNCTION__);
         return VMI_FAILURE;
     }
@@ -1335,11 +1362,15 @@ void xen_events_destroy_48(vmi_instance_t vmi)
     (void)xen_shutdown_single_step_48(vmi);
     (void)xen->libxcw.xc_set_mem_access(xch, dom, XENMEM_access_rwx, ~0ull, 0);
     (void)xen->libxcw.xc_set_mem_access(xch, dom, XENMEM_access_rwx, 0, xen->max_gpfn);
+#if defined(I386) || defined(X86_64)
     (void)xen->libxcw.xc_monitor_write_ctrlreg(xch, dom, VM_EVENT_X86_CR0, false, false, false);
     (void)xen->libxcw.xc_monitor_write_ctrlreg(xch, dom, VM_EVENT_X86_CR3, false, false, false);
     (void)xen->libxcw.xc_monitor_write_ctrlreg(xch, dom, VM_EVENT_X86_CR4, false, false, false);
     (void)xen->libxcw.xc_monitor_write_ctrlreg(xch, dom, VM_EVENT_X86_XCR0, false, false, false);
     (void)xen->libxcw.xc_monitor_software_breakpoint(xch, dom, false);
+#elif defined(ARM32) || defined(ARM64)
+    (void)xen->libxcw.xc_monitor_privileged_call(xch, dom, false);
+#endif
     (void)xen_set_guest_requested_event_48(vmi, 0);
     (void)xen_set_cpuid_event_48(vmi, 0);
     (void)xen_set_debug_event_48(vmi, 0);
