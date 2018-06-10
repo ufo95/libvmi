@@ -61,9 +61,8 @@ typedef uint16_t vmi_event_type_t;
 #define VMI_EVENT_GUEST_REQUEST     5   /**< Guest-requested event */
 #define VMI_EVENT_CPUID             6   /**< CPUID event */
 #define VMI_EVENT_DEBUG_EXCEPTION   7   /**< Debug exception event */
-#define VMI_EVENT_PRIVILEGED_CALL   8   /**< Privileged call (ie. SMC on ARM) */
-#define VMI_EVENT_DESCRIPTOR_ACCESS 9   /**< A descriptor table register was accessed */
-#define VMI_EVENT_FAILED_EMULATION  10  /**< Emulation failed when requested by VMI_EVENT_RESPONSE_EMULATE */
+#define VMI_EVENT_DESCRIPTOR_ACCESS 8   /**< A descriptor table register was accessed */
+#define VMI_EVENT_FAILED_EMULATION  9   /**< Emulation failed when requested by VMI_EVENT_RESPONSE_EMULATE */
 
 /**
  * Max number of vcpus we can set single step on at one time for a domain
@@ -297,6 +296,7 @@ typedef uint8_t interrupts_t;
 #define INT_INVALID     0
 #define INT3            1   /**< Software breakpoint (INT3/0xCC) */
 #define INT_NEXT        2   /**< Catch-all when next interrupt is reported */
+#define INT_SMC         3
 
 typedef struct {
     /* CONST IN */
@@ -609,7 +609,7 @@ struct vmi_event {
 #define SETUP_PRIVCALL_EVENT(_event, _reinject, _callback) \
         do { \
             (_event)->version = VMI_EVENTS_VERSION; \
-            (_event)->type = VMI_EVENT_PRIVILEGED_CALL; \
+            (_event)->type = VMI_EVENT_INTERRUPT; \
             (_event)->interrupt_event.intr = INT_SMC; \
             (_event)->interrupt_event.reinject = _reinject; \
             (_event)->callback = _callback; \

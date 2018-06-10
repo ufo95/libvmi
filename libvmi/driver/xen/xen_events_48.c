@@ -195,12 +195,29 @@ status_t process_interrupt_event(vmi_instance_t vmi,
             event->interrupt_event.type = req->u.interrupt.x86.type;
             event->interrupt_event.cr2 = req->u.interrupt.x86.cr2;
             break;
-    };
+        case INT_SMC:
+            event->interrupt_event.reinject = -1;
+            event->interrupt_event.insn_length = req->u.software_breakpoint.insn_length;
+            break;
+        };
 
+#if defined(I386) || defined(X86_64)
     event->interrupt_event.offset = req->data.regs.x86.rip & VMI_BIT_MASK(0,11);
     event->interrupt_event.gla = req->data.regs.x86.rip;
 
     event->x86_regs = (x86_registers_t *)&req->data.regs.x86;
+#elif defined(ARM32) || defined(ARM64)
+    event->interrupt_event.offset = req->data.regs.arm.pc & VMI_BIT_MASK(0,11);
+    event->interrupt_event.gla = req->data.regs.arm.pc;
+    event->arm_regs = (arm_registers_t *)&req->data.regs.arm;
+
+    if ( VMI_FAILURE == vmi_translate_kv2p(vmi, req->data.regs.arm.pc, &event->interrupt_event.gfn) ) {
+        errprint("%s: CANNOT TRANSLATE PC TO GFN\n", __FUNCTION__);
+        return VMI_FAILURE;
+    }
+
+    event->interrupt_event.gfn = event->interrupt_event.gfn >> 12;
+#endif
     event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
     event->vcpu_id = req->vcpu_id;
 
@@ -283,6 +300,7 @@ status_t process_interrupt_event(vmi_instance_t vmi,
             return VMI_SUCCESS;
         }
         case INT_NEXT:
+        case INT_SMC:
             return VMI_SUCCESS;
         default:
             errprint("%s : Xen event - unknown interrupt %d\n", __FUNCTION__, intr);
@@ -568,30 +586,6 @@ status_t process_debug_event(vmi_instance_t vmi,
 }
 
 static
-status_t process_privcall_event(vmi_instance_t vmi,
-                                vm_event_48_request_t *req,
-                                vm_event_48_request_t *rsp)
-{
-    vmi_event_t * event = vmi->privcall_event;
-
-    if ( !event ) {
-        errprint("%s error: no privileged call event handler is registered in LibVMI\n", __FUNCTION__);
-        return VMI_FAILURE;
-    }
-
-    event->arm_regs = (arm_registers_t *)&req->data.regs.arm;
-    event->slat_id = (req->flags & VM_EVENT_FLAG_ALTERNATE_P2M) ? req->altp2m_idx : 0;
-    event->vcpu_id = req->vcpu_id;
-
-    vmi->event_callback = 1;
-    process_response ( event->callback(vmi, event),
-                       event, rsp );
-    vmi->event_callback = 0;
-
-    return VMI_SUCCESS;
-}
-
-static
 status_t process_desc_access_event(vmi_instance_t vmi,
                                    vm_event_48_request_t *req,
                                    vm_event_48_request_t *rsp)
@@ -738,7 +732,7 @@ status_t process_requests(vmi_instance_t vmi, vm_event_48_request_t *req,
 
             case VM_EVENT_REASON_PRIVILEGED_CALL:
                 dbprint(VMI_DEBUG_XEN, "--Caught privileged call event!\n");
-                vrc = process_privcall_event(vmi, req, rsp);
+                vrc = process_interrupt_event(vmi, INT_SMC, req, rsp);
                 break;
 
             case VM_EVENT_REASON_DESCRIPTOR_ACCESS:
@@ -987,6 +981,42 @@ static status_t xen_set_int3_access(vmi_instance_t vmi, bool enable)
     return VMI_SUCCESS;
 }
 
+static status_t xen_set_privcall_access(vmi_instance_t vmi, bool enable)
+{
+    xc_interface * xch = xen_get_xchandle(vmi);
+    domid_t dom = xen_get_domainid(vmi);
+    xen_events_t *xe = xen_get_events(vmi);
+    xen_instance_t *xen = xen_get_instance(vmi);
+
+    if ( !xch ) {
+        errprint("%s error: invalid xc_interface handle\n", __FUNCTION__);
+        return VMI_FAILURE;
+    }
+
+    if ( dom == (domid_t)VMI_INVALID_DOMID ) {
+        errprint("%s error: invalid domid\n", __FUNCTION__);
+        return VMI_FAILURE;
+    }
+
+    if ( !(xe->vm_event.monitor_capabilities & (1u << XEN_DOMCTL_MONITOR_EVENT_PRIVILEGED_CALL)) ) {
+        errprint("%s error: no system support for event type\n", __FUNCTION__);
+        return VMI_FAILURE;
+    }
+
+    if ( enable == xe->vm_event.monitor_privcall_on ) {
+        errprint("%s error: nothing to change\n", __FUNCTION__);
+        return VMI_FAILURE;
+    }
+
+    if ( xen->libxcw.xc_monitor_privileged_call(xch, dom, enable) < 0) {
+        errprint("%s error: could not set privcall event monitor\n", __FUNCTION__);
+        return VMI_FAILURE;
+    }
+
+    xe->vm_event.monitor_privcall_on = enable;
+    return VMI_SUCCESS;
+}
+
 status_t xen_set_intr_access_48(vmi_instance_t vmi, interrupt_event_t *event, bool enabled)
 {
     switch ( event->intr ) {
@@ -994,6 +1024,8 @@ status_t xen_set_intr_access_48(vmi_instance_t vmi, interrupt_event_t *event, bo
             return xen_set_int3_access(vmi, enabled);
         case INT_NEXT:
             return VMI_SUCCESS;
+        case INT_SMC:
+            return xen_set_privcall_access(vmi, enabled); 
         default:
             errprint("Xen driver does not support enabling events for interrupt: %"PRIu32"\n", event->intr);
             break;
@@ -1164,29 +1196,6 @@ status_t xen_set_cpuid_event_48(vmi_instance_t vmi, bool enabled)
 
     if ( rc < 0 ) {
         errprint("Error %i setting CPUID event monitor\n", rc);
-        return VMI_FAILURE;
-    }
-
-    return VMI_SUCCESS;
-}
-
-status_t xen_set_privcall_event_48(vmi_instance_t vmi, bool enabled)
-{
-    int rc;
-    xen_instance_t *xen = xen_get_instance(vmi);
-
-    if ( xen->major_version != 4 || xen->minor_version < 8 )
-        return VMI_FAILURE;
-
-    if ( !enabled && !vmi->cpuid_event )
-        return VMI_SUCCESS;
-
-    rc = xen->libxcw.xc_monitor_privileged_call(xen_get_xchandle(vmi),
-            xen_get_domainid(vmi),
-            enabled);
-
-    if ( rc < 0 ) {
-        errprint("Error %i setting privcall event monitor\n", rc);
         return VMI_FAILURE;
     }
 
@@ -1448,7 +1457,6 @@ status_t xen_init_events_48(
     vmi->driver.set_guest_requested_ptr = &xen_set_guest_requested_event_48;
     vmi->driver.set_cpuid_event_ptr = &xen_set_cpuid_event_48;
     vmi->driver.set_debug_event_ptr = &xen_set_debug_event_48;
-    vmi->driver.set_privcall_event_ptr = xen_set_privcall_event_48;
     vmi->driver.set_desc_access_event_ptr = xen_set_desc_access_event_410;
     vmi->driver.set_failed_emulation_event_ptr = xen_set_failed_emulation_event_411;
 

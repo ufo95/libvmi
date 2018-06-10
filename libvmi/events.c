@@ -434,19 +434,6 @@ status_t register_debug_event(vmi_instance_t vmi, vmi_event_t *event)
     return rc;
 }
 
-status_t register_privcall_event(vmi_instance_t vmi, vmi_event_t *event)
-{
-    status_t rc = VMI_FAILURE;
-
-    if ( !vmi->privcall_event ) {
-        rc = driver_set_privcall_event(vmi, 1);
-        if ( VMI_SUCCESS == rc )
-            vmi->privcall_event = event;
-    };
-
-    return rc;
-}
-
 status_t register_desc_access_event(vmi_instance_t vmi, vmi_event_t *event)
 {
     status_t rc = VMI_FAILURE;
@@ -812,9 +799,6 @@ vmi_register_event(
             break;
         case VMI_EVENT_DEBUG_EXCEPTION:
             rc = register_debug_event(vmi, event);
-            break;
-        case VMI_EVENT_PRIVILEGED_CALL:
-            rc = register_privcall_event(vmi, event);
             break;
         case VMI_EVENT_DESCRIPTOR_ACCESS:
             rc = register_desc_access_event(vmi, event);
